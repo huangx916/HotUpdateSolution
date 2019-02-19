@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 451e8cac8614e864b991577244e330db
+timeCreated: 1515761951
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/main/managercollection.lua
+  assetBundleVariant: ab

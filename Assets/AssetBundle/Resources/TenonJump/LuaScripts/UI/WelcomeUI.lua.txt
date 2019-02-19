@@ -1,0 +1,24 @@
+---@class LuaClass.TenonJump.WelcomeUI : LuaClass.BaseUI
+---@field private enterBtn UnityEngine.Collider
+---@field private settingBtn UnityEngine.Collider
+local m = LuaClass.Class("TenonJump", "WelcomeUI", LuaClass.BaseUI);
+LuaClass.TenonJump.WelcomeUI = m;
+
+---@private
+function m:Awake()
+	CS.Main.UIAgent.SetOnClick(self.enterBtn, function() self:OnEnterClick() end);
+	CS.Main.UIAgent.SetOnClick(self.settingBtn, function() self:OnSettingClick() end);
+end
+
+---@private
+function m:OnEnterClick()
+	LuaClass.PlatformManager.Instance:EnterPlatform();
+	LuaClass.BuriedPointManager.Instance:EnterGame();
+end
+
+---@private
+function m:OnSettingClick()
+	LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.TenonJump, "SettingUI");
+end
+
+return m;

@@ -1,0 +1,20 @@
+---@class LuaClass.AudioType : LuaClass.Object
+
+---@class LuaClass.AudioType.Class : LuaClass.LuaEnum
+---@field public Bgm LuaClass.AudioType
+---@field public Env LuaClass.AudioType
+---@field public UIOneShot LuaClass.AudioType
+---@field public Scene LuaClass.AudioType
+---@field public SceneOneShot LuaClass.AudioType
+---@field public Max LuaClass.AudioType
+local AudioType = LuaClass.LuaEnum.Create("Common", "AudioType", {
+	"Bgm";
+	"Env";
+	"UIOneShot";
+	"Scene";
+	"SceneOneShot";
+	"Max";
+});
+LuaClass.AudioType = AudioType;
+
+return AudioType;

@@ -1,0 +1,12 @@
+require("Common.LuaScripts.Util.LuaClass.lua");
+require("Common.LuaScripts.Util.LuaBehaviour.lua");
+require("Common.LuaScripts.Util.LuaEnum.lua");
+require("Common.LuaScripts.Util.GlobalExtension.lua");
+require("Common.LuaScripts.Util.MathExtension.lua");
+require("Common.LuaScripts.Util.TableExtension.lua");
+require("Common.LuaScripts.Util.StringExtension.lua");
+require("Common.LuaScripts.Util.SimpleJson.lua");
+require("Common.LuaScripts.Util.RapidJson.lua");
+require("Common.LuaScripts.Util.CacheTable.lua");
+require("Common.LuaScripts.Util.HotFix.lua");
+require("Common.LuaScripts.Util.Test.lua");

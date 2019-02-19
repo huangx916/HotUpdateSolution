@@ -1,0 +1,104 @@
+---@class LuaClass.TimeManager : LuaClass.BaseManager
+---@field public Instance LuaClass.TimeManager @static
+---@field private m_LastPassTime number
+---@field private m_CalibratingServerDateTime System.DateTime
+---@field private m_CalibratingNativeDateTime System.DateTime
+local m = LuaClass.BaseManager:Derive("Common", "TimeManager");
+LuaClass.TimeManager = m;
+
+---@private
+function m:Awake()
+	self.m_LastPassTime = 0;
+	self.m_CalibratingNativeDateTime = CS.System.DateTime.Now;
+	self.m_CalibratingServerDateTime = self.m_CalibratingNativeDateTime;
+end
+
+---@private
+function m:Update()
+	local passTime = CS.UnityEngine.Time.time;
+	if passTime - self.m_LastPassTime > LuaClass.ConstValue.TIME_PASS_INTERVAL then
+		self.m_LastPassTime = passTime;
+		CS.Main.ListenerManager.TriggerExtSilently(LuaClass.ListenerType.TimePass, CS.Main.ConvertExt.DateTimeToMilliseconds(self:GetServerDateTime()));
+	end
+end
+
+---@private
+---@param pauseStatus boolean
+function m:OnApplicationPause(pauseStatus)
+	if not pauseStatus then
+		self:CalibrateTime();
+	end
+	CS.Main.ListenerManager.TriggerExt(LuaClass.ListenerType.ApplicationPause, pauseStatus);
+end
+
+---@return System.DateTime
+function m:GetServerDateTime()
+	return self.m_CalibratingServerDateTime:Add(self:GetNativeDateTime() - self.m_CalibratingNativeDateTime);
+end
+
+---@return number
+function m:GetServerLongTime()
+	return CS.Main.ConvertExt.DateTimeToMilliseconds(self:GetServerDateTime());
+end
+
+---@return System.DateTime
+function m:GetNativeDateTime()
+	return CS.System.DateTime.Now;
+end
+
+---@return number
+function m:GetNativeLongTime()
+	return CS.Main.ConvertExt.DateTimeToMilliseconds(self:GetNativeDateTime());
+end
+
+---@private
+function m:CalibrateTime()
+	--TODO
+end
+
+---@param serverLongTime number
+function m:OnTimeCalibrate(serverLongTime)
+	self.m_CalibratingNativeDateTime = self:GetNativeDateTime();
+	self.m_CalibratingServerDateTime = CS.Main.ConvertExt.MillisecondsToDateTime(serverLongTime);
+end
+
+---@param targetTime number | System.DateTime
+---@return System.TimeSpan
+function m:CompareServerTime(targetTime)
+	local paramType = type(targetTime);
+	if not paramType then
+		return CS.System.TimeSpan(0);
+	elseif paramType == "number" then
+		return self:GetServerDateTime() - CS.Main.ConvertExt.MillisecondsToDateTime(targetTime);
+	else
+		return self:GetServerDateTime() - targetTime;
+	end
+end
+
+---@param targetTime number | System.DateTime
+---@return System.TimeSpan
+function m:CompareNativeTime(targetTime)
+	local paramType = type(targetTime);
+	if not paramType then
+		return CS.System.TimeSpan(0);
+	elseif paramType == "number" then
+		return self:GetNativeDateTime() - CS.Main.ConvertExt.MillisecondsToDateTime(targetTime);
+	else
+		return self:GetNativeDateTime() - targetTime;
+	end
+end
+
+---@param targetTime number | System.DateTime
+---@return System.TimeSpan
+function m:ServerCountdown(targetTime)
+	return -self:CompareServerTime(targetTime);
+end
+
+---@param targetTime number | System.DateTime
+---@return System.TimeSpan
+function m:NativeCountdown(targetTime)
+	return -self:CompareNativeTime(targetTime);
+end
+
+
+return m;

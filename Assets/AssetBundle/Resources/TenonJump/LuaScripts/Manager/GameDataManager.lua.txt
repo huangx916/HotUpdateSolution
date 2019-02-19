@@ -1,0 +1,94 @@
+---@class LuaClass.TenonJump.GameData
+---@field public obstacle number[][]
+---@field public maxDuration number
+---@field private m_Duration number
+---@field public score number
+---@field public resultType LuaClass.TenonJump.ResultType
+---@field public reduceTime number
+
+---@class LuaClass.TenonJump.GameDataManager : LuaClass.BaseManager
+---@field public Instance LuaClass.TenonJump.GameDataManager @static
+---@field private m_GameData LuaClass.TenonJump.GameData
+local m = LuaClass.BaseManager:Derive("TenonJump", "GameDataManager");
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.GameDataManager = m;
+
+function m:Reset()
+	self.m_GameData = {obstacle = {}};
+	self.m_GameData.maxDuration = LuaClass.TenonJump.ConstValue.GAME_DURATION;
+	self.m_GameData.m_Duration = 0;
+	self.m_GameData.score = 0;
+	self.m_GameData.reduceTime = LuaClass.TenonJump.ConstValue.REDUCE_TIME;
+end
+
+---@public
+---@param levelId number
+function m:GenerateGameData(levelId)
+	self:Reset();
+	--local obstacleConfig = LuaClass.TenonJump.ObstacleConfigContainer.Instance;
+	local layerConfig = LuaClass.TenonJump.LayerConfigContainer.Instance;
+	local levelConfig = LuaClass.TenonJump.LevelConfigContainer.Instance;
+
+	local level = levelConfig:GetLevelConfig(levelId);
+	local startIndex = 1;
+	for _, levelValue in ipairs(level.value) do
+		for layerIndex = startIndex, levelValue.index do
+			self.m_GameData.obstacle[layerIndex] = {};
+			for obstacleIndex = 1, 12 do
+				local obstacleId = layerConfig:GetRandomObstacleId(levelValue.use, obstacleIndex);
+				self.m_GameData.obstacle[layerIndex][obstacleIndex] = obstacleId;
+				--LogError("layerIndex : " .. layerIndex .. " obstacleIndex : " .. obstacleIndex .. "    obstacleId : " .. obstacleId);
+			end
+		end
+		startIndex = levelValue.index + 1;
+	end
+end
+
+---@public
+---@return number
+function m:GetLayerCount()
+	return #self.m_GameData.obstacle;
+end
+
+---@public
+---@param layerIndex number
+---@return table
+function m:GetObstacles(layerIndex)
+	return self.m_GameData.obstacle[layerIndex];
+end
+
+---@return number
+function m:GetScore()
+	return self.m_GameData.score;
+end
+
+---@return LuaClass.TenonJump.ResultType
+function m:GetResultType()
+	return self.m_GameData.resultType;
+end
+
+function m:GetDuration()
+	return self.m_GameData.m_Duration;
+end
+
+---@return number
+function m:GetLeftTime()
+	return self.m_GameData.maxDuration - self.m_GameData.m_Duration;
+end
+
+function m:DieReduceTime()
+	self.m_GameData.m_Duration = self.m_GameData.m_Duration + self.m_GameData.reduceTime;
+end
+
+---@param passedLayerCounts number
+function m:AddScore(passedLayerCounts)
+	local addScore = passedLayerCounts * LuaClass.TenonJump.ConstValue.BASE_SCORE;
+	if addScore <= 0 then
+		return;
+	end
+	self.m_GameData.score = self.m_GameData.score + addScore;
+	CS.Main.ListenerManager.TriggerExt(LuaClass.TenonJump.ListenerType.UpdateScore, self.m_GameData.score, addScore);
+end
+
+return m;

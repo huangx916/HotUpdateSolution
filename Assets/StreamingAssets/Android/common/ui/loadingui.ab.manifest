@@ -1,0 +1,47 @@
+ManifestFileVersion: 0
+CRC: 644995028
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 1600a50ab5df755450f24adfd4e444d2
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 08061ad489602f3ec11cc8960d8ccaf2
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: ae942c9068183dc40a9d01f648273726, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 858a20c1b21a3f94bb5b2d3b901c9aaf, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: e9d0b5f3bbe925a408bd595c79d0bf63, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 0b4eb3a400afab046abb8471a9d746d6, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 97b7e9457f29fe6489fdf7c13aea7e94, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 1bdd6ba7ce140f64ba4a144685be8643, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 9b202fea542cfac43b87ef5b4ebda358, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 4d0c51bb0b6e93049af5e88f93826e3b, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 82ea5dee09c28244f9e8e2220dd499d9, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 1b3dc54f924693f41b5cbecb267e647a, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/UI/LoadingUI.prefab
+Dependencies:
+- F:/TenonJumpClient/TenonJump/Assets/StreamingAssets/Android/common/uiatlas/loadinguiatlas.ab
+- F:/TenonJumpClient/TenonJump/Assets/StreamingAssets/Android/common/texture/loading_bg.ab
+- F:/TenonJumpClient/TenonJump/Assets/StreamingAssets/Android/common/uifont/systemfont.ab

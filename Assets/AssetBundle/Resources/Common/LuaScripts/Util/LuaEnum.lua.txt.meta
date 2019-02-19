@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 53babe21e6fd85c4eb2dffffb37b0478
+timeCreated: 1513675586
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/util/luaenum.lua
+  assetBundleVariant: ab

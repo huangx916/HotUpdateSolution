@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 8ae728033a70d694d889673cbfd16e32
+timeCreated: 1529897084
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/branchmanager.lua
+  assetBundleVariant: ab

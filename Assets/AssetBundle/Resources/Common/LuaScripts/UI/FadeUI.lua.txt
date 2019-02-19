@@ -1,0 +1,104 @@
+---@class LuaClass.FadeUI : LuaClass.BaseUI
+---@field protected fadeInTweenerList UITweener[]
+---@field protected fadeOutTweenerList UITweener[]
+---
+---@field protected m_OnExit fun()
+---@field protected m_OnClose fun()
+---@field protected m_Exiting boolean
+local m = LuaClass.Class("Common", "FadeUI", LuaClass.BaseUI);
+LuaClass.FadeUI = m;
+
+---@private
+---@param onExit fun()
+---@param onClose fun()
+function m:ctor(onExit, onClose)
+	self.m_OnExit = onExit;
+	self.m_OnClose = onClose;
+end
+
+---@private
+function m:Start()
+	CS.Main.CoroutineManager.EndOfLag(function()
+		if not self.m_Exiting then
+			self:FadeIn();
+		end
+	end, self.m_CSBehaviour);
+end
+
+---@protected
+function m:OnExitClick()
+	if not self.m_Exiting then
+		self.m_Exiting = true;
+		self:Exit();
+	end
+end
+
+---@protected
+function m:Exit()
+	self:OnExit();
+	local uiName = self.m_CSBehaviour.name;
+	local duration = self:FadeOut();
+	LuaClass.UIManager.Instance:Close(uiName, duration);
+end
+
+---@protected
+function m:OnExit()
+	if self.m_OnExit then
+		self.m_OnExit();
+	end
+end
+
+---@protected
+function m:OnClose()
+	if self.m_OnClose then
+		self.m_OnClose();
+	end
+end
+
+---@protected
+---@return number @duration
+function m:FadeIn()
+	local totalDuration = 0;
+	for index = 1, #self.fadeInTweenerList do
+		local duration = CS.Main.UIAgent.PlayForward(self.fadeInTweenerList[index], true);
+		totalDuration = math.max(totalDuration, duration);
+	end
+	return totalDuration;
+end
+
+---@protected
+---@return number @duration
+function m:GetFadeInDuration()
+	local totalDuration = 0;
+	for index = 1, #self.fadeInTweenerList do
+		local tweener = self.fadeInTweenerList[index];
+		local duration = tweener.delay + tweener.duration;
+		totalDuration = math.max(totalDuration, duration);
+	end
+	return totalDuration;
+end
+
+---@protected
+---@return number @duration
+function m:FadeOut()
+	local totalDuration = 0;
+	for index = 1, #self.fadeOutTweenerList do
+		local duration = CS.Main.UIAgent.PlayForward(self.fadeOutTweenerList[index], true);
+		totalDuration = math.max(totalDuration, duration);
+	end
+	return totalDuration;
+end
+
+---@protected
+---@return number @duration
+function m:GetFadeOutDuration()
+	local totalDuration = 0;
+	for index = 1, #self.fadeOutTweenerList do
+		local tweener = self.fadeOutTweenerList[index];
+		local duration = tweener.delay + tweener.duration;
+		totalDuration = math.max(totalDuration, duration);
+	end
+	return totalDuration;
+end
+
+return m;

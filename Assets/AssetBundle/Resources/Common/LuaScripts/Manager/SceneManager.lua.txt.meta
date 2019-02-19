@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: e9295d526bbe22c4a923e63d58d994ec
+timeCreated: 1513855819
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/scenemanager.lua
+  assetBundleVariant: ab

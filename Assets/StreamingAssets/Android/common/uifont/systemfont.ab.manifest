@@ -1,0 +1,28 @@
+ManifestFileVersion: 0
+CRC: 1954731701
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 5195de4e87e511e46d0a3e6ca2093a76
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 8018158a918b0dc821fb37c2b76c6c3f
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: 0b4eb3a400afab046abb8471a9d746d6, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/UIFont/SystemFont.prefab
+Dependencies: []

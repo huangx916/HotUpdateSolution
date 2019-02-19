@@ -1,0 +1,58 @@
+---@class LuaClass.TenonJump.ObstacleConfig
+---@field public id number
+---@field public name string
+---@field public die boolean
+---@field public finish boolean
+---@field public resource string
+
+---@class LuaClass.TenonJump.ObstacleConfigContainer : LuaClass.BaseConfigContainer
+---@field public Instance LuaClass.TenonJump.ObstacleConfigContainer @static
+---@field private m_ObstacleConfigDict table<number, LuaClass.TenonJump.ObstacleConfig>
+local m = LuaClass.BaseConfigContainer:Derive("TenonJump", "ObstacleConfigContainer");
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.ObstacleConfigContainer = m;
+
+---@private
+function m:ctor()
+	self.m_ObstacleConfigDict = {};
+end
+
+---@return LuaClass.ConfigLoader[]
+function m:GetLoaderList()
+	---@type LuaClass.ConfigLoader[]
+	local configLoaders = {
+		LuaClass.ConfigLoader("ObstacleConfig", self.InitConfig)
+	}
+	return configLoaders;
+end
+
+---@private
+---@param jsonStr string
+function m:InitConfig(jsonStr)
+	local data = LuaClass.RapidJson.Decode(jsonStr);
+	---@param itemConfig LuaClass.TenonJump.ObstacleConfig
+	for _, itemConfig in ipairs(data) do
+		self.m_ObstacleConfigDict[itemConfig.id] = itemConfig;
+	end
+end
+
+---@return number
+function m:GetConfigCount()
+	return #self.m_ObstacleConfigDict;
+end
+
+---@param id number
+---@return LuaClass.TenonJump.ObstacleConfig
+function m:GetObstacleConfig(id)
+	return id and self.m_ObstacleConfigDict[id];
+end
+
+---@public
+---@param id number
+---@return string
+function m:GetObstacleResource(id)
+	return self.m_ObstacleConfigDict[id].resource;
+end
+
+return m;

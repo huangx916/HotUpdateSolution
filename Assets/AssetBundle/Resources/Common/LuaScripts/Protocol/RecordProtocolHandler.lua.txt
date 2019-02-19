@@ -1,0 +1,53 @@
+---@class LuaClass.RecordProtocolHandler : LuaClass.BaseProtocolHandler
+---@field public Instance LuaClass.RecordProtocolHandler @static
+local m = LuaClass.BaseProtocolHandler:Derive("Common", "RecordProtocolHandler", {
+	m_SubmitRoute = "/record";
+	m_GetRoute = "/matches?gameName=%s&playerId=%d";
+});
+LuaClass.RecordProtocolHandler = m;
+
+---@overload fun(matchId:number, playerId:number, cash:number, points:number, score:number)
+---@param matchId number
+---@param playerId number
+---@param cash number
+---@param points number
+---@param score number
+---@param callback fun()
+function m:RequestSubmitRecord(matchId, playerId, cash, points, score, callback)
+	local moduleName = LuaClass.ModuleType[LuaMain:GetModuleType()];
+	local data = { gameName = moduleName, matchId = matchId, playerId = playerId, cash = cash, points = points, score = score};
+	LuaClass.HttpManager.Instance:Post(self.m_SubmitRoute, data, function(data)
+		self:ResponseSubmitRecord(data);
+		if callback then
+			callback();
+		end
+	end);
+end
+
+---@private
+---@param data {matches:LuaClass.RecordInfo[]}
+function m:ResponseSubmitRecord(data)
+	--Do Nothing
+end
+
+---@overload fun(playerId:number)
+---@param playerId number
+---@param callback fun()
+function m:RequestGetRecords(playerId, callback)
+	local moduleName = LuaClass.ModuleType[LuaMain:GetModuleType()];
+	local route = string.format(self.m_GetRoute, moduleName, playerId);
+	LuaClass.HttpManager.Instance:Get(route, function(data)
+		self:ResponseGetRecords(data);
+		if callback then
+			callback();
+		end
+	end);
+end
+
+---@private
+---@param data {matches:LuaClass.RecordInfo[]}
+function m:ResponseGetRecords(data)
+	LuaClass.RecordManager.Instance:SetRecords(data.matches);
+end
+
+return m;

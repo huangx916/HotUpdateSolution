@@ -1,0 +1,53 @@
+---@class LuaClass.RecordUI : LuaClass.BaseUI
+---@field public exitBtn UnityEngine.Collider
+---@field public shortScroll UIShortScroll
+local m = LuaClass.Class("Common", "RecordUI", LuaClass.BaseUI);
+LuaClass.RecordUI = m;
+
+---@private
+function m:Awake()
+	CS.Main.UIAgent.SetOnClick(self.exitBtn, function() self:OnExitClick() end);
+	self:UpdateScrollList(1);
+	LuaClass.RecordManager.Instance:RequestRecordList(function()
+		self:UpdateScrollList(1);
+	end);
+end
+
+---@private
+---@param targetItemIndex number
+function m:UpdateScrollList(targetItemIndex)
+	local listCount = LuaClass.RecordManager.Instance:GetRecordCount();
+	targetItemIndex = math.clamp(targetItemIndex, 0, listCount - 1);
+
+	self.shortScroll.onUpdateItem = function(item, index) self:UpdateItemData(item, index); end;
+	self.shortScroll:StartScroll(listCount, targetItemIndex);
+end
+
+---@private
+---@param item UnityEngine.Transform
+---@param index number
+function m:UpdateItemData(item, index)
+	local matchId = LuaClass.RecordManager.Instance:GetRecordMatchId(index + 1);
+	local recordInfo = LuaClass.RecordManager.Instance:GetRecord(matchId);
+	CS.Main.UIAgent.SetChildText(item, "Label", recordInfo.matchId);
+	CS.Main.UIAgent.SetOnClick(item, function() self:OnItemClick(matchId); end);
+end
+
+---@private
+---@param matchId number
+function m:OnItemClick(matchId)
+	LuaClass.PlaybackManager.Instance:StartPlayback(matchId, function()
+		---@type LuaClass.PlaybackUI
+		local playbackUI = LuaClass.UIManager.Instance:Open(LuaMain:GetModuleType(), "PlaybackUI");
+		playbackUI:Init(matchId);
+		LuaClass.UIManager.Instance:Close("RecordUI");
+	end);
+end
+
+---@private
+function m:OnExitClick()
+	LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "PlatformUI");
+	LuaClass.UIManager.Instance:Close("RecordUI");
+end
+
+return m;

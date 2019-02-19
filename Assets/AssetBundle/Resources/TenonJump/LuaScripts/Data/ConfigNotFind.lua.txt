@@ -1,0 +1,23 @@
+---@class LuaClass.TenonJump.ConfigNotFind : LuaClass.ConfigNotFind
+local m = LuaClass.Class("TenonJump", "ConfigNotFind", LuaClass.ConfigNotFind, {
+	CONFIG_NOT_FIND_BLOCK_GROUP = "<b>Can not find block-group config by id:</b> {0}";
+	CONFIG_NOT_FIND_SCORE = "<b>Can not find score config";
+});
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.ConfigNotFind = m;
+
+---@static
+---@param id number
+---@return string @error message
+function m:BlockGroup(id)
+	return CS.Main.LuaHelp.StringFormat(LuaClass.TenonJump.ConfigNotFind.CONFIG_NOT_FIND_BLOCK_GROUP, id)
+end
+
+---@static
+---@return string @error message
+function m:Score()
+	return LuaClass.TenonJump.ConfigNotFind.CONFIG_NOT_FIND_SCORE;
+end
+
+return m;

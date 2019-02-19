@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 7b2fd07bbe52db84e87aca5c43332eb0
+timeCreated: 1534401474
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/protocol/buriedpointprotocolhandler.lua
+  assetBundleVariant: ab

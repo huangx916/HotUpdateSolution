@@ -1,0 +1,171 @@
+---@class LuaClass.TenonJump.BestScore
+---@field public bestAllTimeScore number
+---@field public bestToday {time:string, score:number}
+
+---@class LuaClass.TenonJump.SettleUI : LuaClass.FadeUI
+---@field private titleRectList UIRect[]
+---@field private scoreShowDelay number
+---@field private scoreShowInterval number
+---@field private screenAdaptCurve UnityEngine.AnimationCurve
+---@field private windowPivot UnityEngine.Transform
+---
+---@field private finalLabelTa TweenAlpha
+---@field private finalScoreLabel UILabel
+---@field private finalScoreLabelTa TweenAlpha
+---
+---@field private scoreLabelTa TweenAlpha
+---@field private scoreScoreLabel UILabel
+---@field private scoreScoreLabelTa TweenAlpha
+---
+---@field private timeLabelTa TweenAlpha
+---@field private timeScoreLabel UILabel
+---@field private timeScoreLabelTa TweenAlpha
+---
+---@field private bestTodayLabelTa TweenAlpha
+---@field private bestTodayLabelTc TweenColor
+---@field private bestTodayScoreLabel UILabel
+---@field private bestTodayScoreLabelTa TweenAlpha
+---@field private bestTodayScoreLabelTc TweenColor
+---@field private bestTodayNewTa TweenAlpha
+---
+---@field private bestAllTimeLabelTa TweenAlpha
+---@field private bestAllTimeLabelTc TweenColor
+---@field private bestAllTimeScoreLabel UILabel
+---@field private bestAllTimeScoreLabelTa TweenAlpha
+---@field private bestAllTimeScoreLabelTc TweenColor
+---@field private bestAllTimeNewTa TweenAlpha
+---
+---@field private submitBtn UnityEngine.Collider
+---@field private submitBtnTa TweenAlpha
+---@field private submitBtnTf TweenFillAmount
+---
+---@field private scoreBgTa TweenAlpha
+local m = LuaClass.Class("TenonJump", "SettleUI", LuaClass.FadeUI);
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.SettleUI = m;
+
+---@private
+function m:Awake()
+	CS.Main.UIAgent.SetOnClick(self.submitBtn, function() self:OnExitClick() end);
+
+	self:ScreenAdapt();
+
+	CS.Main.CoroutineManager.Start(self:DoShow(), self.m_CSBehaviour);
+
+	self.m_OnExit = function() LuaClass.TenonJump.GameController.Instance:Exit() end;
+end
+
+---@private
+function m:ScreenAdapt()
+	local ratio = CS.UnityEngine.Screen.width / CS.UnityEngine.Screen.height;
+	local scale = self.screenAdaptCurve:Evaluate(ratio) * CS.UnityEngine.Vector3.one;
+	self.windowPivot.localScale = scale;
+end
+
+function m:DoShow()
+	return util.cs_generator(function()
+		-- Title
+		local resultType = LuaClass.TenonJump.GameDataManager.Instance:GetResultType();
+		for index, titleRect in ipairs(self.titleRectList) do
+			CS.Main.UIAgent.SetAlpha(titleRect, index == resultType);
+		end
+
+		-- Open sound
+		local soundName;
+		if resultType == LuaClass.TenonJump.ResultType.TimesUp then
+			soundName = "Settle_GameOver";
+		elseif resultType == LuaClass.TenonJump.ResultType.Finish then
+			soundName = "Settle_GameComplete";
+		else
+			soundName = "Settle_GameOver";
+		end
+		LuaClass.AudioManager.Instance:PlayModuleSceneOneShot(LuaClass.ModuleType.TenonJump, soundName);
+
+		-- Read and save score
+		local score = LuaClass.TenonJump.GameDataManager.Instance:GetScore();
+
+		local leftTime = math.round(LuaClass.TenonJump.GameDataManager.Instance:GetLeftTime());
+		local timeBonus = leftTime * LuaClass.TenonJump.ConstValue.TIME_BONUS_SCORE;
+
+		local finalScore = score + timeBonus;
+
+		local bestScoreStr = CS.UnityEngine.PlayerPrefs.GetString(LuaClass.TenonJump.ConstValue.BEST_SCORE_PREF, "{}");
+		---@type LuaClass.TenonJump.BestScore
+		local bestScore = LuaClass.RapidJson.Decode(bestScoreStr);
+		local bestAllTime = not bestScore.bestAllTimeScore or bestScore.bestAllTimeScore < finalScore;
+		if bestAllTime then
+			bestScore.bestAllTimeScore = finalScore;
+		end
+		local time = LuaClass.TimeManager.Instance:GetNativeDateTime():ToString("yyyy.MM.dd");
+		local bestToday = not bestScore.bestToday or bestScore.bestToday.score < finalScore or bestScore.bestToday.time ~= time;
+		if bestToday then
+			bestScore.bestToday = {
+				score = finalScore;
+				time = time;
+			};
+		end
+		CS.UnityEngine.PlayerPrefs.SetString(LuaClass.TenonJump.ConstValue.BEST_SCORE_PREF, LuaClass.RapidJson.Encode(bestScore));
+
+		-- Set score text
+		CS.Main.UIAgent.SetText(self.scoreScoreLabel, score);
+		CS.Main.UIAgent.SetText(self.timeScoreLabel, timeBonus);
+		CS.Main.UIAgent.SetText(self.finalScoreLabel, finalScore);
+
+		CS.Main.UIAgent.SetText(self.bestTodayScoreLabel, bestScore.bestToday.score);
+		CS.Main.UIAgent.SetTweenValue(self.bestTodayLabelTc, bestToday);
+		CS.Main.UIAgent.SetTweenValue(self.bestTodayScoreLabelTc, bestToday);
+
+		CS.Main.UIAgent.SetText(self.bestAllTimeScoreLabel, bestScore.bestAllTimeScore);
+		CS.Main.UIAgent.SetTweenValue(self.bestAllTimeLabelTc, bestAllTime);
+		CS.Main.UIAgent.SetTweenValue(self.bestAllTimeScoreLabelTc, bestAllTime);
+
+		coroutine.yield(CS.UnityEngine.WaitForSeconds(self.scoreShowDelay));
+
+		LuaClass.AudioManager.Instance:PlayModuleSceneOneShot(LuaClass.ModuleType.TenonJump, "Settle_FinalScore");
+
+		CS.Main.UIAgent.PlayForward(self.scoreLabelTa);
+		CS.Main.UIAgent.PlayForward(self.scoreScoreLabelTa);
+		coroutine.yield(CS.UnityEngine.WaitForSeconds(self.scoreShowInterval));
+
+		CS.Main.UIAgent.PlayForward(self.timeLabelTa);
+		CS.Main.UIAgent.PlayForward(self.timeScoreLabelTa);
+		coroutine.yield(CS.UnityEngine.WaitForSeconds(self.scoreShowInterval));
+
+		CS.Main.UIAgent.PlayForward(self.scoreBgTa);
+		coroutine.yield(CS.UnityEngine.WaitForSeconds(self.scoreShowInterval));
+
+		CS.Main.UIAgent.PlayForward(self.finalLabelTa);
+		CS.Main.UIAgent.PlayForward(self.finalScoreLabelTa);
+
+		-- Show score in turn
+		coroutine.yield(CS.UnityEngine.WaitForSeconds(self.scoreShowInterval));
+
+		CS.Main.UIAgent.PlayForward(self.bestTodayLabelTa);
+		CS.Main.UIAgent.PlayForward(self.bestTodayScoreLabelTa);
+		if bestToday then
+			CS.Main.UIAgent.PlayForward(self.bestTodayNewTa);
+			LuaClass.AudioManager.Instance:PlayModuleSceneOneShot(LuaClass.ModuleType.TenonJump, "Settle_BestScore");
+		end
+
+		coroutine.yield(CS.UnityEngine.WaitForSeconds(self.scoreShowInterval));
+
+		CS.Main.UIAgent.PlayForward(self.bestAllTimeLabelTa);
+		CS.Main.UIAgent.PlayForward(self.bestAllTimeScoreLabelTa);
+		if bestAllTime then
+			CS.Main.UIAgent.PlayForward(self.bestAllTimeNewTa);
+			LuaClass.AudioManager.Instance:PlayModuleSceneOneShot(LuaClass.ModuleType.TenonJump, "Settle_BestScore");
+		end
+
+		-- Show submit button
+		coroutine.yield(CS.UnityEngine.WaitForSeconds(self.scoreShowInterval));
+		CS.Main.UIAgent.PlayForward(self.submitBtnTa);
+
+		-- Delay to automatic submit
+		local duration = CS.Main.UIAgent.PlayForward(self.submitBtnTf);
+		coroutine.yield(CS.UnityEngine.WaitForSeconds(duration));
+		self:OnExitClick();
+	end);
+end
+
+return m;

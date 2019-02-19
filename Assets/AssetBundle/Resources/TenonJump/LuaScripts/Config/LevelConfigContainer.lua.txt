@@ -1,0 +1,53 @@
+---@class LuaClass.TenonJump.LevelPartConfig
+---@field public index number
+---@field public use string
+
+---@class LuaClass.TenonJump.LevelConfig
+---@field public id number
+---@field public name string
+---@field public value LuaClass.TenonJump.LevelPartConfig[]
+
+---@class LuaClass.TenonJump.LevelConfigContainer : LuaClass.BaseConfigContainer
+---@field public Instance LuaClass.TenonJump.LevelConfigContainer @static
+---@field private m_LevelConfigDict table<number, LuaClass.TenonJump.LevelConfig>
+local m = LuaClass.BaseConfigContainer:Derive("TenonJump", "LevelConfigContainer");
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.LevelConfigContainer = m;
+
+---@private
+function m:ctor()
+	self.m_LevelConfigDict = {};
+end
+
+---@return LuaClass.ConfigLoader[]
+function m:GetLoaderList()
+	---@type LuaClass.ConfigLoader[]
+	local configLoaders = {
+		LuaClass.ConfigLoader("LevelConfig", self.InitConfig)
+	}
+	return configLoaders;
+end
+
+---@private
+---@param jsonStr string
+function m:InitConfig(jsonStr)
+	local data = LuaClass.RapidJson.Decode(jsonStr);
+	---@param itemConfig LuaClass.TenonJump.LevelConfig
+	for _, itemConfig in ipairs(data) do
+		self.m_LevelConfigDict[itemConfig.id] = itemConfig;
+	end
+end
+
+---@return number
+function m:GetConfigCount()
+	return #self.m_LevelConfigDict;
+end
+
+---@param id string
+---@return LuaClass.TenonJump.LevelConfig
+function m:GetLevelConfig(id)
+	return id and self.m_LevelConfigDict[id];
+end
+
+return m;

@@ -1,0 +1,40 @@
+---@class LuaClass.BaseManager : LuaClass.LuaBehaviour
+---@field public Instance LuaClass.BaseManager @static
+local m = LuaClass.Class("Common", "BaseManager", LuaClass.LuaBehaviour);
+LuaClass.BaseManager = m;
+
+---@static
+---@param nameSpace string
+---@param className string
+---@return LuaClass.BaseManager
+function m:Derive(nameSpace, className)
+	---@type LuaClass.BaseManager
+	local managerClass = LuaClass.Class(nameSpace, className, self);
+
+	---@param propertyValues table
+	---@return LuaClass.BaseManager
+	local function Get(propertyValues)
+		---@type LuaClass.ModuleType
+		local moduleType = LuaClass.ModuleType[managerClass.nameSpace];
+		local moduleMain = LuaMain:GetModuleMain(moduleType);
+		local managerCollection = moduleMain:GetManagerCollection();
+		return managerCollection:Get(managerClass.className);
+	end
+	---@type table<any, PropertyHandle>
+	local propertyHandles = {
+		Instance = {
+			Get = Get;
+		};
+	};
+	local propertyValues = {};
+	LuaClass.SetProperty(managerClass, propertyHandles, propertyValues)
+
+	return managerClass;
+end
+
+---@protected
+function m:OnDestroy()
+	CS.Main.ListenerManager.RemoveAllExt(self.m_CSBehaviour);
+end
+
+return m;

@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 08e8cd2a4aaa21d4583db36912aa2836
+timeCreated: 1513675586
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/util/utilrequire.lua
+  assetBundleVariant: ab

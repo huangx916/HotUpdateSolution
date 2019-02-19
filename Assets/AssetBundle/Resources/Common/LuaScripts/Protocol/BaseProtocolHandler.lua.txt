@@ -1,0 +1,41 @@
+---@class LuaClass.BaseProtocolHandler : LuaClass.LuaBehaviour
+---@field public Instance LuaClass.BaseProtocolHandler @static
+---@field protected m_Route string
+local m = LuaClass.Class("Common", "BaseProtocolHandler", LuaClass.LuaBehaviour);
+LuaClass.BaseProtocolHandler = m;
+
+---@static
+---@param nameSpace string
+---@param className string
+---@param staticVars table
+---@return LuaClass.BaseProtocolHandler
+function m:Derive(nameSpace, className, staticVars)
+	---@type LuaClass.BaseProtocolHandler
+	local handlerClass = LuaClass.Class(nameSpace, className, self, staticVars);
+
+	---@return LuaClass.BaseProtocolHandler
+	local function Get(propertyValues)
+		local isCommon = handlerClass.nameSpace == LuaClass.ModuleType[LuaClass.ModuleType.Common];
+		local protocolManagerClass = isCommon and LuaClass.ProtocolManager or LuaClass[handlerClass.nameSpace].ProtocolManager;
+		return protocolManagerClass.Instance:Get(handlerClass.className);
+	end
+	---@type table<any, PropertyHandle>
+	local propertyHandles = {
+		---@type PropertyHandle
+		Instance = {
+			Get = Get;
+		};
+	};
+	local propertyValues = {};
+	LuaClass.SetProperty(handlerClass, propertyHandles, propertyValues)
+
+	return handlerClass;
+end
+
+---@param route string
+---@return boolean
+function m:IsHandlerOf(route)
+	return self.m_Route == route;
+end
+
+return m;

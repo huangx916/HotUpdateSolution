@@ -1,0 +1,26 @@
+---@class LuaClass.PlaybackProtocolHandler : LuaClass.BaseProtocolHandler
+---@field public Instance LuaClass.PlaybackProtocolHandler @static
+local m = LuaClass.BaseProtocolHandler:Derive("Common", "PlaybackProtocolHandler", {
+	m_UploadUrlFormat = "http://192.168.146.140:5400/playback/upload?gameName=%s&matchId=%d&playerId=%d";
+});
+LuaClass.PlaybackProtocolHandler = m;
+
+---@overload fun(matchId:number, playerId:number, data:string)
+---@param matchId number
+---@param playerId number
+---@param data string
+---@param callback fun(isCompleted:boolean)
+function m:Upload(matchId, playerId, data, callback)
+	local moduleName = LuaClass.ModuleType[LuaMain:GetModuleType()];
+	local url = string.format(self.m_UploadUrlFormat, moduleName, matchId, playerId);
+	LuaClass.HttpManager.Instance:Upload(url, data, callback);
+end
+
+---@overload fun(url:string)
+---@param url string
+---@param respAction fun(downloadBytes:string)
+function m:Download(url, respAction)
+	LuaClass.HttpManager.Instance:Download(url, respAction);
+end
+
+return m;

@@ -1,0 +1,129 @@
+---@class LuaClass.DialogUI : LuaClass.FadeUI
+---@field private titleLabel UILabel
+---@field private contentLabel UILabel
+---@field private confirmLabel UILabel
+---@field private cancelLabel UILabel
+---@field private confirmBtn UnityEngine.Collider
+---@field private cancelBtn UnityEngine.Collider
+---
+---@field private m_ConfirmAction fun()
+---@field private m_CancelAction fun()
+local m = LuaClass.Class("Common", "DialogUI", LuaClass.FadeUI);
+LuaClass.DialogUI = m;
+
+---@private
+function m:Awake()
+	self:InitData();
+	self:InitListener();
+	self:InitUI();
+end
+
+---@private
+function m:InitData()
+
+end
+
+---@private
+function m:InitListener()
+	CS.Main.UIAgent.SetOnClick(self.confirmBtn, function() self:OnExitClick(self.m_ConfirmAction); end);
+	CS.Main.UIAgent.SetOnClick(self.cancelBtn,function() self:OnExitClick(self.m_CancelAction); end);
+end
+
+---@private
+function m:InitUI()
+	---@type LuaClass.LanguageConfigContainer
+	local languageConfigContainer = LuaClass.LanguageConfigContainer.Instance;
+	if languageConfigContainer then
+		CS.Main.UIAgent.SetText(self.titleLabel, languageConfigContainer:GetText("DialogUI", "title"))
+		CS.Main.UIAgent.SetText(self.contentLabel, languageConfigContainer:GetText("DialogUI", "content"))
+		CS.Main.UIAgent.SetText(self.confirmLabel, languageConfigContainer:GetText("DialogUI", "confirm"))
+		CS.Main.UIAgent.SetText(self.cancelLabel, languageConfigContainer:GetText("DialogUI", "cancel"))
+	end
+end
+
+---@private
+---@param action fun()
+function m:OnExitClick(action)
+	if not self.m_Exiting then
+		self.m_Exiting = true;
+
+		if action then
+			action();
+		end
+		self:Exit();
+	end
+end
+
+---@private
+---@param dialogType LuaClass.DialogType
+---@param titleStr string
+---@param contentStr string
+---@param confirmStr string
+---@param cancelStr string
+function m:Init(dialogType, titleStr, contentStr, confirmStr, cancelStr)
+	if titleStr then
+		CS.Main.UIAgent.SetText(self.titleLabel, titleStr)
+	end
+	if contentStr then
+		CS.Main.UIAgent.SetText(self.contentLabel, contentStr)
+	end
+	if confirmStr then
+		CS.Main.UIAgent.SetText(self.confirmLabel, confirmStr)
+	end
+	if cancelStr then
+		CS.Main.UIAgent.SetText(self.cancelLabel, cancelStr)
+	end
+
+	if dialogType == LuaClass.DialogType.None then
+		CS.Main.CompAgent.SetActive(self.confirmBtn, false)
+		CS.Main.CompAgent.SetActive(self.cancelBtn, false)
+	elseif dialogType == LuaClass.DialogType.Confirm then
+		CS.Main.CompAgent.SetLocalPosition(self.confirmBtn, CS.UnityEngine.Vector3.zero)
+		CS.Main.CompAgent.SetActive(self.cancelBtn, false)
+	elseif dialogType == LuaClass.DialogType.Cancel then
+		CS.Main.CompAgent.SetActive(self.confirmBtn, false)
+		CS.Main.CompAgent.SetLocalPosition(self.cancelBtn, CS.UnityEngine.Vector3.zero)
+	end
+end
+
+---@overload fun(titleStr:string, contentStr:string)
+---@param titleStr string
+---@param contentStr string
+---@param confirmStr string
+function m:InitConfirm(titleStr, contentStr, confirmStr)
+	self:Init(LuaClass.DialogType.Confirm, titleStr, contentStr, confirmStr, nil)
+end
+
+---@overload fun(titleStr:string, contentStr:string)
+---@param titleStr string
+---@param contentStr string
+---@param cancelStr string
+function m:InitCancel(titleStr, contentStr, cancelStr)
+	self:Init(LuaClass.DialogType.Confirm, titleStr, contentStr, nil, cancelStr)
+end
+
+---@overload fun(titleStr:string, contentStr:string)
+---@param titleStr string
+---@param contentStr string
+---@param confirmStr string
+---@param cancelStr string
+function m:InitConfirmCancel(titleStr, contentStr, confirmStr, cancelStr)
+	self:Init(LuaClass.DialogType.Confirm, titleStr, contentStr, confirmStr, cancelStr)
+end
+
+---@param confirmAction fun()
+function m:SetConfirmAction(confirmAction)
+	self.m_ConfirmAction = confirmAction;
+end
+
+---@param cancelAction fun()
+function m:SetCancelAction(cancelAction)
+	self.m_CancelAction = cancelAction;
+end
+
+---@return LuaClass.UIType
+function m:GetType()
+	return LuaClass.UIType.Transitory;
+end
+
+return m;

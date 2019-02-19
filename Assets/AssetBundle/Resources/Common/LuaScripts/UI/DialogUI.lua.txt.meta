@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: a97a7790fee9ed34eb6af6464bf0df3a
+timeCreated: 1529497339
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/ui/dialogui.lua
+  assetBundleVariant: ab

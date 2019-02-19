@@ -1,0 +1,4 @@
+require("Common.LuaScripts.Data.ConstValue.lua");
+require("Common.LuaScripts.Data.ListenerType.lua");
+require("Common.LuaScripts.Data.ConfigNotFind.lua");
+require("Common.LuaScripts.Data.ErrorCode.lua");

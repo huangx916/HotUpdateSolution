@@ -1,0 +1,52 @@
+---@class LuaClass.TenonJump.ObstacleLogic : LuaClass.LuaBehaviour
+---@field tweenTPY TweenPosition
+---@field tweenTPZ TweenPosition
+---@field tweenTRX TweenRotation
+---@field colliderList UnityEngine.MeshCollider[]
+---@field public layerIndex number
+---@field private broken boolean
+---@field private passed boolean
+---@field public die boolean
+---@field public finish boolean
+local m = LuaClass.Class("TenonJump", "ObstacleLogic", LuaClass.LuaBehaviour);
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.ObstacleLogic = m;
+
+function m:Awake()
+    self.broken = false;
+    self.passed = false;
+end
+
+---@public
+function m:PlayBreak()
+    if not self.broken then
+        self.broken = true;
+        CS.Main.CoroutineManager.Start(self:DoPlayBreak(), self.m_CSBehaviour);
+    end
+end
+
+---@public
+function m:PlayPass()
+    if not self.passed then
+        self.passed = true;
+        CS.Main.CoroutineManager.Delay(self.tweenTPY.duration, function() CS.UnityEngine.Object.Destroy(self.m_CSBehaviour.gameObject); end, self.m_CSBehaviour);
+    end
+end
+
+---@private
+function m:DoPlayBreak()
+    return util.cs_generator(function()
+        for i = 1, #self.colliderList do
+            self.colliderList[i].enabled = false;
+        end
+        self.m_CSBehaviour.gameObject.transform.parent = LuaClass.TenonJump.GameController.Instance.game3DRoot.transform;
+        CS.Main.UIAgent.PlayForward(self.tweenTPY, true);
+        CS.Main.UIAgent.PlayForward(self.tweenTPZ, true);
+        CS.Main.UIAgent.PlayForward(self.tweenTRX, true);
+        coroutine.yield(CS.UnityEngine.WaitForSeconds(self.tweenTPY.duration));
+        CS.UnityEngine.Object.Destroy(self.m_CSBehaviour.gameObject);
+        end);
+end
+
+return m;

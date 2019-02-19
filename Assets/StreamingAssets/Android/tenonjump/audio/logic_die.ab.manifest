@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 716151171
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 7bf843eaf399bedad7d4b826db5463b7
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c516f2a3b2b6b67ef759f6410a790acd
+HashAppended: 0
+ClassTypes:
+- Class: 83
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Audio/Logic_Die.mp3
+Dependencies: []

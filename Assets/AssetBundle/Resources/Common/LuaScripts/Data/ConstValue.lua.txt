@@ -1,0 +1,26 @@
+---@class LuaClass.ConstValue : LuaClass.Object
+local ConstValue = {
+	BETA_VERSION = false;
+
+	---asset directory
+	ASSET_DIR_CONFIG = "Config";
+	ASSET_DIR_UI = "UI";
+	ASSET_DIR_AUDIO = "Audio";
+	ASSET_DIR_EFFECT = "Effect";
+	ASSET_DIR_ATLAS = "UIAtlas";
+
+	---time
+	TIME_PASS_INTERVAL = 2;
+
+	---audio
+	BGM_FADE_DURATION = 0.5;
+
+	---Cache
+	CACHE_ONE_SHOT_AUDIO_COUNT = 10;
+	CACHE_ASSET_BUNDLE_COUNT = 20;
+}
+
+---@type LuaClass.ConstValue
+LuaClass.ConstValue = LuaClass.Class("Common", "ConstValue", nil, ConstValue);
+
+return ConstValue;

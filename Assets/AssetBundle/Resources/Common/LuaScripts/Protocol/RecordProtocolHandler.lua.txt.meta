@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 42fcee8793de8814fa872fdf8fc28848
+timeCreated: 1532610080
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/protocol/recordprotocolhandler.lua
+  assetBundleVariant: ab

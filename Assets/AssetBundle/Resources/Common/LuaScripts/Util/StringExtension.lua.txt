@@ -1,0 +1,75 @@
+---@overload fun(str string):string
+---@param str string
+---@param pattern string
+---@return string
+function string.trim(str, pattern)
+	if str == nil then
+		return nil, "the string parameter is nil"
+	end
+	return string.gsub(str, pattern or " ", "");
+end
+
+---@param str string
+---@param substr string
+---@return boolean
+function string.startswith(str, substr)
+	if str == nil or substr == nil then
+		return nil, "the string or the sub-stirng parameter is nil"
+	end
+	if string.find(str, substr, 1, true) ~= 1 then
+		return false
+	else
+		return true
+	end
+end
+
+---@param str string
+---@param substr string
+---@return boolean
+function string.endswith(str, substr)
+	if str == nil or substr == nil then
+		return nil, "the string or the sub-string parameter is nil"
+	end
+	local str_tmp = string.reverse(str)
+	local substr_tmp = string.reverse(substr)
+	if string.find(str_tmp, substr_tmp, 1, true) ~= 1 then
+		return false
+	else
+		return true
+	end
+end
+
+---@param str string
+---@param ... string
+---@return string
+function string.split(str, ...)
+	local strs = CS.Main.LuaHelp.StringSplit(str, ...);
+	local count = strs and strs.Length or 0;
+	local strTable = {};
+	for index = 1, count do
+		strTable[index] = strs[index - 1];
+	end
+	return table.unpack(strTable, 1, count);
+end
+
+---@param str string
+---@return boolean
+function string.isnilorempty(str)
+	return str == nil or str == "";
+end
+
+---@param s string
+---@param pattern string
+---@param init number
+---@param plain boolean
+---@return number, number
+function string.lastfind(s, pattern)
+	local invS = string.reverse(s)
+	local invPattern = string.reverse(pattern)
+	local invStart, invEnd = string.find(invS, invPattern);
+	if not invStart then
+		return nil, nil;
+	else
+		return string.len(s) - invEnd + 1, string.len(s) - invStart + 1;
+	end
+end

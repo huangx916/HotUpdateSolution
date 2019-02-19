@@ -1,0 +1,7 @@
+[
+	{ "name": "Lobby", "volume": 1, "path": "Bgm/Lobby", "desc": "" },
+	{ "name": "Login", "volume": 1, "path": "Bgm/Login", "desc": "" },
+
+	{ "name": "Click", "volume": 1, "path": "Effect/UI/Click", "desc": "" },
+	{ "name": "Select", "volume": 1, "path": "Effect/UI/Select", "desc": "" }
+]

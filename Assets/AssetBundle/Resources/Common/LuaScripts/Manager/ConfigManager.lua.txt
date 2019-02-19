@@ -1,0 +1,59 @@
+require("Common.LuaScripts.Config.BaseConfigContainer.lua");
+
+---@class LuaClass.ConfigManager : LuaClass.BaseManager
+---@field public Instance LuaClass.ConfigManager @static
+---@field private m_ConfigContainerDict table<string, LuaClass.BaseConfigContainer>
+local m = LuaClass.BaseManager:Derive("Common", "ConfigManager");
+LuaClass.ConfigManager = m;
+
+---@private
+function m:ctor()
+	self.m_ConfigContainerDict = {};
+end
+
+---@private
+function m:Awake()
+	self:Add("LanguageConfigContainer");
+	self:Add("AudioConfigContainer");
+end
+
+---@private
+function m:Start()
+	---@param value LuaClass.BaseConfigContainer
+	for _, value in pairs(self.m_ConfigContainerDict) do
+		value:LoadConfig();
+	end
+end
+
+---@protected
+---@param configContainerName string
+---@return string
+function m:GetConfigContainerPath(configContainerName)
+	return self.class.nameSpace .. ".LuaScripts.Config." .. configContainerName .. ".lua";
+end
+
+---@private
+---@param configContainerName string
+function m:Add(configContainerName)
+	if configContainerName then
+		local configContainerClass = require(self:GetConfigContainerPath(configContainerName));
+		self.m_ConfigContainerDict[configContainerName] = configContainerClass();
+	end
+end
+
+---@private
+---@param configContainerName string
+function m:Init(configContainerName)
+	local configContainer = self.m_ConfigContainerDict[configContainerName];
+	if configContainer then
+		configContainer:LoadConfig();
+	end
+end
+
+---@param configContainerName string
+---@return LuaClass.BaseConfigContainer
+function m:Get(configContainerName)
+	return self.m_ConfigContainerDict[configContainerName];
+end
+
+return m;

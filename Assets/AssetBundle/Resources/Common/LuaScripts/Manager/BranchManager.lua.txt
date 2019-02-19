@@ -1,0 +1,11 @@
+---@class LuaClass.BranchManager : LuaClass.BaseManager
+---@field public Instance LuaClass.BranchManager @static
+local m = LuaClass.BaseManager:Derive("Common", "BranchManager");
+LuaClass.BranchManager = m;
+
+---@return string
+function m:GetBranchName()
+	return CS.Main.ConstValue.GAME_NAME;
+end
+
+return m;

@@ -1,0 +1,495 @@
+---@class LuaClass.HotUpdateModule
+---@field public Instance LuaClass.HotUpdateModule @static
+---@field m_ModuleName string
+---@field m_AssetPathType LuaClass.AssetPathType
+---@field m_UpdateStepType LuaClass.UpdateStepType
+---@field m_Version string
+---@field m_CdnVersion string
+---@field m_CdnFileList table
+---@field m_PersistentFileList table
+---@field m_StreamingFileList table
+---@field m_UpdateFileNameList string[]
+---@field m_DeleteFileNameList string[]
+---@field m_CurrentLoader Main.WWWLoader
+---@field m_Index number
+local m = LuaClass.BaseManager:Derive("Common", "HotUpdateModule");
+LuaClass.HotUpdateModule = m;
+
+function m:Awake()
+
+end
+
+---@public
+---@param moduleName string
+function m:Init(moduleName)
+    self.m_ModuleName = moduleName;
+
+    if CS.Main.ConstValue.DOWNLOAD then
+        self.m_UpdateStepType = LuaClass.UpdateStepType.NativeVersionCompare;
+        self:NativeVersionCompare();
+
+        if self:IsPersistentHasVersion() then
+            print("---如果有Version字段，则有Persistent数据，加载Persistent的FileList");
+            print("persistentFileList Path" .. CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.FILE_LIST_NAME);
+            local persistentFileListBytes = CS.Main.FileManager.Read(CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.FILE_LIST_NAME);
+            print(persistentFileListBytes and "persistentFileListBytes true" or "persistentFileListBytes false");
+            local persistentFileListStr = persistentFileListBytes and CS.Main.ConvertExt.BytesToString(persistentFileListBytes) or nil;
+            self.m_PersistentFileList = LuaClass.RapidJson.Decode(persistentFileListStr);
+        else
+            print("---否则，Persistent的FileList为空");
+            self.m_PersistentFileList = {};
+        end
+    else
+        self.m_UpdateStepType = LuaClass.UpdateStepType.UpdateCancel;
+        self.m_Version = CS.Main.ConstValue.VERSION;
+    end
+
+    print("streamingFileList Path : " .. CS.Main.ConstValue.STREAMING_DIR_PATH .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.FILE_LIST_NAME);
+    if CS.Main.FileManager.IsFileExist(CS.Main.ConstValue.STREAMING_DIR_PATH .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.FILE_LIST_NAME) then
+        print("streamingFileList exist");
+        local streamingFileListBytes = CS.Main.FileManager.Read(CS.Main.ConstValue.STREAMING_DIR_PATH .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.FILE_LIST_NAME);
+        print(streamingFileListBytes and "streamingFileListBytes true" or "streamingFileListBytes false");
+        local streamingFileListStr = streamingFileListBytes and CS.Main.ConvertExt.BytesToString(streamingFileListBytes) or nil;
+        self.m_StreamingFileList = LuaClass.RapidJson.Decode(streamingFileListStr);
+        print("streamingFileListStr = " .. streamingFileListStr);
+    else
+        print("---否则，Streaming的FileList为空");
+        self.m_StreamingFileList = {};
+    end
+end
+
+---@private
+---@return boolean
+function m:IsPersistentHasVersion()
+    local path = CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.VERSION_NAME
+    --CS.Main.Debugger.LogError(path);
+    return CS.Main.FileManager.IsFileExist(path);
+end
+
+---@private
+---@param defaultVersion string
+---@return string
+function m:GetPersistentVersion(defaultVersion)
+    if self:IsPersistentHasVersion() then
+        --print("==================exist==============")
+        local persistentVersionInfoBytes = CS.Main.FileManager.Read(
+                CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.VERSION_NAME);
+        --CS.Main.Debugger.LogError(persistentVersionInfoBytes);
+        local persistentVersionInfoStr = persistentVersionInfoBytes and CS.Main.ConvertExt.BytesToString(persistentVersionInfoBytes) or nil;
+        local persistentVersionInfoJo = CS.Main.StringParser.StringToJo(persistentVersionInfoStr);
+        return CS.Main.JsonParser.JoItemToString(persistentVersionInfoJo, CS.Main.ConstValue.VERSION_KEY, defaultVersion);
+    end
+    --print("===================not exist==============")
+    return defaultVersion;
+end
+
+---@private
+function m:NativeVersionCompare()
+    if CS.Main.ConstValue.PLATFORM == CS.UnityEngine.RuntimePlatform.WebGLPlayer then
+        self.m_AssetPathType = LuaClass.AssetPathType.Persistent;
+        self.m_Version = self:GetPersistentVersion(nil);
+        Log("Persistent version: " .. (self.m_Version or "nil"));
+        Log("Last native version in Persistent.");
+    else
+        local streamingVersion = CS.Main.ConstValue.VERSION;
+        local streamingVersions = table.pack(string.split(streamingVersion, '.'));
+        local streamingHotVersion = tonumber(streamingVersions[3]);
+
+        local persistentVersion = self:GetPersistentVersion(CS.Main.ConstValue.VERSION);
+        local persistentVersions = table.pack(string.split(persistentVersion, '.'));
+        local persistentHotVersion = tonumber(persistentVersions[3]);
+
+        --print(persistentVersions[1],persistentVersions[2],persistentVersions[3]);
+
+        if (persistentVersions[1] == streamingVersions[1])
+                and (persistentVersions[2] == streamingVersions[2])
+                and persistentHotVersion > streamingHotVersion
+        then
+            self.m_AssetPathType = LuaClass.AssetPathType.Persistent;
+            self.m_Version = persistentVersion;
+        else
+            self.m_AssetPathType = LuaClass.AssetPathType.Streaming;
+            self.m_Version = streamingVersion;
+        end
+    end
+end
+
+---@param updateAction fun()
+function m:VersionCompare(updateAction)
+    if CS.Main.ConstValue.DOWNLOAD then
+        CS.Main.CoroutineManager.Start(self:DoVersionCompare(updateAction), self.m_CSBehaviour);
+    end
+end
+
+---@private
+---@param updateAction fun()
+---@return System.Collections.IEnumerator
+function m:DoVersionCompare(updateAction)
+    return util.cs_generator(function()
+
+        if self.m_UpdateStepType >= LuaClass.UpdateStepType.VersionCompare
+                and self.m_UpdateStepType <= LuaClass.UpdateStepType.VersionWrite then
+            return;
+        end
+
+        print("---对比版本");
+        self.m_UpdateStepType = LuaClass.UpdateStepType.VersionCompare;
+        CS.Main.Debugger.Log("Start cdn version compare.");
+
+        print("---下载CDN服务器上的版本信息");
+        local streamingVersion = CS.Main.ConstValue.VERSION;
+        local streamingVersions = table.pack(string.split(streamingVersion, '.'));
+        local cdnCurVerUrl = CS.Main.ConstValue.CDN_URL .. "/" .. CS.Main.ConstValue.GAME_NAME .. "/" .. CS.Main.ConstValue.BUNDLE_DIR .. "/" .. streamingVersions[1] .. "." .. streamingVersions[2];
+        local cdnVersionLoader = CS.Main.WWWManager.Load(cdnCurVerUrl .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.VERSION_NAME, self.m_CSBehaviour);
+        coroutine.yield(cdnVersionLoader.Wait);
+        if cdnVersionLoader.Error ~= nil then
+            --CS.Main.Debugger.Log("Update failed by: " .. cdnVersionLoader.Error);
+            --self.m_UpdateStepType = LuaClass.UpdateStepType.UpdateFailed;
+            ----OnUpdateFaild(ConstValue.VERSION_NAME, cdnVersionLoader.Error);
+            --self:ShowOfflineDialog(nil);
+            self.m_UpdateStepType = LuaClass.UpdateStepType.UpdateCancel;
+            return;
+        end
+
+        print("---解析CDN上的版本号");
+        local cdnVersionInfoJo = CS.Main.StringParser.StringToJo(cdnVersionLoader.Text);
+        self.m_CdnVersion = CS.Main.JsonParser.JoItemToString(cdnVersionInfoJo, CS.Main.ConstValue.VERSION_KEY, CS.Main.ConstValue.VERSION);
+        CS.Main.Debugger.Log("Cdn version: " .. self.m_CdnVersion);
+        local cdnVersions = table.pack(string.split(self.m_CdnVersion, '.'));
+        local cdnHotVersion = tonumber(cdnVersions[3]);
+
+        if CS.Main.ConstValue.PLATFORM == CS.UnityEngine.RuntimePlatform.WebGLPlayer then
+            self.m_Version = cdnVersions[1] .. "." .. cdnVersions[2] .. "." .. -1;
+        end
+        print("---解析本地对比后的版本号");
+        local nativeVersions = table.pack(string.split(self.m_Version, '.'));
+        local nativeHotVersion = tonumber(nativeVersions[3]);
+
+        print("---大版本更新判断");
+        if cdnVersions[1] ~= nativeVersions[1] or cdnVersions[2] ~= nativeVersions[2] then
+            self:ShowReDownloadDialog(self.m_CdnVersion);
+            return;
+        end
+
+        print("---对比CDN上的和本地对比后的版本号");
+        print("cdnVersion : " .. self.m_CdnVersion);
+        print("nativeVersion : " .. self.m_Version);
+        if nativeHotVersion >= cdnHotVersion then
+            print("---本地是最新的热更版本，不需要更新");
+            if self.m_AssetPathType == LuaClass.AssetPathType.Streaming then
+                print("---如果最新的热更版本来自Streaming，则清空Persistent，清完后删除Version字段");
+                if table.count(self.m_PersistentFileList) > 0 then
+                    ---@type table
+                    for k,_ in pairs(self.m_PersistentFileList) do
+                        local fileName = k;
+                        CS.Main.FileManager.Delete(CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. string.lower(self.m_ModuleName) .. "/" .. fileName);
+                        coroutine.yield(nil);
+                    end
+                    CS.Main.FileManager.Delete(CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.FILE_LIST_NAME);
+                end
+                if (self:IsPersistentHasVersion()) then
+                    CS.Main.FileManager.Delete(CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.VERSION_NAME);
+                end
+            end
+            CS.Main.Debugger.Log("Last version in native.");
+            print("---跳过更新");
+
+            self.m_UpdateStepType = LuaClass.UpdateStepType.UpdateCancel;
+
+            --[[
+            if LuaClass.SlotDownloadManager.Instance:IsSlotDownloaded(self.m_SlotName) then
+                --local uiLoaded = false;
+                local moduleType = LuaClass.ModuleType[self.m_SlotName];
+                local uiManager = LuaClass.UIManager.Instance;
+                if LuaMain:GetModuleType() ~= moduleType then
+                    LuaClass.SceneManager.Instance:SwitchToScene(LuaClass.SceneType.Slot, moduleType, function()
+                        local slotLoadingUI = uiManager:Open(moduleType, "SlotLoadingUI");
+                        uiManager:Close("LobbyUI");
+                        --uiLoaded = true;
+                        slotLoadingUI:PlayDefault();
+                    end);
+                    --while uiLoaded == false do
+                    --    coroutine.yield(nil);
+                    --end
+                else
+                    local slotLoadingUI = uiManager:Open(moduleType, "SlotLoadingUI");
+                    uiManager:Close("LobbyUI");
+                    slotLoadingUI:PlayDefault();
+                end
+                --@type LuaClass_ClassicSlot.SlotLoadingUI || LuaClass_PirateSlot.SlotLoadingUI
+                --local slotLoadingUI = LuaClass.UIManager.Instance:Get("SlotLoadingUI");
+                --slotLoadingUI:PlayDefault();
+            end
+            --]]
+            --[[
+            if enterSlot ~= nil then
+                enterSlot(self.m_SlotName);
+            end
+            --]]
+            return;
+        end
+        CS.Main.Debugger.Log("Last version in cdn.");
+        self.m_UpdateStepType = LuaClass.UpdateStepType.VersionCompared;
+
+        if (updateAction ~= nil) then
+            CS.Main.CoroutineManager.MainThread(updateAction);
+        end
+    end
+    );
+end
+
+---@private
+function m:SetPersistentFileList()
+    local persistentFileListBytes = CS.Main.ConvertExt.StringToBytes(LuaClass.RapidJson.Encode(self.m_PersistentFileList));
+    CS.Main.FileManager.Write(CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.FILE_LIST_NAME, persistentFileListBytes);
+end
+
+---@private
+---@param version string
+function m:SetPersistentVersion(version)
+    local persistentVersionInfoJo = CS.SimpleJson.JsonObject();
+    persistentVersionInfoJo:Add(CS.Main.ConstValue.VERSION_KEY, version);
+    local persistentVersionInfoBytes = CS.Main.ConvertExt.StringToBytes(persistentVersionInfoJo:ToString());
+    CS.Main.FileManager.Write(CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.VERSION_NAME, persistentVersionInfoBytes);
+end
+
+---@overload fun()
+---@param resetAction fun()
+function m:VersionUpdate(resetAction)
+    if CS.Main.ConstValue.DOWNLOAD then
+        CS.Main.CoroutineManager.Start(self:DoVersionUpdate(resetAction), self.m_CSBehaviour);
+    end
+end
+
+---@private
+---@param resetAction fun()
+---@return System.Collections.IEnumerator
+function m:DoVersionUpdate(resetAction)
+    return util.cs_generator(function()
+
+        print("---对比文件");
+        self.m_UpdateStepType = LuaClass.UpdateStepType.FileCompare;
+
+        local streamingVersions = table.pack(string.split(CS.Main.ConstValue.VERSION, '.'));
+        local cdnCurVerUrl = CS.Main.ConstValue.CDN_URL .. "/" .. CS.Main.ConstValue.GAME_NAME .. "/" .. CS.Main.ConstValue.BUNDLE_DIR .. "/" .. streamingVersions[1] .. "." .. streamingVersions[2];
+
+        print("---下载并解析CDN上的文件列表和Manifest");
+        local cdnFileListLoader = CS.Main.WWWManager.Load(cdnCurVerUrl .. "/" .. string.lower(self.m_ModuleName) .. "/" .. CS.Main.ConstValue.FILE_LIST_NAME, self.m_CSBehaviour);
+        coroutine.yield(cdnFileListLoader.Wait);
+
+        self.m_CdnFileList = LuaClass.RapidJson.Decode(cdnFileListLoader.Text);
+
+        print("---统计需要下载的和需要删除的");
+        self:CountFiles();
+
+        --if LuaClass.SlotDownloadManager.Instance:IsSlotDownloaded(self.m_SlotName) then
+        --    local uiLoaded = false;
+        --    ---@type LuaClass.ModuleType
+        --    local moduleType = LuaClass.ModuleType[self.m_SlotName];
+        --    local uiManager = LuaClass.UIManager.Instance;
+        --    if LuaMain:GetModuleType() ~= moduleType then
+        --        LuaClass.SceneManager.Instance:SwitchToScene(LuaClass.SceneType.Slot, moduleType, function()
+        --            uiManager:Open(moduleType, "SlotLoadingUI");
+        --            uiManager:Close("LobbyUI");
+        --            uiLoaded = true;
+        --        end);
+        --        while uiLoaded == false do
+        --            coroutine.yield(nil);
+        --        end
+        --    else
+        --        uiManager:Open(moduleType, "SlotLoadingUI");
+        --        uiManager:Close("LobbyUI");
+        --    end
+        --end
+
+        print("---下载");
+        self.m_UpdateStepType = LuaClass.UpdateStepType.FileDownload;
+
+        for i,v in ipairs(self.m_UpdateFileNameList) do
+            self.m_Index = i;
+            local fileName = v;
+            self.m_CurrentLoader = CS.Main.WWWManager.Load(cdnCurVerUrl .. "/" .. fileName, self.m_CSBehaviour);
+            coroutine.yield(self.m_CurrentLoader.Wait);
+
+
+            if self.m_CurrentLoader.Error ~= nil then
+                print("---下载失败，需要重新更新");
+                CS.Main.Debugger.Log("Update failed by: " .. self.m_CurrentLoader.Error);
+                self.m_UpdateStepType = LuaClass.UpdateStepType.UpdateFailed;
+                --OnUpdateFaild(fileName, m_CurrentLoader.Error);
+                self:ShowOfflineDialog(function()
+                    LuaClass.SceneManager.Instance:SwitchToScene(LuaClass.SceneType.Lobby, LuaClass.ModuleType.Common, function()
+                        LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "LobbyUI");
+                        LuaClass.UIManager.Instance:Close("ModuleLoadingUI");
+                    end);
+                end);
+                return;
+            end
+
+            local bytes = self.m_CurrentLoader.Bytes;
+            if (bytes ~= nil) then
+                CS.Main.FileManager.Write(CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. fileName, bytes);
+            end
+
+        end
+
+        print("---删除");
+        self.m_UpdateStepType = LuaClass.UpdateStepType.FileDelete;
+        for _,v in ipairs(self.m_DeleteFileNameList) do
+            local fileName = v;
+            CS.Main.FileManager.Delete(CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. fileName);
+            coroutine.yield(nil);
+        end
+
+        print("---将CDN上的Version文件和Manifest文件写入本地");
+        self.m_UpdateStepType = LuaClass.UpdateStepType.VersionWrite;
+
+        print("---将Persistent的文件列表替换成Cdn上的文件列表，并写入文件");
+        self.m_PersistentFileList = self.m_CdnFileList;
+        self:SetPersistentFileList();
+
+        print("---将Version标记为最新的版本");
+        local cdnVersions = table.pack(string.split(self.m_CdnVersion, '.'));
+        local nativeVersions = table.pack(string.split(self.m_Version, '.'));
+        self.m_Version = nativeVersions[1] .. "." .. nativeVersions[2] .. "." .. cdnVersions[3];
+        self:SetPersistentVersion(self.m_Version);
+
+        print("---热更完成");
+        local action = function()
+            self.m_UpdateStepType = LuaClass.UpdateStepType.UpdateFinished;
+            print("---优先读Persistent");
+            self.m_AssetPathType = LuaClass.AssetPathType.Persistent;
+            if resetAction then
+                resetAction();
+            end
+        end
+        CS.Main.CoroutineManager.MainThread(action);
+    end);
+end
+
+---@private
+function m:CountFiles()
+    print("Begin CountFiles");
+
+    self.m_UpdateFileNameList = {};
+    self.m_DeleteFileNameList = {};
+    print("---遍历Cdn上的每一个bundle");
+    ---@param fileName string
+    for fileName, cdnInfo in pairs(self.m_CdnFileList) do
+        local cdnMd5 = cdnInfo[CS.Main.ConstValue.FILE_LIST_MD5_KEY];
+        print(fileName .. " cdnMd5:" .. cdnMd5);
+        if self.m_PersistentFileList[fileName] then
+            print("---如果Persistent存在")
+            local persistentInfoJo = self.m_PersistentFileList[fileName];
+            local persistentMd5 = persistentInfoJo[CS.Main.ConstValue.FILE_LIST_MD5_KEY];
+            print(fileName .. " persistentMd5:" .. persistentMd5);
+            if persistentMd5 ~= cdnMd5 then
+                print("---如果Persistent与Cdn上的不一样")
+                if self.m_StreamingFileList[fileName] then
+                    print("---如果Streaming存在")
+                    local streamingInfoJo = self.m_StreamingFileList[fileName];
+                    local streamingMd5 = streamingInfoJo[CS.Main.ConstValue.FILE_LIST_MD5_KEY];
+                    print(fileName .. " streamingMd5:" .. streamingMd5);
+                    if streamingMd5 == cdnMd5 then
+                        print("---如果Streaming与Cdn上的一样，则删除Persistent")
+                        table.insert(self.m_DeleteFileNameList, fileName);
+                    else
+                        print("---如果Streaming与Cdn上的不一样，则下载覆盖Persistent")
+                        table.insert(self.m_UpdateFileNameList, fileName);
+                    end
+                else
+                    print("---如果Streaming不存在，则下载覆盖Persistent")
+                    table.insert(self.m_UpdateFileNameList, fileName);
+                end
+            end
+        else
+            print("---如果Persistent不存在");
+            if self.m_StreamingFileList[fileName] then
+                print("---如果Streaming存在");
+                local streamingInfoJo = self.m_StreamingFileList[fileName];
+                local streamingMd5 = streamingInfoJo[CS.Main.ConstValue.FILE_LIST_MD5_KEY];
+                print(fileName .. " streamingMd5:" .. streamingMd5);
+                if streamingMd5 ~= cdnMd5 then
+                    print("---如果Streaming与Cdn上的不一样，则下载到Persistent");
+                    table.insert(self.m_UpdateFileNameList, fileName);
+                end
+            else
+                print("---如果Streaming不存在，则下载到Persistent");
+                table.insert(self.m_UpdateFileNameList, fileName);
+            end
+        end
+    end
+    print("---遍历Persistent里的每一个bundle");
+    ---@type table
+    ---@param fileName string
+    for fileName,_ in pairs(self.m_PersistentFileList) do
+        if not self.m_CdnFileList[fileName] then
+            print("---本地存在该文件，但CDN上不存在该文件，则删除");
+            table.insert(self.m_DeleteFileNameList, fileName);
+        else
+            print("---双方都存在，在Cdn循环里已经处理过了");
+        end
+    end
+
+    print("m_UpdateFileNameList-------->begin")
+    for _,v in ipairs(self.m_UpdateFileNameList) do
+        print(v);
+    end
+    print("m_UpdateFileNameList-------->end")
+
+    print("m_DeleteFileNameList-------->begin")
+    for _,v in ipairs(self.m_DeleteFileNameList) do
+        print(v);
+    end
+    print("m_DeleteFileNameList-------->end")
+end
+
+function m:CheckModule()
+    self:VersionCompare(function()
+        self:VersionUpdate(function()
+            LuaClass.AssetBundleManager.Instance:LoadModuleManifest(LuaClass.ModuleType[self.m_ModuleName]);
+        end);
+    end);
+end
+
+function m:DownloadModule()
+    self:VersionCompare(function()
+        self:VersionUpdate(function()
+            LuaClass.AssetBundleManager.Instance:LoadModuleManifest(LuaClass.ModuleType[self.m_ModuleName]);
+        end)
+    end);
+end
+
+---@private
+---@param version string
+function m:ShowReDownloadDialog(version)
+    ---@type LuaClass.LanguageConfigContainer
+    local languageConfigContainer = LuaClass.LanguageConfigContainer.Instance;
+    local contentFormat = languageConfigContainer:GetText("HotUpdateModule", "RedownloadContent");
+    local contentStr = CS.Main.LuaHelp.StringFormat(contentFormat, version);
+
+    ---@type LuaClass.DialogUI
+    local dialogUI = LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "DialogUI");
+    dialogUI:InitConfirm(nil, contentStr, nil);
+    dialogUI:SetConfirmAction(function() CS.UnityEngine.Application.Quit(); end);
+end
+
+---@private
+---@param callback fun()
+function m:ShowOfflineDialog(callback)
+    ---@type LuaClass.LanguageConfigContainer
+    local languageConfigContainer = LuaClass.LanguageConfigContainer.Instance;
+    local contentStr = languageConfigContainer:GetText("ModuleLoadingUI", "ConnectionLostContent");
+
+    ---@type LuaClass.DialogUI
+    local dialogUI = LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "DialogUI");
+    dialogUI:InitConfirm(nil, contentStr, "Confirm");
+    dialogUI:SetConfirmAction(function()
+        if callback then
+            callback();
+        end
+    end);
+end
+
+
+return m;

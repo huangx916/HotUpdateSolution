@@ -1,0 +1,2 @@
+require("TenonJump.LuaScripts.Enum.ResultType.lua");
+require("TenonJump.LuaScripts.Enum.GameState.lua");

@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 2069184726
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 7e5d007f7f0bdd19c0acf0313e4f0d14
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/LuaScripts/Manager/BuriedPointManager.lua.txt
+Dependencies: []

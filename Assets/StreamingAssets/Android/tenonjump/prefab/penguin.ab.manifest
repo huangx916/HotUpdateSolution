@@ -1,0 +1,50 @@
+ManifestFileVersion: 0
+CRC: 3730618152
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: e629ca29f270b091b146b2ad24f33440
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 3ee8af5060ea82c8b9d0f2b0f2374245
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 54
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 74
+  Script: {instanceID: 0}
+- Class: 96
+  Script: {instanceID: 0}
+- Class: 111
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: 97b7e9457f29fe6489fdf7c13aea7e94, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 82ea5dee09c28244f9e8e2220dd499d9, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 136
+  Script: {instanceID: 0}
+- Class: 137
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Prefab/penguin.prefab
+Dependencies: []

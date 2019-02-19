@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 2348095096
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: dc776e321f997cfa4627fd4f34f5b7ca
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c516f2a3b2b6b67ef759f6410a790acd
+HashAppended: 0
+ClassTypes:
+- Class: 83
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Audio/Help_OpenClose.wav
+Dependencies: []

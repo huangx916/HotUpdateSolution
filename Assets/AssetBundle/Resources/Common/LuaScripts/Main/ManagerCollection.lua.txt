@@ -1,0 +1,65 @@
+require("Common.LuaScripts.Manager.BaseManager.lua");
+
+---@class LuaClass.ManagerCollection : LuaClass.LuaBehaviour
+---@field private m_ManagerDict table<string, LuaClass.BaseManager>
+local m = LuaClass.Class("Common", "ManagerCollection", LuaClass.LuaBehaviour);
+LuaClass.ManagerCollection = m;
+
+---@private
+function m:ctor()
+	self.m_ManagerDict = {};
+end
+
+---@private
+function m:Awake()
+	self:Add("AssetBundleManager");
+	self:Add("AssetLoadManager");
+
+	self:Add("TimeManager");
+	self:Add("UIManager");
+	self:Add("ConfigManager");
+	self:Add("ProtocolManager");
+	self:Add("AudioManager");
+	self:Add("HttpManager");
+
+	self:Add("SettingsManager");
+	self:Add("SceneManager");
+	self:Add("BranchManager");
+	self:Add("HotUpdateModule");
+	self:Add("PlatformManager");
+	self:Add("RecordManager");
+	self:Add("PlaybackManager");
+	self:Add("BuriedPointManager");
+end
+
+---@protected
+---@param managerName string
+---@return string
+function m:GetManagerPath(managerName)
+	return self.class.nameSpace .. ".LuaScripts.Manager." .. managerName .. ".lua";
+end
+
+---@param managerName string
+---@param managerLuaPath string
+function m:Add(managerName)
+	---@type LuaClass.BaseManager
+	local manager = CS.Main.LuaHelp.AddLuaChild(self.m_CSBehaviour, managerName, self:GetManagerPath(managerName));
+	if manager then
+		self.m_ManagerDict[managerName] = manager;
+	end
+end
+
+---@overload fun(managerName string)
+---@param managerName string
+---@return LuaClass.BaseManager
+function m:Get(managerName)
+	local manager = self.m_ManagerDict[managerName];
+	if manager then
+		return manager;
+	end
+
+	LogErrorFormat("{0} is not exist!", managerName);
+	return nil;
+end
+
+return m;

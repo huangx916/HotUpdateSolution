@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 58fb7cc0a9b3e2042843c97f6ed54b51
+timeCreated: 1515129444
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/util/tableextension.lua
+  assetBundleVariant: ab

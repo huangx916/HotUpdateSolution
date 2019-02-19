@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 7c31e8aca6dd5b349b2aa7f93bd3557c
+timeCreated: 1513955607
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/enum/enumrequire.lua
+  assetBundleVariant: ab

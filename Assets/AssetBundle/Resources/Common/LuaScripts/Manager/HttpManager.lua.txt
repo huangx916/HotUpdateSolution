@@ -1,0 +1,162 @@
+---@class LuaClass.ResponseData
+---@field status {code:number, message:string}
+---@field data table
+
+---@class LuaClass.HttpManager : LuaClass.BaseManager
+---@field public Instance LuaClass.HttpManager @static
+---@field postUrl string
+---@field payCallback string
+local m = LuaClass.BaseManager:Derive("Common", "HttpManager");
+LuaClass.HttpManager = m;
+
+---@private
+function m:ctor()
+	self.postUrl = "http://192.168.146.140:5400";
+end
+
+---@param route string
+---@param respAction fun(data:table)
+function m:Get(route, respAction)
+	self:Request(route, "GET", nil, respAction);
+end
+
+---@param route string
+---@param sendData table
+---@param respAction fun(data:table)
+function m:Post(route, sendData, respAction)
+	self:Request(route, "POST", sendData, respAction);
+end
+
+---@param route string
+---@param method string
+---@param sendData table
+---@param respAction fun(data:table)
+function m:Request(route, method, sendData, respAction)
+	CS.Main.CoroutineManager.Start(self:DoRequest(route, method, sendData, respAction), self.m_CSBehaviour);
+end
+
+---@private
+---@param route string
+---@param method string
+---@param sendData table
+---@param respAction fun(data:table)
+---@return System.Collections.IEnumerator
+function m:DoRequest(route, method, sendData, respAction)
+	return util.cs_generator(function()
+		local url = string.startswith(route, "http") and route or self.postUrl .. route;
+		---@type UnityEngine.Networking.UnityWebRequest
+		local request = CS.UnityEngine.Networking.UnityWebRequest(url, method);
+		if sendData then
+			local sendStr = LuaClass.RapidJson.Encode(sendData);
+			local sendBytes = CS.Main.ConvertExt.StringToBytes(sendStr);
+			---@type UnityEngine.Networking.UnityWebRequest
+			request.uploadHandler = CS.UnityEngine.Networking.UploadHandlerRaw(sendBytes);
+			Log("<b>" .. method .. " " .. url .. ":</b> " .. sendStr);
+		else
+			Log("<b>" .. method .. " " .. url .. "</b> ");
+		end
+		request.downloadHandler = CS.UnityEngine.Networking.DownloadHandlerBuffer();
+
+		local startTime = CS.UnityEngine.Time.unscaledTime;
+		coroutine.yield(request:Send());
+		local duration = CS.UnityEngine.Time.unscaledTime - startTime;
+
+		if request.isDone and not request.error then
+			local receiveStr = request.downloadHandler.text;
+			Log("<b>Receive[cost:" .. duration .. "s] " .. url .. ":</b> " .. receiveStr);
+			if respAction then
+				if request.responseCode == 200 then
+					---@type LuaClass.ResponseData
+					local resp = LuaClass.RapidJson.Decode(receiveStr);
+					local code = resp.status.code;
+					if code == LuaClass.ErrorCode.OK then
+						respAction(resp.data);
+					else
+						local msg = resp.status.message;
+						LogError("Route: " .. route .. ", Error Code: " .. code .. ", Message: " .. msg);
+						CS.Main.ListenerManager.TriggerExt(LuaClass.ListenerType.NetError, route, code, msg);
+					end
+				else
+					LogError("Route: " .. route .. ", Error Code: " .. request.responseCode .. ", Message: " .. receiveStr);
+					CS.Main.ListenerManager.TriggerExt(LuaClass.ListenerType.NetError, route, request.responseCode, receiveStr);
+				end
+			end
+		else
+			LogError("<b>Receive error[cost:" .. duration .. "s] " .. url .. " :</b> " .. request.error);
+			CS.Main.ListenerManager.TriggerExt(LuaClass.ListenerType.ConnectError, route);
+		end
+	end);
+end
+
+---@param url string
+---@param uploadBytes string
+---@param respAction fun(isCompleted:boolean)
+function m:Upload(url, uploadBytes, respAction)
+	CS.Main.CoroutineManager.Start(self:DoUpload(url, uploadBytes, respAction), self.m_CSBehaviour);
+end
+
+---@private
+---@param url string
+---@param uploadBytes string
+---@param respAction fun(isCompleted:boolean)
+---@return System.Collections.IEnumerator
+function m:DoUpload(url, uploadBytes, respAction)
+	return util.cs_generator(function()
+		---@type UnityEngine.Networking.UnityWebRequest
+		local request = CS.UnityEngine.Networking.UnityWebRequest(url, "POST");
+		request:SetRequestHeader("Content-Disposition", "attachment");
+		request.uploadHandler =  CS.UnityEngine.Networking.UploadHandlerRaw(uploadBytes);
+		Log("<b>Upload:</b> " .. url);
+
+		local startTime = CS.UnityEngine.Time.unscaledTime;
+		coroutine.yield(request:Send());
+		local duration = CS.UnityEngine.Time.unscaledTime - startTime;
+
+		local isCompleted = request.responseCode == 200;
+		if request.isDone and not request.error then
+			Log("<b>Upload " .. (isCompleted and "completed" or "failed") .. "[cost:" .. duration .. "s]:</b> " .. url);
+			if respAction then
+				respAction(isCompleted);
+			end
+		else
+			LogError("<b>Upload error[cost:" .. duration .. "s] " .. url .. " :</b> " .. request.error);
+			CS.Main.ListenerManager.TriggerExt(LuaClass.ListenerType.ConnectError, url);
+		end
+	end);
+end
+
+---@param url string
+---@param respAction fun(downloadBytes:string)
+function m:Download(url, respAction)
+	CS.Main.CoroutineManager.Start(self:DoDownload(url, respAction), self.m_CSBehaviour);
+end
+
+---@private
+---@param url string
+---@param respAction fun(downloadBytes:string)
+---@return System.Collections.IEnumerator
+function m:DoDownload(url, respAction)
+	return util.cs_generator(function()
+		---@type UnityEngine.Networking.UnityWebRequest
+		local request = CS.UnityEngine.Networking.UnityWebRequest(url, "GET");
+		request.downloadHandler = CS.UnityEngine.Networking.DownloadHandlerBuffer();
+		Log("<b>Download:</b> " .. url);
+
+		local startTime = CS.UnityEngine.Time.unscaledTime;
+		coroutine.yield(request:Send());
+		local duration = CS.UnityEngine.Time.unscaledTime - startTime;
+
+		local isCompleted = request.responseCode == 200;
+		if request.isDone and not request.error then
+			Log("<b>Download " .. (isCompleted and "completed" or "failed") .. "[cost:" .. duration .. "s]:</b> " .. url);
+			if respAction then
+				respAction(isCompleted and request.downloadHandler.data or nil);
+			end
+		else
+			LogError("<b>Download error[cost:" .. duration .. "s] " .. url .. " :</b> " .. request.error);
+			CS.Main.ListenerManager.TriggerExt(LuaClass.ListenerType.ConnectError, url);
+		end
+	end);
+end
+
+return m;

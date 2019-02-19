@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 5cb44f33f3da56d418687fc4ecac9df1
+timeCreated: 1514552911
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/util/mathextension.lua
+  assetBundleVariant: ab

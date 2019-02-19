@@ -1,0 +1,16 @@
+---@class LuaClass.MatchInfo : LuaClass.Object
+---@field public Name string
+---@field public Description string
+---@field public ID number
+---@field public TemplateID number
+---@field public SkillzDifficulty number
+---@field public IsCash boolean
+---@field public EntryPoints number
+---@field public EntryCash number
+---@field public IsSynchronous boolean
+---@field public Players LuaClass.PlayerInfo[]
+---@field public GameParams table<string, string>
+local m = LuaClass.Class("Common", "MatchInfo");
+LuaClass.MatchInfo = m;
+
+return m;

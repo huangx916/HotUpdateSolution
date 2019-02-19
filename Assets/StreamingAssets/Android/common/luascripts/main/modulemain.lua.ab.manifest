@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 1179058456
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 44a7fd85c99ff95008c6549503bfdd64
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/LuaScripts/Main/ModuleMain.lua.txt
+Dependencies: []

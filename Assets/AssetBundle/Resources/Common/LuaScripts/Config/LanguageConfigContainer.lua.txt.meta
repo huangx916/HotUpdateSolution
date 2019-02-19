@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: b947397721f15164996aa2b84249d178
+timeCreated: 1515764141
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/config/languageconfigcontainer.lua
+  assetBundleVariant: ab

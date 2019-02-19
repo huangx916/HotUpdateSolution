@@ -1,0 +1,77 @@
+---@class LuaClass.SceneManager : LuaClass.BaseManager
+---@field public Instance LuaClass.SceneManager @static
+---@field private m_SceneType LuaClass.SceneType
+---@field private m_OldSceneType LuaClass.SceneType
+---
+---@field private m_SwitchCo UnityEngine.Coroutine
+local m = LuaClass.BaseManager:Derive("Common", "SceneManager");
+LuaClass.SceneManager = m;
+
+---@private
+function m:ctor()
+	self.m_SceneType = LuaClass.SceneType.Login;
+	self.m_OldSceneType = self.m_SceneType;
+end
+
+---@return LuaClass.SceneType
+function m:GetSceneType()
+	return self.m_SceneType;
+end
+
+---@private
+---@param sceneType LuaClass.SceneType
+function m:SetSceneType(sceneType)
+	if self.m_SceneType ~= sceneType then
+		self.m_OldSceneType = self.m_SceneType;
+		self.m_SceneType = sceneType;
+		CS.Main.ListenerManager.TriggerExt(LuaClass.ListenerType.SceneSwitch, self.m_OldSceneType, self.m_SceneType);
+	end
+end
+
+---@overload fun(sceneType:LuaClass.SceneType, moduleType:LuaClass.ModuleType)
+---@param sceneType LuaClass.SceneType
+---@param moduleType LuaClass.ModuleType
+---@param callback fun()
+function m:SwitchToScene(sceneType, moduleType, callback)
+	if self.m_SwitchCo then
+		CS.Main.CoroutineManager.StopCo(self.m_SwitchCo, self.m_CSBehaviour);
+	end
+	self.m_SwitchCo = CS.Main.CoroutineManager.Start(self:DoSwitchToScene(sceneType, moduleType, callback), self.m_CSBehaviour);
+end
+
+---@private
+---@param sceneType LuaClass.SceneType
+---@param moduleType LuaClass.ModuleType
+---@param callback fun()
+---@return System.Collections.IEnumerator
+function m:DoSwitchToScene(sceneType, moduleType, callback)
+	return util.cs_generator(function()
+
+		if moduleType == LuaClass.ModuleType.Common then
+			LuaClass.AssetBundleManager.Instance:UnloadAllModuleBundle();
+			LuaClass.AssetLoadManager.Instance:ClearAllModuleAsset();
+			LuaClass.AudioManager.Instance:StopAllModuleAudio();
+			LuaMain:DisposeModule();
+		else
+			local moduleType = LuaClass.ModuleType[LuaClass.BranchManager.Instance:GetBranchName()];
+			LuaMain:LoadModule(moduleType);
+			coroutine.yield(nil);
+		end
+
+		self:SetSceneType(sceneType);
+		if callback then
+			callback();
+		end
+
+		coroutine.yield(nil);
+		collectgarbage();
+		CS.UnityEngine.Resources.UnloadUnusedAssets();
+		CS.System.GC.Collect();
+		coroutine.yield(CS.UnityEngine.WaitForSeconds(1));
+		collectgarbage();
+
+		self.m_SwitchCo = nil;
+	end);
+end
+
+return m;

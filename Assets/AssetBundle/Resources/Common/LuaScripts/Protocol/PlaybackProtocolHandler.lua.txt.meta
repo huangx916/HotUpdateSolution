@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: eb14ad922fa39b0429e19875de5fdb25
+timeCreated: 1532611536
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/protocol/playbackprotocolhandler.lua
+  assetBundleVariant: ab

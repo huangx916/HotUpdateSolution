@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 320253015
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 3caa3df6de702d79ea26f707aadd2e75
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/LuaScripts/UI/RecordUI.lua.txt
+Dependencies: []

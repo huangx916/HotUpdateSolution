@@ -1,0 +1,17 @@
+---@class LuaClass.DialogType : LuaClass.Object
+
+---@class LuaClass.DialogType.Class : LuaClass.LuaEnum
+---@field public None LuaClass.DialogType
+---@field public Confirm LuaClass.DialogType
+---@field public Cancel LuaClass.DialogType
+---@field public Confirm_Cancel LuaClass.DialogType
+local DialogType = LuaClass.LuaEnum.Create("Common", "DialogType", {
+    "None",
+    "Confirm",
+    "Cancel",
+    "Confirm_Cancel",
+});
+LuaClass.DialogType = DialogType;
+
+
+return DialogType;

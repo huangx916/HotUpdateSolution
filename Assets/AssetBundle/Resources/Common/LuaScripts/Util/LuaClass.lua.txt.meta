@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 826bb044d853cc34e90f27bae9fb38f7
+timeCreated: 1513675954
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/util/luaclass.lua
+  assetBundleVariant: ab

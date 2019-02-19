@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 2051371431
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 10c72c672653afa6a9c1a6358716352b
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/LuaScripts/Data/ConstValue.lua.txt
+Dependencies: []

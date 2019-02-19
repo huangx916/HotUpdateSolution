@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 4ab9f3865b362ab498be87edc5bbf84b
+timeCreated: 1530790204
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/httpmanager.lua
+  assetBundleVariant: ab

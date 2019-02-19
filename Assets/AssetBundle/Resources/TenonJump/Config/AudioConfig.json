@@ -1,0 +1,57 @@
+[
+	{ "name": "Music", "volume": 0.8, "path": "Music", "desc": "" },
+
+	{ "name": "UI_Click", "volume": 1, "path": "UI_Click", "desc": "" },
+
+	{ "name": "Game_CreateShapes", "volume": 1, "path": "Game_CreateShapes", "desc": "" },
+	{ "name": "Game_PickUpShape", "volume": 1, "path": "Game_PickUpShape", "desc": "" },
+	{ "name": "Game_DropDown", "volume": 1, "path": "Game_DropDown", "desc": "" },
+	{ "name": "Game_ShapeBack", "volume": 1, "path": "Game_ShapeBack", "desc": "" },
+
+	{ "name": "Game_TimeReminding_180", "volume": 1, "path": "Game_TimeReminding", "desc": "" },
+	{ "name": "Game_TimeReminding_120", "volume": 1, "path": "Game_TimeReminding", "desc": "" },
+	{ "name": "Game_TimeReminding_60", "volume": 1, "path": "Game_TimeReminding", "desc": "" },
+	{ "name": "Game_TimeReminding_30", "volume": 1, "path": "Game_TimeReminding_30Sec", "desc": "" },
+	{ "name": "Game_TimeReminding_10", "volume": 1, "path": "Game_TimeReminding_10Sec", "desc": "" },
+
+	{ "name": "Game_Eliminate_1", "volume": 0.8, "path": "Game_Eliminate_1", "desc": "" },
+	{ "name": "Game_Eliminate_2", "volume": 0.9, "path": "Game_Eliminate_1", "desc": "" },
+	{ "name": "Game_Eliminate_3", "volume": 1, "path": "Game_Eliminate_1", "desc": "" },
+	{ "name": "Game_Eliminate_4", "volume": 1.1, "path": "Game_Eliminate_1", "desc": "" },
+	{ "name": "Game_Eliminate_5", "volume": 1.2, "path": "Game_Eliminate_1", "desc": "" },
+	{ "name": "Game_Eliminate_6", "volume": 1.3, "path": "Game_Eliminate_1", "desc": "" },
+
+	{ "name": "Game_Combo_2", "volume": 1, "path": "Game_Combo_2", "desc": "" },
+	{ "name": "Game_Combo_3", "volume": 1, "path": "Game_Combo_3", "desc": "" },
+	{ "name": "Game_Combo_4", "volume": 1, "path": "Game_Combo_4", "desc": "" },
+	{ "name": "Game_Combo_5", "volume": 1, "path": "Game_Combo_5", "desc": "" },
+	{ "name": "Game_Combo_6", "volume": 1, "path": "Game_Combo_6", "desc": "" },
+
+	{ "name": "Game_Streak_2", "volume": 1, "path": "Game_Streak_2", "desc": "" },
+	{ "name": "Game_Streak_3", "volume": 1, "path": "Game_Streak_3", "desc": "" },
+	{ "name": "Game_Streak_4", "volume": 1, "path": "Game_Streak_4", "desc": "" },
+	{ "name": "Game_Streak_5", "volume": 1, "path": "Game_Streak_5", "desc": "" },
+	{ "name": "Game_Streak_6", "volume": 1, "path": "Game_Streak_6", "desc": "" },
+	{ "name": "Game_Streak_7", "volume": 1, "path": "Game_Streak_7", "desc": "" },
+	{ "name": "Game_Streak_8", "volume": 1, "path": "Game_Streak_8", "desc": "" },
+	{ "name": "Game_Streak_9", "volume": 1, "path": "Game_Streak_9", "desc": "" },
+	{ "name": "Game_Streak_10", "volume": 1, "path": "Game_Streak_10", "desc": "" },
+
+	{ "name": "Game_Finish", "volume": 1, "path": "Game_Finish", "desc": "" },
+	{ "name": "Game_TimesUp", "volume": 1, "path": "Game_TimesUp", "desc": "" },
+
+	{ "name": "Settle_GameComplete", "volume": 1, "path": "Settle_GameComplete", "desc": "" },
+	{ "name": "Settle_GameOver", "volume": 1, "path": "Settle_GameOverOutOfMoves", "desc": "" },
+	{ "name": "Settle_OutOfMoves", "volume": 1, "path": "Settle_GameOverOutOfMoves", "desc": "" },
+	{ "name": "Settle_FinalScore", "volume": 1, "path": "Settle_FinalScore", "desc": "" },
+	{ "name": "Settle_BestScore", "volume": 1, "path": "Settle_BestScore", "desc": "" },
+
+	{ "name": "Help_Close", "volume": 1, "path": "Help_OpenClose", "desc": "" },
+	{ "name": "Help_Open", "volume": 1, "path": "Help_OpenClose", "desc": "" },
+	{ "name": "Help_Page", "volume": 1, "path": "Help_Page", "desc": "" },
+
+	{ "name": "Logic_Die", "volume": 1, "path": "Logic_Die", "desc": "" },
+	{ "name": "Logic_Jump", "volume": 1, "path": "Logic_Jump", "desc": "" },
+	{ "name": "Logic_Finish", "volume": 1, "path": "Logic_Finish", "desc": "" },
+	{ "name": "Obstacle_Break", "volume": 1, "path": "Obstacle_Break", "desc": "" }
+]

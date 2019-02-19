@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 2ad53d9c543a0d04c800e1cb19658e14
+timeCreated: 1513690517
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/timemanager.lua
+  assetBundleVariant: ab

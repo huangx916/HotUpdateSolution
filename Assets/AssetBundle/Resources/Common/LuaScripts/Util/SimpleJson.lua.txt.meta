@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 3a2dfd7364fa56940b5b1e6c5e217d41
+timeCreated: 1531906072
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/util/simplejson.lua
+  assetBundleVariant: ab

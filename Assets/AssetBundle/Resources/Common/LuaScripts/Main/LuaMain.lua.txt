@@ -1,0 +1,99 @@
+require("Common.LuaScripts.Util.UtilRequire.lua");
+
+---@class LuaClass.LuaMain : LuaClass.LuaBehaviour
+---@field private m_ModuleType LuaClass.ModuleType
+---@field private m_ModuleMainDict table<LuaClass.ModuleType, LuaClass.ModuleMain>
+local LuaMain = LuaClass.Class("Common", "LuaMain", LuaClass.LuaBehaviour);
+LuaClass.LuaMain = LuaMain;
+
+---@private
+function LuaMain:ctor()
+	---@type LuaClass.LuaMain
+	_G.LuaMain = self;
+	self.m_ModuleMainDict = {};
+end
+
+---@private
+function LuaMain:Awake()
+	local luaPath = "Common.LuaScripts.Main.ModuleMain.lua";
+	---@type LuaClass.ModuleMain
+	local commonMain = CS.Main.LuaHelp.AddLuaChild(self.m_CSBehaviour,"CommonMain", luaPath);
+	self.m_ModuleMainDict[LuaClass.ModuleType.Common] = commonMain;
+
+	if not CS.Main.ConstValue.DOWNLOAD then
+		-- UIRoot will create in Start, create TestUI after it.
+		CS.Main.CoroutineManager.EndOfFrame(function()
+			LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "LobbyUI");
+		end, self.m_CSBehaviour);
+	end
+end
+
+---@param moduleType LuaClass.ModuleType
+function LuaMain:LoadModule(moduleType)
+	---@type string
+	local moduleName = LuaClass.ModuleType[moduleType];
+
+	--Init LuaClass
+	--LuaClass[moduleName] = {};
+
+	--Create GameObject & Require LuaScripts
+	local luaPath = moduleName .. ".LuaScripts.Main.ModuleMain.lua";
+	---@type LuaClass.ModuleMain
+	local moduleMain = CS.Main.LuaHelp.AddLuaChild(self.m_CSBehaviour,moduleName .. "Main", luaPath);
+	self.m_ModuleMainDict[moduleType] = moduleMain;
+
+	--Set ModuleType
+	self.m_ModuleType = moduleType;
+
+	CS.Main.Debugger.Log("<b>Module loaded:</b> " .. moduleName);
+end
+
+---@param moduleType LuaClass.ModuleType
+function LuaMain:DisposeModule(moduleType)
+	moduleType = moduleType or self.m_ModuleType;
+	if moduleType ~= LuaClass.ModuleType.Common and self.m_ModuleMainDict[moduleType] then
+		--Destroy GameObject
+		CS.UnityEngine.Object.Destroy(self.m_ModuleMainDict[moduleType].m_CSBehaviour.gameObject);
+		self.m_ModuleMainDict[moduleType] = nil;
+
+		--Dispose LuaScripts
+		---@type string
+		local moduleName = LuaClass.ModuleType[moduleType];
+		local disposeList = {};
+		---@param key string
+		for key, _ in pairs(package.loaded) do
+			if string.startswith(key, moduleName) then
+				table.insert(disposeList, key);
+			end
+		end
+		for _, value in ipairs(disposeList) do
+			package.loaded[value] = nil;
+		end
+
+		--Clear LuaClass
+		LuaClass[moduleName] = nil;
+
+		--Reset ModuleType
+		self.m_ModuleType = LuaClass.ModuleType.Common;
+		CS.Main.Debugger.Log("<b>Module disposed:</b> " .. moduleName);
+	end
+end
+
+---@return LuaClass.ModuleMain
+function LuaMain:GetCommonMain()
+	return self.m_ModuleMainDict[LuaClass.ModuleType.Common];
+end
+
+---@overload fun()
+---@param moduleType LuaClass.ModuleType
+---@return LuaClass.ModuleMain
+function LuaMain:GetModuleMain(moduleType)
+	return self.m_ModuleMainDict[moduleType or self.m_ModuleType];
+end
+
+---@return LuaClass.ModuleType
+function LuaMain:GetModuleType()
+	return self.m_ModuleType;
+end
+
+return LuaMain;

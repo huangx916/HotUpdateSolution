@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: ee8c8067dd3354b459f0a34e43e0816a
+timeCreated: 1529397806
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/ui/loadingui.lua
+  assetBundleVariant: ab

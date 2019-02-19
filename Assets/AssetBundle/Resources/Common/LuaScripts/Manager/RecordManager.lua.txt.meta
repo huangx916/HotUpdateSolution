@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 107c52953b97941448d2e33f07d5fe57
+timeCreated: 1532610080
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/recordmanager.lua
+  assetBundleVariant: ab

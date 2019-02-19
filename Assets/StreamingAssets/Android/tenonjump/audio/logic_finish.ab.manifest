@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 2058296726
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 17f4384c6c5bd703dbe7ea2da301df04
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c516f2a3b2b6b67ef759f6410a790acd
+HashAppended: 0
+ClassTypes:
+- Class: 83
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Audio/Logic_Finish.mp3
+Dependencies: []

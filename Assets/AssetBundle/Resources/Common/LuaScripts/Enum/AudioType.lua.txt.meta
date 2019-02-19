@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 6bfb35a9d77720643b284caf976fa035
+timeCreated: 1513955607
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/enum/audiotype.lua
+  assetBundleVariant: ab

@@ -1,0 +1,17 @@
+---@param func table|fun(...)
+---@param args object[]
+local function FuncInvoke(func, args)
+	if func then
+		local count = args and args.Length or 0;
+		local argTable = {};
+		for index = 1, count do
+			argTable[index] = args[index - 1];
+		end
+		return func(table.unpack(argTable, 1, count));
+	end
+	return nil;
+end
+
+return {
+	FuncInvoke = FuncInvoke;
+}

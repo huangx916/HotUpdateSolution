@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 839690909
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 7a00655f71eb114b33cee3ae4a46171a
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/LuaScripts/Main/ModuleMain.lua.txt
+Dependencies: []

@@ -1,0 +1,694 @@
+---@class LuaClass.AudioClipInfo : LuaClass.Object
+---@field private m_ModuleType LuaClass.ModuleType
+---@field private m_Name string
+---@field private m_Clip UnityEngine.AudioClip
+---@field private m_Volume number
+local AudioClipInfo = LuaClass.Class("Common", "AudioClipInfo");
+LuaClass.AudioClipInfo = AudioClipInfo;
+
+---@private
+---@param instance LuaClass.AudioClipInfo
+---@param name string
+---@param clip UnityEngine.AudioClip
+---@param volume number
+function AudioClipInfo:ctor(moduleType, name, clip, volume)
+	self.m_ModuleType = moduleType or LuaClass.ModuleType.Common;
+	self.m_Name = name or "";
+	self.m_Clip = clip;
+	self.m_Volume = volume or 1;
+end
+
+---@return LuaClass.ModuleType
+function AudioClipInfo:GetModuleType()
+	return self.m_ModuleType;
+end
+
+---@return string
+function AudioClipInfo:GetName()
+	return self.m_Name;
+end
+
+---@return UnityEngine.AudioClip
+function AudioClipInfo:GetClip()
+	return self.m_Clip;
+end
+
+---@return number
+function AudioClipInfo:GetVolume()
+	return self.m_Volume;
+end
+
+---@param info1 LuaClass.AudioClipInfo
+---@param info2 LuaClass.AudioClipInfo
+---@return boolean
+function AudioClipInfo.Equals(info1, info2)
+	if info1 and info2 then
+		return info1:GetName() == info2:GetName();
+	end
+	if not info1 and not info2 then
+		return true;
+	end
+	return false;
+end
+
+
+---@class LuaClass.AudioSourceInfo : LuaClass.Object
+---@field private m_Source UnityEngine.AudioSource
+---@field private m_ClipInfo LuaClass.AudioClipInfo
+---@field private m_Volume number
+local AudioSourceInfo = LuaClass.Class("Common", "AudioSourceInfo");
+LuaClass.AudioSourceInfo = AudioSourceInfo;
+
+---@private
+---@param instance LuaClass.AudioSourceInfo
+---@param source UnityEngine.AudioSource
+function AudioSourceInfo:ctor(source)
+	self.m_Source = source;
+	self.m_Volume = 1;
+end
+
+---@return UnityEngine.AudioSource
+function AudioSourceInfo:GetSource()
+	return self.m_Source;
+end
+
+---@return number
+function AudioSourceInfo:GetVolume()
+	return self.m_Volume;
+end
+
+---@return LuaClass.AudioClipInfo
+function AudioSourceInfo:GetClipInfo()
+	return self.m_ClipInfo;
+end
+
+---@param clipInfo LuaClass.AudioClipInfo
+function AudioSourceInfo:SetClipInfo(clipInfo)
+	self.m_ClipInfo = clipInfo;
+	self.m_Source.clip = clipInfo and clipInfo:GetClip() or nil;
+end
+
+---@overload fun(globalVolume:number)
+---@param globalVolume number
+---@param localVolume number
+function AudioSourceInfo:ScaleVolume(globalVolume, localVolume)
+	if localVolume then
+		self.m_Volume = localVolume;
+	end
+	local volume = self.m_Volume * (globalVolume or 1);
+	self.m_Source.volume = self.m_ClipInfo and self.m_ClipInfo.m_Volume * volume or volume;
+end
+
+---@return boolean
+function AudioSourceInfo:IsPlaying()
+	return self.m_Source.isPlaying;
+end
+
+---@overload fun()
+---@param loop boolean
+function AudioSourceInfo:Play(loop)
+	self.m_Source.loop = loop or false;
+	return self.m_Source:Play();
+end
+
+function AudioSourceInfo:Pause()
+	return self.m_Source:Pause();
+end
+
+function AudioSourceInfo:UnPause()
+	return self.m_Source:UnPause();
+end
+
+function AudioSourceInfo:Stop()
+	self:SetClipInfo(nil);
+	self.m_Source:Stop();
+end
+
+---@param clipInfo LuaClass.AudioClipInfo
+---@param volume number
+function AudioSourceInfo:PlayOneShot(clipInfo, volume)
+	volume = volume or 1;
+	if clipInfo then
+		local clip = clipInfo:GetClip();
+		if clip then
+			self.m_Source:PlayOneShot(clip, clipInfo:GetVolume() * volume)
+		end
+	end
+end
+
+
+---@class LuaClass.AudioManager : LuaClass.BaseManager
+---@field public Instance LuaClass.AudioManager @static
+---@field public BgmVolume number
+---@field public SoundVolume number
+---
+---@field private m_BgmVolumeScale number
+---@field private m_SoundVolumeScale number
+---@field private m_BgmSourceInfo LuaClass.AudioSourceInfo
+---@field private m_BgmSourceInfoExt LuaClass.AudioSourceInfo
+---@field private m_SourceInfoDict table<LuaClass.AudioType, LuaClass.AudioSourceInfo>
+---@field private m_OneShotCacheList LuaClass.AudioClipInfo[]
+---
+---@field private m_PauseUnPauseCo UnityEngine.Coroutine
+local m = LuaClass.BaseManager:Derive("Common", "AudioManager");
+LuaClass.AudioManager = m;
+
+---@private
+function m:ctor()
+	self.m_BgmVolumeScale = 1;
+	self.m_SoundVolumeScale = 1;
+
+	self.m_BgmSourceInfo = nil;
+	self.m_BgmSourceInfoExt = nil;
+
+	self.m_SourceInfoDict = {};
+	self.m_OneShotCacheList = {};
+
+	---@type table<any, PropertyHandle>
+	local propertyHandles = {
+		BgmVolume = {
+			Get = function(propertyValues) return self:GetBgmVolume() end;
+			Set = function(propertyValues, volume) self:SetBgmVolume(volume) end;
+		};
+		SoundVolume = {
+			Get = function(propertyValues) return self:GetSoundVolume() end;
+			Set = function(propertyValues, volume) self:SetSoundVolume(volume) end;
+		};
+	};
+	local propertyValues = {};
+	LuaClass.SetProperty(self, propertyHandles, propertyValues)
+end
+
+---@private
+---@return number
+function m:GetBgmVolume()
+	return self.m_BgmVolumeScale;
+end
+
+---@private
+---@param volume number
+function m:SetBgmVolume(volume)
+	self.m_BgmVolumeScale = math.max(0, volume);
+	self.m_BgmSourceInfo:ScaleVolume(self.m_BgmVolumeScale);
+end
+
+---@private
+function m:GetSoundVolume()
+	return self.m_SoundVolumeScale;
+end
+
+---@private
+---@param volume number
+function m:SetSoundVolume(volume)
+	self.m_SoundVolumeScale = math.max(0, volume);
+	for type = LuaClass.AudioType.Bgm + 1, LuaClass.AudioType.Max - 1 do
+		self.m_SourceInfoDict[type]:ScaleVolume(self.m_SoundVolumeScale);
+	end
+end
+
+
+---@private
+function m:Awake()
+	local bgmSource = self.m_CSBehaviour.gameObject:AddComponent(typeof(CS.UnityEngine.AudioSource));
+	self.m_BgmSourceInfo = LuaClass.AudioSourceInfo(bgmSource);
+	local bgmSourceExt = self.m_CSBehaviour.gameObject:AddComponent(typeof(CS.UnityEngine.AudioSource));
+	self.m_BgmSourceInfoExt = LuaClass.AudioSourceInfo(bgmSourceExt);
+
+	for type = LuaClass.AudioType.Bgm + 1, LuaClass.AudioType.Max - 1 do
+		local soundSource = self.m_CSBehaviour.gameObject:AddComponent(typeof(CS.UnityEngine.AudioSource));
+		local soundSourceInfo = LuaClass.AudioSourceInfo(soundSource);
+		self.m_SourceInfoDict[type] = soundSourceInfo;
+	end
+end
+
+function m:StopAllModuleAudio()
+	local bgmClipInfo = self.m_BgmSourceInfo:GetClipInfo();
+	if bgmClipInfo and bgmClipInfo:GetModuleType() ~= LuaClass.ModuleType.Common then
+		self.m_BgmSourceInfo:Stop();
+	end
+	for type = LuaClass.AudioType.Bgm + 1, LuaClass.AudioType.Max - 1 do
+		local sourceInfo = self.m_SourceInfoDict[type];
+		local clipInfo = sourceInfo:GetClipInfo();
+		if clipInfo and clipInfo:GetModuleType() ~= LuaClass.ModuleType.Common then
+			sourceInfo:Stop();
+		end
+	end
+end
+
+---@param bgmName string
+---@return boolean
+function m:IsPlayingBgm(bgmName)
+	return self.m_BgmSourceInfo:IsPlaying() and bgmName == self.m_BgmSourceInfo:GetClipInfo():GetName();
+end
+
+---@param bgmName string
+---@return boolean
+function m:IsBgmReady(bgmName)
+	return self.m_BgmSourceInfo:GetClipInfo() and bgmName == self.m_BgmSourceInfo:GetClipInfo():GetName();
+end
+
+---@overload fun(volume:number)
+---@param volume number
+---@param bgmSourceInfo LuaClass.AudioSourceInfo
+function m:ScaleBgmVolume(volume, bgmSourceInfo)
+	(bgmSourceInfo or self.m_BgmSourceInfo):ScaleVolume(self.m_BgmVolumeScale, volume);
+end
+
+---@private
+---@param volume number
+---@param fadeDuration number
+function m:FadeInBgm(volume, fadeDuration)
+	self:FadeBgmVolume(volume, fadeDuration);
+end
+
+---@private
+---@param fadeDuration number
+---@param callback fun()
+function m:FadeOutBgm(fadeDuration, callback)
+	self:FadeBgmVolume(0, fadeDuration, callback);
+end
+
+---@overload fun(volume:number, duration:number)
+---@param volume number
+---@param duration number
+---@param callback fun()
+function m:FadeBgmVolume(volume, duration, callback)
+	duration = duration or LuaClass.ConstValue.BGM_FADE_DURATION;
+	if duration > 0 then
+		CS.Main.CoroutineManager.Start(self:DoFadeBgmVolume(volume, duration, callback), self.m_CSBehaviour);
+	else
+		self:ScaleBgmVolume(volume);
+		if callback then
+			callback();
+		end
+	end
+end
+
+---@private
+---@param volume number
+---@param duration number
+---@param callback fun()
+---@return System.Collections.IEnumerator
+function m:DoFadeBgmVolume(volume, duration, callback)
+	return util.cs_generator(function()
+		local bgmSourceInfo = self.m_BgmSourceInfo;
+		local from = bgmSourceInfo:GetVolume();
+
+		local startTime = CS.UnityEngine.Time.unscaledTime;
+		local time = 0;
+		while time < duration do
+			local volumeScale = CS.UnityEngine.Mathf.Lerp(from, volume, time / duration);
+			self:ScaleBgmVolume(volumeScale, bgmSourceInfo);
+			coroutine.yield(nil)
+			time = CS.UnityEngine.Time.unscaledTime - startTime;
+		end
+		self:ScaleBgmVolume(volume, bgmSourceInfo);
+
+		if callback then
+			callback();
+		end
+	end);
+end
+
+---@private
+function m:SwitchBgmSourceInfo()
+	local bgmSourceInfoTemp = self.m_BgmSourceInfo;
+	self.m_BgmSourceInfo = self.m_BgmSourceInfoExt;
+	self.m_BgmSourceInfoExt = bgmSourceInfoTemp;
+end
+
+---@overload fun(bgmName:string)
+---@overload fun(bgmName:string, volume:number)
+---@param bgmName string
+---@param volume number
+---@param fadeDuration number
+function m:PlayBgm(bgmName, volume, fadeDuration)
+	self:PlayModuleBgm(LuaClass.ModuleType.Common, bgmName, volume, fadeDuration);
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, bgmName string)
+---@overload fun(moduleType:LuaClass.ModuleType, bgmName string, volume:number)
+---@param moduleType LuaClass.ModuleType
+---@param bgmName string
+---@param volume number
+---@param fadeDuration number
+function m:PlayModuleBgm(moduleType, bgmName, volume, fadeDuration)
+	if not self:IsPlayingBgm(bgmName) then
+		---@param clipInfo LuaClass.AudioClipInfo
+		local function callback(clipInfo)
+			self.m_BgmSourceInfo:SetClipInfo(clipInfo);
+			self.m_BgmSourceInfo:Play(true);
+			self:FadeInBgm(volume or 1, fadeDuration);
+		end
+		self:GetClipInfo(moduleType, bgmName, false, callback);
+	end
+end
+
+---@overload fun()
+---@param fadeDuration number
+function m:PauseBgm(fadeDuration)
+	local bgmSourceInfo = self.m_BgmSourceInfo;
+	if bgmSourceInfo:IsPlaying() then
+		self:FadeOutBgm(fadeDuration, function()
+			bgmSourceInfo:Pause();
+		end);
+	end
+end
+
+---@overload fun(bgmName string)
+---@param bgmName string
+---@param fadeDuration number
+function m:ResumeBgm(bgmName, fadeDuration)
+	self:ResumeModuleBgm(LuaClass.ModuleType.Common, bgmName, fadeDuration);
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, bgmName string)
+---@param moduleType LuaClass.ModuleType
+---@param bgmName string
+---@param volume number
+---@param fadeDuration number
+function m:ResumeModuleBgm(moduleType, bgmName, volume, fadeDuration)
+	local oldClipInfo = self.m_BgmSourceInfo:GetClipInfo();
+	if not oldClipInfo or oldClipInfo:GetModuleType() ~= moduleType or oldClipInfo:GetName() == bgmName then
+		self:PlayModuleBgm(moduleType, bgmName, fadeDuration);
+	elseif not self.m_BgmSourceInfo:IsPlaying() then
+		self.m_BgmSourceInfo:Play(true);
+		self:FadeInBgm(volume, fadeDuration or LuaClass.ConstValue.BGM_FADE_DURATION);
+	end
+end
+
+---@overload fun()
+---@param fadeDuration number
+function m:StopBgm(fadeDuration)
+	local bgmSourceInfo = self.m_BgmSourceInfo;
+	if bgmSourceInfo:IsPlaying() then
+		self:FadeOutBgm(fadeDuration, function()
+			local clip = bgmSourceInfo:GetClipInfo():GetClip();
+			bgmSourceInfo:Stop();
+		end);
+	end
+	self:SwitchBgmSourceInfo();
+end
+
+---@overload fun(audioType:LuaClass.AudioType, soundName:string)
+---@param audioType LuaClass.AudioType
+---@param soundName string
+---@param volume number
+function m:PlayOneShot(audioType, soundName, volume)
+	self:PlayModuleOneShot(LuaClass.ModuleType.Common, audioType, soundName, volume);
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, audioType:LuaClass.AudioType, soundName:string)
+---@param moduleType LuaClass.ModuleType
+---@param audioType LuaClass.AudioType
+---@param soundName string
+---@param volume number
+function m:PlayModuleOneShot(moduleType, audioType, soundName, volume)
+	if audioType ~= LuaClass.AudioType.Bgm then
+		volume = volume or 1;
+		---@param clipInfo LuaClass.AudioClipInfo
+		local function callback(clipInfo)
+			self.m_SourceInfoDict[audioType]:PlayOneShot(clipInfo, self.m_SoundVolumeScale * volume);
+			self:CacheOneShot(clipInfo);
+		end
+		self:GetClipInfo(moduleType, soundName, true, callback);
+	end
+end
+
+---@overload fun(audioType:LuaClass.AudioType, soundName:string)
+---@overload fun(audioType:LuaClass.AudioType, soundName:string, volume:number)
+---@param audioType LuaClass.AudioType
+---@param soundName string
+---@param volume number
+---@param loop boolean
+function m:PlaySound(audioType, soundName, volume, loop)
+	self:PlayModuleSound(LuaClass.ModuleType.Common, audioType, soundName, volume, loop);
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, audioType:LuaClass.AudioType, soundName:string)
+---@overload fun(moduleType:LuaClass.ModuleType, audioType:LuaClass.AudioType, soundName:string, volume:number)
+---@param moduleType LuaClass.ModuleType
+---@param audioType LuaClass.AudioType
+---@param soundName string
+---@param volume number
+---@param loop boolean
+function m:PlayModuleSound(moduleType, audioType, soundName, volume, loop)
+	if audioType ~= LuaClass.AudioType.Bgm then
+		volume = volume or 1;
+		---@param clipInfo LuaClass.AudioClipInfo
+		local function callback(clipInfo)
+			local sourceInfo = self.m_SourceInfoDict[audioType];
+			sourceInfo:SetClipInfo(clipInfo);
+			sourceInfo:ScaleVolume(self.m_SoundVolumeScale, volume);
+			sourceInfo:Play(loop);
+		end
+		self:GetClipInfo(moduleType, soundName, false, callback);
+	end
+end
+
+---@overload fun(audioType:LuaClass.AudioType, soundName:string)
+---@overload fun(audioType:LuaClass.AudioType, soundName:string, volume:number)
+---@param audioType LuaClass.AudioType
+---@param soundName string
+---@param volume number
+---@param loop boolean
+function m:ResumeSound(audioType, soundName, volume, loop)
+	self:PlayModuleSound(LuaClass.ModuleType.Common, audioType, soundName, volume, loop);
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, audioType:LuaClass.AudioType, soundName:string)
+---@overload fun(moduleType:LuaClass.ModuleType, audioType:LuaClass.AudioType, soundName:string, volume:number)
+---@param moduleType LuaClass.ModuleType
+---@param audioType LuaClass.AudioType
+---@param soundName string
+---@param volume number
+---@param loop boolean
+function m:ResumeModuleSound(moduleType, audioType, soundName, volume, loop)
+	if audioType ~= LuaClass.AudioType.Bgm then
+		local sourceInfo = self.m_SourceInfoDict[audioType];
+		local clipInfo = sourceInfo:GetClipInfo();
+		if clipInfo and clipInfo:GetModuleType() == moduleType and clipInfo:GetName() == soundName then
+			if not sourceInfo:IsPlaying() then
+				if volume ~= nil then
+					sourceInfo:ScaleVolume(self.m_SoundVolumeScale, volume);
+				end
+				sourceInfo:Play(loop);
+			end
+		else
+			self:PlayModuleSound(moduleType, audioType, soundName, volume, loop);
+		end
+	end
+end
+
+---@param audioType LuaClass.AudioType
+function m:PauseSound(audioType)
+	if audioType ~= LuaClass.AudioType.Bgm then
+		self.m_SourceInfoDict[audioType]:Pause();
+	end
+end
+
+---@param audioType LuaClass.AudioType
+function m:UnPauseSound(audioType)
+	if audioType ~= LuaClass.AudioType.Bgm then
+		self.m_SourceInfoDict[audioType]:UnPause();
+	end
+end
+
+---@param audioType LuaClass.AudioType
+function m:StopSound(audioType)
+	if audioType ~= LuaClass.AudioType.Bgm then
+		self.m_SourceInfoDict[audioType]:Stop();
+	end
+end
+
+---@param audioType LuaClass.AudioType
+---@param volume number
+function m:ScaleVolume(audioType, volume)
+	if audioType ~= LuaClass.AudioType.Bgm then
+		self.m_SourceInfoDict[audioType]:ScaleVolume(self.m_SoundVolumeScale, volume);
+	end
+end
+
+---@overload fun(soundName:string)
+---@overload fun(soundName:string, volume:number)
+---@param soundName string
+---@param volume number
+---@param loop boolean
+function m:PlayEnvSound(soundName, volume, loop)
+	self:PlaySound(LuaClass.AudioType.Env, soundName, volume, loop)
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, soundName:string)
+---@overload fun(moduleType:LuaClass.ModuleType, soundName:string, volume:number)
+---@param moduleType LuaClass.ModuleType
+---@param soundName string
+---@param volume number
+---@param loop boolean
+function m:PlayModuleEnvSound(moduleType, soundName)
+	self:PlayModuleSound(moduleType, LuaClass.AudioType.Env, soundName, 1, true)
+end
+
+---@param volume number
+function m:ScaleEnvVolume(volume)
+	self:ScaleVolume(LuaClass.AudioType.Env, volume)
+end
+
+function m:PauseEnvSound()
+	self:PauseSound(LuaClass.AudioType.Env)
+end
+
+function m:UnPauseEnvSound()
+	self:UnPauseSound(LuaClass.AudioType.Env)
+end
+
+function m:StopEnvSound()
+	self:StopSound(LuaClass.AudioType.Env)
+end
+
+---@overload fun(soundName:string)
+---@param soundName string
+---@param volume number
+function m:PlayUIOneShot(soundName, volume)
+	self:PlayOneShot(LuaClass.AudioType.UIOneShot, soundName, volume)
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, soundName:string)
+---@param moduleType LuaClass.ModuleType
+---@param soundName string
+---@param volume number
+function m:PlayModuleUIOneShot(moduleType, soundName, volume)
+	self:PlayModuleOneShot(moduleType, LuaClass.AudioType.UIOneShot, soundName, volume)
+end
+
+---@overload fun(soundName:string)
+---@param soundName string
+---@param volume number
+function m:PlaySceneOneShot(soundName, volume)
+	self:PlayOneShot(LuaClass.AudioType.SceneOneShot, soundName, volume)
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, soundName:string)
+---@param moduleType LuaClass.ModuleType
+---@param soundName string
+---@param volume number
+function m:PlayModuleSceneOneShot(moduleType, soundName, volume)
+	self:PlayModuleOneShot(moduleType, LuaClass.AudioType.SceneOneShot, soundName, volume)
+end
+
+---@overload fun(soundName:string)
+---@overload fun(soundName:string, volume:number)
+---@param soundName string
+---@param volume number
+---@param loop boolean
+function m:PlaySceneSound(soundName, volume, loop)
+	self:PlaySound(LuaClass.AudioType.Scene, soundName, volume, loop)
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, soundName:string)
+---@overload fun(moduleType:LuaClass.ModuleType, soundName:string, volume:number)
+---@param moduleType LuaClass.ModuleType
+---@param soundName string
+---@param volume number
+---@param loop boolean
+function m:PlayModuleSceneSound(moduleType, soundName, volume, loop)
+	self:PlayModuleSound(moduleType, LuaClass.AudioType.Scene, soundName, volume, loop)
+end
+
+---@overload fun(soundName:string)
+---@overload fun(soundName:string, volume:number)
+---@param soundName string
+---@param volume number
+---@param loop boolean
+function m:ResumeSceneSound(soundName, volume, loop)
+	self:ResumeSound(LuaClass.AudioType.Scene, soundName, volume, loop)
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, soundName:string)
+---@overload fun(moduleType:LuaClass.ModuleType, soundName:string, volume:number)
+---@param moduleType LuaClass.ModuleType
+---@param soundName string
+---@param volume number
+---@param loop boolean
+function m:ResumeModuleSceneSound(moduleType, soundName, volume, loop)
+	self:ResumeModuleSound(moduleType, LuaClass.AudioType.Scene, soundName, volume, loop)
+end
+
+function m:PauseSceneSound()
+	self:PauseSound(LuaClass.AudioType.Scene)
+end
+
+function m:StopSceneSound()
+	self:StopSound(LuaClass.AudioType.Scene)
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param audioName string
+---@param fromCache boolean
+---@param callback fun(clipInfo LuaClass.AudioClipInfo)
+---@return UnityEngine.WaitUntil
+function m:GetClipInfo(moduleType, audioName, fromCache, callback)
+	if not callback then
+		return nil;
+	end
+
+	if string.isnilorempty(audioName) then
+		return nil;
+	end
+
+	if fromCache then
+		---@param index number
+		for index = 1, #self.m_OneShotCacheList do
+			local clipInfo = self.m_OneShotCacheList[index];
+			if clipInfo:GetName() == audioName then
+				table.remove(self.m_OneShotCacheList, index);
+				callback(clipInfo);
+				return nil;
+			end
+		end
+	end
+
+	local audioConfig = self:GetAudioConfig(moduleType, audioName);
+	if CS.Main.PointerCheck.IsNotNull(audioConfig, LuaClass.ConfigNotFind.Audio(audioName)) then
+		local clipPath = audioConfig.path;
+		if not string.isnilorempty(clipPath) then
+			local relativePath = LuaClass.ConstValue.ASSET_DIR_AUDIO .. "/" .. clipPath;
+			return LuaClass.AssetLoadManager.Instance:LoadAsync(moduleType, relativePath, function(clip)
+				callback(LuaClass.AudioClipInfo(moduleType, audioName, clip, audioConfig.volume));
+			end, typeof(CS.UnityEngine.AudioClip));
+		end
+	end
+
+	callback(LuaClass.AudioClipInfo(moduleType, audioName));
+	return nil;
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param audioName string
+---@return LuaClass.AudioConfig
+function m:GetAudioConfig(moduleType, audioName)
+	local isCommon = moduleType == LuaClass.ModuleType.Common;
+	local configContainerClass = isCommon and LuaClass.AudioConfigContainer or LuaClass[LuaClass.ModuleType[moduleType]].AudioConfigContainer;
+	return configContainerClass.Instance:GetAudioConfig(audioName);
+end
+
+---@private
+---@param clipInfo LuaClass.AudioClipInfo
+function m:CacheOneShot(clipInfo)
+	if clipInfo then
+		---@param index number
+		for index = 1, #self.m_OneShotCacheList do
+			if self.m_OneShotCacheList[index] == clipInfo then
+				table.remove(self.m_OneShotCacheList, index);
+				break;
+			end
+		end
+		table.insert(self.m_OneShotCacheList, clipInfo);
+		while #self.m_OneShotCacheList > LuaClass.ConstValue.CACHE_ONE_SHOT_AUDIO_COUNT do
+			table.remove(self.m_OneShotCacheList, 1);
+		end
+	end
+end
+
+return m;

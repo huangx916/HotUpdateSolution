@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: fdd2cedcfa4fb4e489a8eeb037cb2dc5
+timeCreated: 1521615243
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/enum/uitype.lua
+  assetBundleVariant: ab

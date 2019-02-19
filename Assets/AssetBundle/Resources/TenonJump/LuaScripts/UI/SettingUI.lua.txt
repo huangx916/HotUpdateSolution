@@ -1,0 +1,140 @@
+---@class LuaClass.TenonJump.SettingUI.Sound
+---@field public button UnityEngine.Collider
+---@field public buttonOffRect UIRect
+---@field public buttonOnRect UIRect
+---@field public slider UISlider
+---@field public sliderFgOffSprite UISprite
+---@field public sliderFgOnSprite UISprite
+
+---@class LuaClass.TenonJump.SettingUI.Music
+---@field public button UnityEngine.Collider
+---@field public buttonOffRect UIRect
+---@field public buttonOnRect UIRect
+---@field public slider UISlider
+---@field public sliderFgOffSprite UISprite
+---@field public sliderFgOnSprite UISprite
+
+---@class LuaClass.TenonJump.SettingUI : LuaClass.FadeUI
+---@field private screenAdaptCurve UnityEngine.AnimationCurve
+---@field private windowPivot UnityEngine.Transform
+---@field private exitBtnList UnityEngine.Collider[]
+---@field private sound LuaClass.TenonJump.SettingUI.Sound
+---@field private music LuaClass.TenonJump.SettingUI.Music
+local m = LuaClass.Class("TenonJump", "SettingUI", LuaClass.FadeUI);
+LuaClass.TenonJump.SettingUI = m;
+
+---@private
+function m:Awake()
+	self:InitListener();
+	self:InitUI();
+end
+
+---@private
+function m:InitListener()
+	for _, exitBtn in pairs(self.exitBtnList) do
+		CS.Main.UIAgent.SetOnClick(exitBtn, function() self:OnExitClick() end);
+	end
+	CS.Main.UIAgent.SetOnClick(self.sound.button, function() self:OnSoundBtnClick(); end);
+	CS.Main.UIAgent.SetOnClick(self.music.button, function() self:OnMusicBtnClick(); end);
+
+	CS.Main.CoroutineManager.EndOfFrame(function()
+		CS.EventDelegate.Add(self.sound.slider.onChange, function()
+			local volume = self.sound.slider.value;
+			LuaClass.SettingsManager.Instance:SetSoundsVolume(volume);
+			self:ShowSoundVolume(volume);
+			if volume <= 0 then
+				LuaClass.SettingsManager.Instance:SetSoundsEnable(false);
+				self:ShowSoundEnable(false);
+			elseif not LuaClass.SettingsManager.Instance:GetSoundsEnable() then
+				LuaClass.SettingsManager.Instance:SetSoundsEnable(true);
+				self:ShowSoundEnable(true);
+			end
+		end);
+		CS.EventDelegate.Add(self.music.slider.onChange, function()
+			local volume = self.music.slider.value;
+			LuaClass.SettingsManager.Instance:SetMusicVolume(volume);
+			self:ShowMusicVolume(volume);
+			if volume <= 0 then
+				LuaClass.SettingsManager.Instance:SetMusicEnable(false);
+				self:ShowMusicEnable(false);
+			elseif not LuaClass.SettingsManager.Instance:GetMusicEnable() then
+				LuaClass.SettingsManager.Instance:SetMusicEnable(true);
+				self:ShowMusicEnable(true);
+			end
+		end);
+	end);
+end
+
+---@private
+function m:InitUI()
+	self:ScreenAdapt();
+
+	local soundEnable = LuaClass.SettingsManager.Instance:GetSoundsEnable();
+	self:ShowSoundEnable(soundEnable);
+	local soundVolume = LuaClass.SettingsManager.Instance:GetSoundsVolume();
+	CS.Main.UIAgent.SetProgress(self.sound.slider, soundVolume);
+	self:ShowSoundVolume(soundVolume);
+
+	local musicEnable = LuaClass.SettingsManager.Instance:GetMusicEnable();
+	self:ShowMusicEnable(musicEnable);
+	local musicVolume = LuaClass.SettingsManager.Instance:GetMusicVolume();
+	CS.Main.UIAgent.SetProgress(self.music.slider, musicVolume);
+	self:ShowMusicVolume(musicVolume);
+end
+
+---@private
+function m:ScreenAdapt()
+	local ratio = CS.UnityEngine.Screen.width / CS.UnityEngine.Screen.height;
+	local scale = self.screenAdaptCurve:Evaluate(ratio) * CS.UnityEngine.Vector3.one;
+	self.windowPivot.localScale = scale;
+end
+
+---@private
+---@param enable boolean
+function m:ShowSoundEnable(enable)
+	CS.Main.UIAgent.SetAlpha(self.sound.buttonOnRect, enable);
+	CS.Main.UIAgent.SetAlpha(self.sound.buttonOffRect, not enable);
+	CS.Main.UIAgent.SetAlpha(self.sound.sliderFgOnSprite, enable);
+	CS.Main.UIAgent.SetAlpha(self.sound.sliderFgOffSprite, not enable);
+end
+
+---@private
+---@param volume number
+function m:ShowSoundVolume(volume)
+	self.sound.sliderFgOnSprite.fillAmount = volume;
+	self.sound.sliderFgOffSprite.fillAmount = volume;
+end
+
+---@private
+---@param enable boolean
+function m:ShowMusicEnable(enable)
+	CS.Main.UIAgent.SetAlpha(self.music.buttonOnRect, enable);
+	CS.Main.UIAgent.SetAlpha(self.music.buttonOffRect, not enable);
+	CS.Main.UIAgent.SetAlpha(self.music.sliderFgOnSprite, enable);
+	CS.Main.UIAgent.SetAlpha(self.music.sliderFgOffSprite, not enable);
+end
+
+---@private
+---@param volume number
+function m:ShowMusicVolume(volume)
+	self.music.sliderFgOnSprite.fillAmount = volume;
+	self.music.sliderFgOffSprite.fillAmount = volume;
+end
+
+---@private
+function m:OnSoundBtnClick()
+	local soundEnable = not LuaClass.SettingsManager.Instance:GetSoundsEnable();
+	CS.Main.CoroutineManager.Delay(0.1, function()
+		LuaClass.SettingsManager.Instance:SetSoundsEnable(soundEnable);
+	end, self.m_CSBehaviour);
+	self:ShowSoundEnable(soundEnable);
+end
+
+---@private
+function m:OnMusicBtnClick()
+	local musicEnable = not LuaClass.SettingsManager.Instance:GetMusicEnable();
+	LuaClass.SettingsManager.Instance:SetMusicEnable(musicEnable);
+	self:ShowMusicEnable(musicEnable);
+end
+
+return m;

@@ -1,0 +1,23 @@
+---@class LuaClass.TenonJump.PausedUI : LuaClass.FadeUI
+---@field private continueBtn UnityEngine.Collider
+---@field private endGameBtn UnityEngine.Collider
+local m = LuaClass.Class("TenonJump", "PausedUI", LuaClass.FadeUI);
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.PausedUI = m;
+
+---@private
+function m:Awake()
+	CS.Main.UIAgent.SetOnClick(self.continueBtn, function() self:OnExitClick() end);
+	CS.Main.UIAgent.SetOnClick(self.endGameBtn, function() self:OnEndGameClick() end);
+end
+
+---@private
+function m:OnEndGameClick()
+	self.m_OnClose = function()
+		LuaClass.TenonJump.GameController.Instance:GameOver(LuaClass.TenonJump.ResultType.EndGame);
+	end;
+	self:OnExitClick();
+end
+
+return m;

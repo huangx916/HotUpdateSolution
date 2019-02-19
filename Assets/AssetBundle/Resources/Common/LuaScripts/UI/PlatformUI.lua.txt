@@ -1,0 +1,31 @@
+---@class LuaClass.PlatformUI : LuaClass.BaseUI
+---@field private exitBtn UnityEngine.Collider
+---@field private recordBtn UnityEngine.Collider
+---@field private startBtn UnityEngine.Collider
+local m = LuaClass.Class("Common", "PlatformUI", LuaClass.BaseUI);
+LuaClass.PlatformUI = m;
+
+---@private
+function m:Awake()
+	CS.Main.UIAgent.SetOnClick(self.exitBtn, function() self:OnExitClick() end);
+	CS.Main.UIAgent.SetOnClick(self.startBtn, function() self:OnStartClick() end);
+	CS.Main.UIAgent.SetOnClick(self.recordBtn, function() self:OnRecordClick() end);
+end
+
+---@private
+function m:OnRecordClick()
+	LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "RecordUI");
+	LuaClass.UIManager.Instance:Close("PlatformUI");
+end
+
+---@private
+function m:OnStartClick()
+	LuaClass.PlatformManager.Instance:OnGameEnter(nil);
+end
+
+---@private
+function m:OnExitClick()
+	LuaClass.PlatformManager.Instance:OnPlatformExit();
+end
+
+return m;

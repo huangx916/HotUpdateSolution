@@ -1,0 +1,46 @@
+---@class LuaClass.AudioConfig : LuaClass.Object
+---@field public name string
+---@field public volume number
+---@field public path string
+---@field public desc string
+
+---@class LuaClass.AudioConfigContainer : LuaClass.BaseConfigContainer
+---@field public Instance LuaClass.AudioConfigContainer @static
+---@field private m_AudioConfigDict table<string, LuaClass.AudioConfig>
+local m = LuaClass.BaseConfigContainer:Derive("Common", "AudioConfigContainer");
+LuaClass.AudioConfigContainer = m;
+
+---@private
+function m:ctor()
+	self.m_AudioConfigDict = {};
+end
+
+---@return LuaClass.ConfigLoader[]
+function m:GetLoaderList()
+	---@type LuaClass.ConfigLoader[]
+	local configLoaders = {
+		LuaClass.ConfigLoader("AudioConfig", self.InitConfig)
+	}
+	return configLoaders;
+end
+
+---@private
+---@param jsonStr string
+function m:InitConfig(jsonStr)
+	local data = LuaClass.RapidJson.Decode(jsonStr);
+	---@param itemConfig LuaClass.AudioConfig
+	for _, itemConfig in ipairs(data) do
+		self.m_AudioConfigDict[itemConfig.name] = itemConfig;
+	end
+end
+
+---@param name string
+---@return LuaClass.AudioConfig
+function m:GetAudioConfig(name)
+	if name then
+		return self.m_AudioConfigDict[name];
+	end
+	return nil;
+end
+
+return m;

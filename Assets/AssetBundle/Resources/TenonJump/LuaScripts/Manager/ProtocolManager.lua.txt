@@ -1,0 +1,12 @@
+---@class LuaClass.TenonJump.ProtocolManager : LuaClass.ProtocolManager
+---@field public Instance LuaClass.TenonJump.ProtocolManager @static
+local m = LuaClass.ProtocolManager:Derive("TenonJump", "ProtocolManager");
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.ProtocolManager = m;
+
+---@private
+function m:Awake()
+end
+
+return m;

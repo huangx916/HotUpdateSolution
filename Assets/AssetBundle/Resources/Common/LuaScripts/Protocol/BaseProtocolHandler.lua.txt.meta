@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 30b457f0d9bc68c4c9e9935f4bad99cb
+timeCreated: 1517386914
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/protocol/baseprotocolhandler.lua
+  assetBundleVariant: ab

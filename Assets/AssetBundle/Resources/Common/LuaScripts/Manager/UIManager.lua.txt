@@ -1,0 +1,261 @@
+require("Common.LuaScripts.UI.BaseUI.lua");
+require("Common.LuaScripts.UI.FadeUI.lua");
+
+---@class LuaClass.UIManager : LuaClass.BaseManager
+---@field public Instance LuaClass.UIManager @static
+---@field private m_UiRootTrans UnityEngine.Transform
+---@field private m_TopColliderGo UnityEngine.GameObject
+---@field private m_UiDisplayList LuaClass.BaseUI[]
+---@field private m_TopColliderSet table<any, table<string, boolean>>
+local m = LuaClass.BaseManager:Derive("Common", "UIManager");
+LuaClass.UIManager = m;
+
+---@private
+function m:Awake()
+	self:InitData();
+	self:InitListener();
+end
+
+---@private
+function m:Start()
+	self:InitRoot();
+	self:InitTopCollider();
+end
+
+---@private
+function m:OnDestroy()
+	if CS.Main.LuaHelp.IsNotNull(self.m_UiRootTrans) then
+		CS.UnityEngine.Object.Destroy(self.m_UiRootTrans.gameObject);
+	end
+	if CS.Main.LuaHelp.IsNotNull(self.m_TopColliderGo) then
+		CS.UnityEngine.Object.Destroy(self.m_TopColliderGo);
+	end
+	m.super.OnDestroy(self);
+end
+
+---@private
+function m:InitData()
+	self.m_UiDisplayList = {};
+	self.m_TopColliderSet = {};
+end
+
+---@private
+function m:InitListener()
+	CS.Main.ListenerManager.AddLua1(LuaClass.ListenerType.ConnectError, self.m_CSBehaviour, function(route) self:OnConnectError(route) end);
+	CS.Main.ListenerManager.AddLua3(LuaClass.ListenerType.NetError, self.m_CSBehaviour, function(route, errorCode, msg) self:OnNetError(route, errorCode, msg) end);
+end
+
+---@private
+---@param route string
+function m:OnConnectError(route)
+	LogError("Route: " .. route .. ", Connect Error!");
+end
+
+---@private
+---@param route string
+---@param errorCode number
+---@param msg string
+function m:OnNetError(route, errorCode, msg)
+	-----@type LuaClass.ToastUI
+	--local toastUI = LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "ToastUI");
+	--toastUI:Init(resp.state.message);
+end
+
+---@private
+function m:InitRoot()
+	local relativePath = LuaClass.ConstValue.ASSET_DIR_UI .. "/UIRoot";
+	local uiRootPrefab = LuaClass.AssetLoadManager.Instance:Load(LuaClass.ModuleType.Common, relativePath, typeof(CS.UnityEngine.GameObject));
+	if uiRootPrefab then
+		---@type UnityEngine.GameObject
+		local uiRoot = CS.UnityEngine.Object.Instantiate(uiRootPrefab);
+		if uiRoot then
+			uiRoot.name = "UIRoot";
+			self.m_UiRootTrans = uiRoot.transform;
+		end
+	end
+end
+
+---@private
+function m:InitTopCollider()
+	local relativePath = LuaClass.ConstValue.ASSET_DIR_UI .. "/TopCollider";
+	local topColliderPrefab = LuaClass.AssetLoadManager.Instance:Load(LuaClass.ModuleType.Common, relativePath, typeof(CS.UnityEngine.GameObject));
+	if topColliderPrefab then
+		---@type UnityEngine.GameObject
+		local topCollider = CS.UnityEngine.Object.Instantiate(topColliderPrefab, self.m_UiRootTrans);
+		if topCollider then
+			topCollider.name = "TopCollider";
+			topCollider:SetActive(false);
+			self.m_TopColliderGo = topCollider;
+		end
+	end
+end
+
+---@return number
+function m:GetRootHeight()
+	---@type UIRoot
+	local uiRoot = self.m_UiRootTrans:GetComponent(typeof(CS.UIRoot));
+	return uiRoot and uiRoot.activeHeight or 0;
+end
+
+---@overload fun(observable:any)
+---@param observable any
+---@param key string
+function m:AddTopCollider(observable, key)
+	if not self.m_TopColliderSet[observable] then
+		self.m_TopColliderSet[observable] = {};
+	end
+	key = key or "__default";
+	if not self.m_TopColliderSet[observable][key] then
+		self.m_TopColliderSet[observable][key] = true;
+		if table.count(self.m_TopColliderSet) > 0 then
+			self.m_TopColliderGo:SetActive(true);
+		end
+	end
+end
+
+---@overload fun(observable:any)
+---@param observable any
+---@param key string
+function m:RemoveTopCollider(observable, key)
+	if self.m_TopColliderSet[observable] then
+		if key then
+			self.m_TopColliderSet[observable][key] = nil;
+			if table.count(self.m_TopColliderSet[observable]) <= 0 then
+				self.m_TopColliderSet[observable] = nil;
+			end
+		else
+			self.m_TopColliderSet[observable] = nil;
+		end
+		if table.count(self.m_TopColliderSet) <= 0 then
+			self.m_TopColliderGo:SetActive(false);
+		end
+	end
+end
+
+---@param moduleType LuaClass.ModuleType
+---@param uiName string
+---@return LuaClass.BaseUI
+function m:Open(moduleType, uiName, ...)
+	self:Close(uiName)
+	return self:Create(moduleType, uiName, ...);
+end
+
+---@overload fun(uiName string)
+---@overload fun(uiName string, delay number)
+---@param uiName string
+---@param delay number
+---@param callback fun()
+function m:Close(uiName, delay, callback)
+	self:Destroy(uiName, delay, callback);
+end
+
+function m:CloseDefault()
+	for index = #self.m_UiDisplayList, 1, -1 do
+		local baseUI = self.m_UiDisplayList[index];
+		if baseUI:GetType() == LuaClass.UIType.Default then
+			baseUI:OnClose();
+			CS.UnityEngine.Object.Destroy(baseUI.m_CSBehaviour.gameObject);
+			table.remove(self.m_UiDisplayList, index);
+		end
+	end
+end
+
+---@param uiName string
+---@return boolean
+function m:IsExist(uiName)
+	return self:Get(uiName,true) ~= nil;
+end
+
+---@overload fun(uiName string):LuaClass.BaseUI
+---@param uiName string
+---@param logError boolean
+---@return LuaClass.BaseUI
+function m:Get(uiName, noLog)
+	for index = 1, #self.m_UiDisplayList do
+		local baseUI = self.m_UiDisplayList[index];
+		if baseUI.m_CSBehaviour.name == uiName then
+			return baseUI;
+		end
+	end
+	if not noLog then
+		LogErrorFormat("Can not get {0}!", uiName);
+	end
+	return nil;
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param uiName string
+---@return LuaClass.BaseUI
+function m:Create(moduleType, uiName, ...)
+	if string.isnilorempty(uiName) then
+		LogError("Create ui failed: uiName is null or empty!");
+		return nil;
+	end
+
+	local relativePath = LuaClass.ConstValue.ASSET_DIR_UI .. "/" .. uiName;
+	---@type Main.LuaBehaviour
+	local uiPrefabBehaviour = LuaClass.AssetLoadManager.Instance:Load(moduleType, relativePath, typeof(CS.Main.LuaBehaviour));
+	if CS.Main.LuaHelp.IsNull(uiPrefabBehaviour) then
+		LogErrorFormat("Can't find the ui asset [{0}] !", relativePath);
+		return nil;
+	end
+	---@type Main.LuaBehaviour
+	local uiInstanceBehaviour = CS.UnityEngine.Object.Instantiate(uiPrefabBehaviour, self.m_UiRootTrans);
+	if CS.Main.LuaHelp.IsNull(uiInstanceBehaviour) then
+		LogError("Instantiate ui failed!");
+		return nil;
+	end
+
+	uiInstanceBehaviour.name = uiName;
+	uiInstanceBehaviour:InitLua(...);
+	---@type LuaClass.BaseUI
+	local targetUI = uiInstanceBehaviour.LuaTable;
+	table.insert(self.m_UiDisplayList, targetUI);
+	return targetUI;
+end
+
+---@private
+---@overload fun(uiName string)
+---@overload fun(uiName string, delay number)
+---@param uiName string
+---@param delay number
+---@param callback fun()
+function m:Destroy(uiName, delay, callback)
+	if string.isnilorempty(uiName) then
+		LogError("Destroy ui failed: uiName is null or empty!");
+		return;
+	end
+
+	local targetUI = self:Get(uiName, true);
+	if targetUI then
+		local destroyFunc = function()
+			---@param index number
+			for index = 1, #self.m_UiDisplayList do
+				local baseUI = self.m_UiDisplayList[index];
+				if CS.Main.LuaHelp.IsNotNull(baseUI.m_CSBehaviour) then
+					if baseUI.m_CSBehaviour.name == uiName then
+						table.remove(self.m_UiDisplayList, index);
+						baseUI:OnClose();
+						CS.UnityEngine.Object.Destroy(baseUI.m_CSBehaviour.gameObject);
+						break;
+					end
+				end
+			end
+		end
+
+		local function OnDestroy()
+			destroyFunc();
+			if callback then
+				callback();
+			end
+		end
+		if delay and delay > 0 then
+			CS.Main.CoroutineManager.Delay(delay, OnDestroy, targetUI.m_CSBehaviour);
+		else
+			OnDestroy();
+		end
+	end
+end
+
+return m;

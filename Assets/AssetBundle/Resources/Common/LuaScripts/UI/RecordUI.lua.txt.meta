@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 159d956c39fd4324c9f2695fb7440b61
+timeCreated: 1532002155
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/ui/recordui.lua
+  assetBundleVariant: ab

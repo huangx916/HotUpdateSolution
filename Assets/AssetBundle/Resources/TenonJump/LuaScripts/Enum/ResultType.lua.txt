@@ -1,0 +1,16 @@
+---@class LuaClass.TenonJump.ResultType : LuaClass.Object
+
+---@class LuaClass.TenonJump.ResultType.Class : LuaClass.LuaEnum
+---@field public Finish LuaClass.UIType
+---@field public TimesUp LuaClass.UIType
+---@field public EndGame LuaClass.UIType
+local m = LuaClass.LuaEnum.Create("TenonJump", "ResultType", {
+	"Finish";
+	"TimesUp";
+	"EndGame";
+});
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.ResultType = m;
+
+return m;

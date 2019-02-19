@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: c0c360706a9d44c45b29308ab5504c23
+timeCreated: 1516007507
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/data/confignotfind.lua
+  assetBundleVariant: ab

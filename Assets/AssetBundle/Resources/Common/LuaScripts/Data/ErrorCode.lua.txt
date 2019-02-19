@@ -1,0 +1,11 @@
+---@class LuaClass.ErrorCode : LuaClass.Object
+local ErrorCode = {
+	OK = 0;
+	TokenInvalid = 101;
+	LoginFailed = 1001;
+	PasswordError = 1002;
+};
+---@type LuaClass.ErrorCode
+LuaClass.ErrorCode = LuaClass.Class("Common", "ListenerType", nil, ErrorCode);
+
+return ErrorCode;

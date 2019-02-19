@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: ae0cd11fdc18e7540b349ca11eedabcc
+timeCreated: 1513258251
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/data/constvalue.lua
+  assetBundleVariant: ab

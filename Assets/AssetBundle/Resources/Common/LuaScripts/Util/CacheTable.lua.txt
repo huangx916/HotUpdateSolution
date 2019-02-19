@@ -1,0 +1,149 @@
+---可以给table设置元素上限，当元素个数超过上限，则最早的元素会被移除，同时触发onDiscard
+---@class LuaClass.CacheTable : LuaClass.Object
+---@field private m_MaxCount number
+---@field private m_CacheList table
+---@field private m_DataDict table
+---@field private m_OnDiscard fun(key any)
+local CacheTable = LuaClass.Class(nil, "CacheTable");
+LuaClass.CacheTable = CacheTable;
+
+---@private
+---@overload fun(instance LuaClass.CacheTable, maxCount number, onDiscard fun(key any))
+---@param instance LuaClass.CacheTable
+---@param maxCount number
+---@param onDiscard fun(key any)
+function CacheTable:ctor(maxCount, onDiscard)
+	self:SetMaxCount(maxCount or 1);
+	self.m_CacheList = {};
+	self.m_DataDict = {};
+	self.m_OnDiscard = onDiscard;
+end
+
+---@return number
+function CacheTable:GetMaxCount()
+	return self.m_MaxCount;
+end
+
+---@param maxCount number
+function CacheTable:SetMaxCount(maxCount)
+	maxCount = math.max(maxCount, 1);
+	self.m_MaxCount = math.floor(maxCount);
+end
+
+function CacheTable:Get(key)
+	return self.m_DataDict[key];
+end
+
+function CacheTable:Set(key, value)
+	if key and value then
+		self.m_DataDict[key] = value;
+		self:MoveToLast(key);
+	end
+end
+
+function CacheTable:Add(key, value)
+	if key and value then
+		self.m_DataDict[key] = value;
+		table.insert(self.m_CacheList, key);
+		self:Cap();
+	end
+end
+
+---@overload fun(key any)
+---@param onRemove fun(key any)
+function CacheTable:Remove(key, onRemove)
+	if self:ContainsKey(key) then
+		if onRemove then
+			onRemove(key);
+		end
+		self.m_DataDict[key] = nil;
+		---@param index number
+		for index = 1, #self.m_CacheList do
+			if self.m_CacheList[index] == key then
+				table.remove(self.m_CacheList, index);
+				break;
+			end
+		end
+	end
+end
+
+---@return boolean
+function CacheTable:ContainsKey(key)
+	return self.m_DataDict[key] ~= nil;
+end
+
+---@return boolean
+function CacheTable:ContainsValue(value)
+	for key, value in pairs(self.m_DataDict) do
+		if value == value then
+			return true;
+		end
+	end
+	return false;
+end
+
+---@private
+function CacheTable:Cap()
+	while #self.m_CacheList > self:GetMaxCount() do
+		self:Remove(self.m_CacheList[1], self.m_OnDiscard);
+	end
+end
+
+function CacheTable:MoveToLast(key)
+	if self:ContainsKey(key) then
+		---@param index number
+		for index = 1, #self.m_CacheList do
+			if self.m_CacheList[index] == key then
+				table.remove(self.m_CacheList, index);
+				break;
+			end
+		end
+	end
+	table.insert(self.m_CacheList, key);
+	self:Cap();
+end
+
+function CacheTable:Clear()
+	for index = 1, #self.m_CacheList do
+		table.remove(self.m_CacheList);
+	end
+	for key, _ in pairs(self.m_DataDict) do
+		self.m_DataDict[key] = nil;
+	end
+end
+
+function CacheTable:Pairs()
+	return pairs(self.m_DataDict);
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+return CacheTable;

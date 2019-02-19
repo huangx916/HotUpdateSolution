@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: a527e1d6affa1ce41abd3ce2bdcbfbb5
+timeCreated: 1534401474
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/buriedpointmanager.lua
+  assetBundleVariant: ab

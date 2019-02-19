@@ -1,0 +1,64 @@
+---@class LuaClass.BuriedPointManager : LuaClass.BaseManager
+---@field public Instance LuaClass.BuriedPointManager @static
+local m = LuaClass.BaseManager:Derive("Common", "BuriedPointManager");
+LuaClass.BuriedPointManager = m;
+
+function m:Start()
+    self:OpenApp();
+end
+
+---@public
+function m:OpenApp()
+    local param = "&event=OpenApp";
+    LuaClass.BuriedPointProtocolHandler.Instance:BuriedPoint(param, function(result) self:OnResult(result) end);
+end
+
+---@public
+function m:EnterGame()
+    local param = "&event=EnterGame";
+    LuaClass.BuriedPointProtocolHandler.Instance:BuriedPoint(param);
+end
+
+---@public
+function m:StartGame()
+    local playerId = LuaClass.PlatformManager.Instance:GetPlayerInfo().ID;
+    local matchId = LuaClass.PlatformManager.Instance:GetMatchInfo().ID;
+    local matchName = LuaClass.PlatformManager.Instance:GetMatchInfo().Name;
+    local skillzDifficulty = LuaClass.PlatformManager.Instance:GetMatchInfo().SkillzDifficulty;
+    local entryPoints = LuaClass.PlatformManager.Instance:GetMatchInfo().EntryPoints;
+    local entryCash = LuaClass.PlatformManager.Instance:GetMatchInfo().EntryCash;
+    local param = "&event=StartGame"
+            .. "&playerId="..(playerId or 0)
+            .. "&matchId="..(matchId or 0)
+            .. "&matchName="..(matchName or "")
+            .. "&skillzDifficulty="..(skillzDifficulty or 5)
+            .. "&entryPoints="..(entryPoints or 0)
+            .. "&entryCash="..(entryCash or 0);
+    LuaClass.BuriedPointProtocolHandler.Instance:BuriedPoint(param);
+end
+
+---@public
+---@param costTime number
+---@param totalScore number
+---@param startTime number
+---@param endTime number
+function m:EndGame(costTime, totalScore, startTime, endTime)
+    local playerId = LuaClass.PlatformManager.Instance:GetPlayerInfo().ID;
+    local matchId = LuaClass.PlatformManager.Instance:GetMatchInfo().ID;
+
+    local param = "&event=EndGame"
+            .. "&playerId="..(playerId or 0)
+            .. "&matchId="..(matchId or 0)
+            .. "&costTime="..costTime
+            .. "&totalScore="..totalScore
+            .. "&startTime="..startTime
+            .. "&endTime="..endTime;
+    LuaClass.BuriedPointProtocolHandler.Instance:BuriedPoint(param);
+end
+
+---@param result string
+function m:OnResult(result)
+    --LogError(result);
+end
+
+return m;

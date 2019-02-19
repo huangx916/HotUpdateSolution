@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 2f54bb707755e5b45ac43b1214c024da
+timeCreated: 1529234812
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/ui/fadeui.lua
+  assetBundleVariant: ab

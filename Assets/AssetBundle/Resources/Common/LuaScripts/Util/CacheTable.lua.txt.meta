@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 82159bffb5f4b4d4e9cfad255f3d006d
+timeCreated: 1516007507
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/util/cachetable.lua
+  assetBundleVariant: ab

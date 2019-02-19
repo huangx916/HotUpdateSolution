@@ -1,0 +1,69 @@
+---@class LuaClass.RecordPlayer
+---@field public id number
+---@field public score number
+---@field public log string
+
+---@class LuaClass.RecordInfo
+---@field public matchId number
+---@field public time number
+---@field public cash number
+---@field public points number
+---@field public players LuaClass.RecordPlayer[]
+
+---@class LuaClass.RecordManager : LuaClass.BaseManager
+---@field public Instance LuaClass.RecordManager @static
+---@field private m_RecordList number[]
+---@field private m_RecordDict table<number, LuaClass.RecordInfo>
+local m = LuaClass.BaseManager:Derive("Common", "RecordManager");
+LuaClass.RecordManager = m;
+
+function m:ctor()
+	self.m_RecordList = {};
+	self.m_RecordDict = {};
+end
+
+---@param score number
+---@param callback fun()
+function m:SubmitRecord(score, callback)
+	local playerId = LuaClass.PlatformManager.Instance:GetPlayerInfo().ID;
+	local matchInfo = LuaClass.PlatformManager.Instance:GetMatchInfo();
+	local matchId = matchInfo.ID;
+	local cash = matchInfo.EntryCash;
+	local points = matchInfo.EntryPoints;
+	LuaClass.RecordProtocolHandler.Instance:RequestSubmitRecord(matchId, playerId, cash, points, score, callback);
+end
+
+---@param callback fun()
+function m:RequestRecordList(callback)
+	local playerId = LuaClass.PlatformManager.Instance:GetPlayerInfo().ID;
+	LuaClass.RecordProtocolHandler.Instance:RequestGetRecords(playerId, callback);
+end
+
+---@param recordInfoList LuaClass.RecordInfo[]
+function m:SetRecords(recordInfoList)
+	self.m_RecordList = {};
+	self.m_RecordDict = {};
+	for index, recordInfo in ipairs(recordInfoList) do
+		self.m_RecordList[index] = recordInfo.matchId;
+		self.m_RecordDict[recordInfo.matchId] = recordInfo;
+	end
+end
+
+---@param matchId number
+---@return LuaClass.RecordInfo
+function m:GetRecord(matchId)
+	return self.m_RecordDict and self.m_RecordDict[matchId];
+end
+
+---@return number
+function m:GetRecordCount()
+	return self.m_RecordList and #self.m_RecordList or 0;
+end
+
+---@param index number
+---@return number
+function m:GetRecordMatchId(index)
+	return self.m_RecordList and self.m_RecordList[index];
+end
+
+return m;

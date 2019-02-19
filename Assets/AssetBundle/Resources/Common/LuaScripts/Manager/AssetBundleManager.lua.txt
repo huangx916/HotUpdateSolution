@@ -1,0 +1,613 @@
+---@class LuaClass.AssetBundleManager.BundleContainer
+---@field public manifest UnityEngine.AssetBundleManifest
+---@field public bundleLoadingDict table<string, Main.AssetBundleLoader>
+---@field public bundleRequireDict table<string, Main.AssetBundleLoader>
+---@field public bundleCacheDict LuaClass.CacheTable
+
+---@class LuaClass.AssetBundleManager : LuaClass.BaseManager
+---@field public Instance LuaClass.AssetBundleManager @static
+---@field private m_BundleContainerDict table<LuaClass.ModuleType, LuaClass.AssetBundleManager.BundleContainer>
+local m = LuaClass.BaseManager:Derive("Common", "AssetBundleManager");
+LuaClass.AssetBundleManager = m;
+
+---@private
+function m:Awake()
+	self.m_BundleContainerDict = {};
+	---@param moduleType LuaClass.ModuleType
+	for moduleType = 1, #LuaClass.ModuleType do
+		self:InitModule(moduleType);
+	end
+end
+
+---@private
+function m:OnDestroy()
+	for _, value in pairs(self.m_BundleContainerDict) do
+		for name, loader in pairs(value.bundleLoadingDict) do
+			loader:Unload();
+		end
+		for name, loader in pairs(value.bundleRequireDict) do
+			loader:Unload();
+		end
+		---@param loader Main.AssetBundleLoader
+		for name, loader in value.bundleCacheDict:Pairs() do
+			loader:Unload();
+		end
+	end
+	m.super.OnDestroy(self);
+end
+
+---@param moduleType LuaClass.ModuleType
+function m:LoadModuleManifest(moduleType)
+	local bundleContainer = self.m_BundleContainerDict[moduleType];
+	local bundleName = LuaClass.ModuleType[moduleType] .. "/" .. CS.Main.ConstValue.MANIFEST_NAME .. "." .. CS.Main.ConstValue.ASSET_BUNDLE_VARIANT;
+	bundleName = string.lower(bundleName);
+	local type = typeof(CS.UnityEngine.AssetBundleManifest)
+	local persistentPath = CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. bundleName;
+	if CS.Main.ConstValue.DOWNLOAD then
+		if CS.Main.FileManager.IsFileExist(persistentPath) then
+			if CS.Main.ConstValue.BUNDLE_LOAD_LOG then
+				Log("<b>Load manifest form persistent</b>: " .. bundleName);
+			end
+			local assetBundle = CS.UnityEngine.AssetBundle.LoadFromFile(persistentPath);
+			if assetBundle then
+				bundleContainer.manifest = assetBundle:LoadAsset("AssetBundleManifest", type);
+				assetBundle:Unload(false);
+			end
+			return;
+		end
+	end
+	local streamingPath = CS.Main.ConstValue.STREAMING_DIR_PATH .. "/" .. bundleName;
+	if CS.Main.FileManager.IsFileExist(streamingPath) then
+		if CS.Main.ConstValue.BUNDLE_LOAD_LOG then
+			Log("<b>Load manifest form streaming</b>: " .. bundleName);
+		end
+		local assetBundle = CS.UnityEngine.AssetBundle.LoadFromFile(streamingPath);
+		if assetBundle then
+			bundleContainer.manifest = assetBundle:LoadAsset("AssetBundleManifest", type);
+			assetBundle:Unload(false);
+		end
+		return;
+	end
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+function m:InitModule(moduleType)
+	local bundleContainer = {};
+	self.m_BundleContainerDict[moduleType] = bundleContainer;
+
+	bundleContainer.bundleLoadingDict = {};
+	bundleContainer.bundleRequireDict = {};
+	---@param bundleName string
+	local function UnloadBundle(bundleName)
+		---@type Main.AssetBundleLoader
+		local loader = bundleContainer.bundleCacheDict:Get(bundleName);
+		loader:ForEachDependency(function(dependBundleName) self:RemovePointer(moduleType, dependBundleName) end);
+		loader:ClearDependencies();
+		loader:Unload();
+	end;
+	bundleContainer.bundleCacheDict = LuaClass.CacheTable(LuaClass.ConstValue.CACHE_ASSET_BUNDLE_COUNT, UnloadBundle);
+
+	self:LoadModuleManifest(moduleType);
+end
+
+function m:UnloadAllModuleBundle()
+	for moduleType, _ in pairs(self.m_BundleContainerDict) do
+		if moduleType ~= LuaClass.ModuleType.Common then
+			self:UnloadModuleBundle(moduleType);
+		end
+	end
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+function m:UnloadModuleBundle(moduleType)
+	local bundleContainer = self.m_BundleContainerDict[moduleType];
+	for name, loader in pairs(bundleContainer.bundleLoadingDict) do
+		loader:Unload();
+	end
+	bundleContainer.bundleLoadingDict = {};
+	for name, loader in pairs(bundleContainer.bundleRequireDict) do
+		loader:Unload();
+	end
+	bundleContainer.bundleRequireDict = {};
+	---@param loader Main.AssetBundleLoader
+	for name, loader in bundleContainer.bundleCacheDict:Pairs() do
+		loader:Unload();
+	end
+	bundleContainer.bundleCacheDict:Clear();
+end
+
+---@param moduleType LuaClass.ModuleType
+---@param bundleName string
+---@return boolean
+function m:IsStreamingBundleExist(moduleType, bundleName)
+	if CS.Main.ConstValue.UNITY_EDITOR_WIN or CS.Main.ConstValue.UNITY_EDITOR_OSX then
+		return CS.Main.FileManager.IsFileExist(CS.Main.ConstValue.STREAMING_DIR_PATH .. "/" .. bundleName);
+	else
+		local bundleContainer = self.m_BundleContainerDict[moduleType];
+		if bundleContainer.manifest then
+			local allAssetBundles = bundleContainer.manifest:GetAllAssetBundles();
+			for index = 0, allAssetBundles.Length - 1 do
+				if allAssetBundles[index] == bundleName then
+					return true;
+				end
+			end
+		end
+		return false;
+	end
+end
+
+--region sync
+
+---@overload fun(moduleType:LuaClass.ModuleType, dirPath:string, bundleName:string, assetName:string):UnityEngine.Object
+---@param moduleType LuaClass.ModuleType
+---@param dirPath string
+---@param bundleName string
+---@param assetName string
+---@param type System.Type
+---@return UnityEngine.Object
+function m:LoadAsset(moduleType, dirPath, bundleName, assetName, type)
+	local assetBundle = self:LoadBundle(moduleType, dirPath, bundleName);
+	if assetBundle then
+		---@type UnityEngine.Object
+		local asset;
+		if typeof(CS.UnityEngine.Component):IsAssignableFrom(type) then
+			---@type UnityEngine.GameObject
+			local goAsset = assetBundle:LoadAsset(assetName, typeof(CS.UnityEngine.GameObject));
+			if goAsset then
+				self:ResetGoShader(goAsset);
+				local comp = goAsset:GetComponent(type);
+				if CS.Main.ConstValue.UNITY_EDITOR_WIN or CS.Main.ConstValue.UNITY_EDITOR_OSX then
+					asset = CS.Main.LuaHelp.IsNotNull(comp) and comp or nil;
+				else
+					asset = comp;
+				end
+			end
+		else
+			asset = assetBundle:LoadAsset(assetName, type or typeof(CS.UnityEngine.Object));
+			if asset then
+				local assetType = asset:GetType();
+				if assetType == typeof(CS.UnityEngine.GameObject) then
+					---@type UnityEngine.GameObject
+					local goAsset = asset;
+					self:ResetGoShader(goAsset);
+				elseif assetType == typeof(CS.UnityEngine.Material) then
+					---@type UnityEngine.Material
+					local matAsset = asset;
+					self:ResetMatShader(matAsset);
+				end
+			end
+		end
+		return asset;
+	end
+	return nil;
+end
+
+---@param moduleType LuaClass.ModuleType
+---@param dirPath string
+---@param bundleName string
+---@return UnityEngine.AssetBundle
+function m:LoadBundle(moduleType, dirPath, bundleName)
+	bundleName = string.lower(bundleName);
+	local loader = self:LoadLoader(moduleType, dirPath, bundleName);
+	return loader.AssetBundle;
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param dirPath string
+---@param bundleName string
+---@return Main.AssetBundleLoader
+function m:LoadLoader(moduleType, dirPath, bundleName)
+	local bundleContainer = self.m_BundleContainerDict[moduleType];
+	local loader = bundleContainer.bundleLoadingDict[bundleName];
+	if loader then
+		if CS.Main.ConstValue.BUNDLE_LOAD_LOG then
+			Log("<b>Load assetBundle form loading:</b> " .. bundleName);
+		end
+		return loader;
+	end
+
+	loader = bundleContainer.bundleRequireDict[bundleName];
+	if loader then
+		if CS.Main.ConstValue.BUNDLE_LOAD_LOG then
+			Log("<b>Load assetBundle form require:</b> " .. bundleName);
+		end
+		return loader;
+	end
+
+	loader = bundleContainer.bundleCacheDict:Get(bundleName);
+	if loader then
+		if CS.Main.ConstValue.BUNDLE_LOAD_LOG then
+			Log("<b>Load assetBundle form cache:</b> " .. bundleName);
+		end
+		bundleContainer.bundleCacheDict:MoveToLast(bundleName);
+		return loader;
+	end
+
+	return self:LoadNewLoader(moduleType, dirPath, bundleName);
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param dirPath string
+---@param bundleName string
+---@return Main.AssetBundleLoader
+function m:LoadNewLoader(moduleType, dirPath, bundleName)
+	if CS.Main.ConstValue.BUNDLE_LOAD_LOG then
+		Log("<b>Load assetBundle from file:</b> " .. dirPath .. "/" .. bundleName);
+	end
+
+	local bundleContainer = self.m_BundleContainerDict[moduleType];
+	local loader = CS.Main.AssetBundleLoaderSync(dirPath .. "/" .. bundleName);
+	bundleContainer.bundleLoadingDict[bundleName] = loader;
+	bundleContainer.bundleCacheDict:Add(bundleName, loader);
+	self:LoadDependencies(moduleType, bundleName, loader);
+	loader:Load();
+	bundleContainer.bundleLoadingDict[bundleName] = nil;
+	return loader;
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param bundleName string
+---@param loader Main.AssetBundleLoader
+function m:LoadDependencies(moduleType, bundleName, loader)
+	local bundleContainer = self.m_BundleContainerDict[moduleType];
+	if bundleContainer.manifest then
+		local depends = bundleContainer.manifest:GetDirectDependencies(bundleName);
+		for index = 0, depends.Length - 1 do
+			local dependBundleName = depends[index];
+			if loader.IsUnloaded then
+				break;
+			end
+			if CS.Main.ConstValue.BUNDLE_LOAD_LOG then
+				Log(bundleName .. " <b>depend:</b> " .. dependBundleName);
+			end
+			self:LoadDependency(moduleType, dependBundleName, loader);
+		end
+	end
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param bundleName string
+---@param loader Main.AssetBundleLoader
+function m:LoadDependency(moduleType, bundleName, loader)
+	if CS.Main.ConstValue.DOWNLOAD then
+		local fullPath = CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. bundleName;
+		if CS.Main.FileManager.IsFileExist(fullPath) then
+			self:LoadBundle(moduleType, CS.Main.ConstValue.PERSISTENT_DIR_PATH, bundleName);
+			loader:AddDependency(bundleName);
+			self:AddPointer(moduleType, bundleName);
+			return;
+		end
+	end
+	if self:IsStreamingBundleExist(moduleType, bundleName) then
+		self:LoadBundle(moduleType, CS.Main.ConstValue.STREAMING_DIR_PATH, bundleName);
+		loader:AddDependency(bundleName);
+		self:AddPointer(moduleType, bundleName);
+		return;
+	end
+end
+
+--endregion
+
+--region async
+
+---@overload fun(moduleType:LuaClass.ModuleType, dirPath:string, bundleName:string, assetName:string, callback:fun(asset:UnityEngine.Object)):UnityEngine.WaitUntil
+---@param moduleType LuaClass.ModuleType
+---@param dirPath string
+---@param bundleName string
+---@param assetName string
+---@param callback fun(asset:UnityEngine.Object)
+---@param type System.Type
+---@return UnityEngine.WaitUntil
+function m:LoadAssetAsync(moduleType, dirPath, bundleName, assetName, callback, type)
+	---@param assetBundle UnityEngine.AssetBundle
+	local function bundleCallback(assetBundle)
+		if callback then
+			if assetBundle then
+				---@type UnityEngine.Object
+				local asset;
+				if typeof(CS.UnityEngine.Component):IsAssignableFrom(type) then
+					---@type UnityEngine.GameObject
+					local goAsset = assetBundle:LoadAsset(assetName, typeof(CS.UnityEngine.GameObject));
+					if goAsset then
+						self:ResetGoShader(goAsset);
+						local comp = goAsset:GetComponent(type);
+						if CS.Main.ConstValue.UNITY_EDITOR_WIN or CS.Main.ConstValue.UNITY_EDITOR_OSX then
+							asset = CS.Main.LuaHelp.IsNotNull(comp) and comp or nil;
+						else
+							asset = comp;
+						end
+					end
+				else
+					asset = assetBundle:LoadAsset(assetName, type or typeof(CS.UnityEngine.Object));
+					if asset then
+						local assetType = asset:GetType();
+						if assetType == typeof(CS.UnityEngine.GameObject) then
+							---@type UnityEngine.GameObject
+							local goAsset = asset;
+							self:ResetGoShader(goAsset);
+						elseif assetType == typeof(CS.UnityEngine.Material) then
+							---@type UnityEngine.Material
+							local matAsset = asset;
+							self:ResetMatShader(matAsset);
+						end
+					end
+				end
+				callback(asset);
+			else
+				callback(nil);
+			end
+		end
+	end
+	return self:LoadBundleAsync(moduleType, dirPath, bundleName, bundleCallback);
+end
+
+---@param moduleType LuaClass.ModuleType
+---@param dirPath string
+---@param bundleName string
+---@param callback fun(assetBundle:UnityEngine.AssetBundle)
+---@return UnityEngine.WaitUntil
+function m:LoadBundleAsync(moduleType, dirPath, bundleName, callback)
+	bundleName = string.lower(bundleName);
+	---@param loader Main.AssetBundleLoader
+	local function loaderCallback(loader)
+		local assetBundle = loader.AssetBundle;
+		if callback then
+			callback(assetBundle);
+		end
+		local bundleContainer = self.m_BundleContainerDict[moduleType];
+		if not assetBundle and bundleContainer.bundleCacheDict:ContainsKey(bundleName) then
+			bundleContainer.bundleCacheDict:Remove(bundleName);
+		end
+	end
+	return self:LoadLoaderAsync(moduleType, dirPath, bundleName, loaderCallback);
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param dirPath string
+---@param bundleName string
+---@param callback fun(assetBundle:Main.AssetBundleLoader)
+---@return UnityEngine.WaitUntil
+function m:LoadLoaderAsync(moduleType, dirPath, bundleName, callback)
+	local bundleContainer = self.m_BundleContainerDict[moduleType];
+	local loader = bundleContainer.bundleLoadingDict[bundleName];
+	if loader then
+		if CS.Main.ConstValue.BUNDLE_LOAD_LOG then
+			Log("<b>AsyncLoad assetBundle form loading:</b> " .. bundleName);
+		end
+		if callback then
+			CS.Main.CoroutineManager.Wait(loader.Wait, function() callback(loader); end, self.m_CSBehaviour);
+		end
+		return loader.Wait;
+	end
+
+	loader = bundleContainer.bundleRequireDict[bundleName];
+	if loader then
+		if CS.Main.ConstValue.BUNDLE_LOAD_LOG then
+			Log("<b>AsyncLoad assetBundle form require:</b> " .. bundleName);
+		end
+		if callback then
+			callback(loader);
+		end
+		return nil;
+	end
+
+	loader = bundleContainer.bundleCacheDict:Get(bundleName);
+	if loader then
+		if CS.Main.ConstValue.BUNDLE_LOAD_LOG then
+			Log("<b>AsyncLoad assetBundle form cache:</b> " .. bundleName);
+		end
+		bundleContainer.bundleCacheDict:MoveToLast(bundleName);
+		if callback then
+			callback(loader);
+		end
+		return nil;
+	end
+
+	return self:LoadNewLoaderAsync(moduleType, dirPath, bundleName, function(loader)
+		if callback then
+			callback(loader);
+		end
+	end);
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param dirPath string
+---@param bundleName string
+---@param callback fun(assetBundle:Main.AssetBundleLoader)
+---@return UnityEngine.WaitUntil
+function m:LoadNewLoaderAsync(moduleType, dirPath, bundleName, callback)
+	if CS.Main.ConstValue.BUNDLE_LOAD_LOG then
+		Log("<b>AsyncLoad assetBundle from file:</b> " .. dirPath .. "/" .. bundleName);
+	end
+
+	local bundleContainer = self.m_BundleContainerDict[moduleType];
+	local loader = CS.Main.AssetBundleLoaderAsync(dirPath .. "/" .. bundleName);
+	bundleContainer.bundleLoadingDict[bundleName] = loader;
+	bundleContainer.bundleCacheDict:Add(bundleName, loader);
+	local loadDependenciesCoroutine = CS.Main.CoroutineManager.Start(self:LoadDependenciesAsync(moduleType, bundleName, loader), self.m_CSBehaviour);
+	CS.Main.CoroutineManager.Delay(loadDependenciesCoroutine, function() loader:Load(); end, self.m_CSBehaviour);
+	CS.Main.CoroutineManager.Wait(loader.Wait, function()
+		if callback then
+			callback(loader);
+		end
+		bundleContainer.bundleLoadingDict[bundleName] = nil;
+	end, self.m_CSBehaviour);
+	return loader.Wait;
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param bundleName string
+---@param loader Main.AssetBundleLoader
+---@return System.Collections.IEnumerator
+function m:LoadDependenciesAsync(moduleType, bundleName, loader)
+	return util.cs_generator(function()
+		local bundleContainer = self.m_BundleContainerDict[moduleType];
+		if bundleContainer.manifest then
+			local depends = bundleContainer.manifest:GetDirectDependencies(bundleName);
+			for index = 0, depends.Length - 1 do
+				local dependBundleName = depends[index];
+				if loader.IsUnloaded then
+					break;
+				end
+				if CS.Main.ConstValue.BUNDLE_LOAD_LOG then
+					Log(bundleName .. " <b>depend:</b> " .. dependBundleName);
+				end
+				local wait = self:LoadDependencyAsync(moduleType, bundleName, loader);
+				coroutine.yield(wait)
+			end
+		end
+	end);
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param bundleName string
+---@param loader Main.AssetBundleLoader
+---@return UnityEngine.WaitUntil
+function m:LoadDependencyAsync(moduleType, bundleName, loader)
+	if CS.Main.ConstValue.DOWNLOAD then
+		local fullPath = CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. bundleName;
+		if CS.Main.FileManager.IsFileExist(fullPath) then
+			local wait = self:LoadBundleAsync(moduleType, CS.Main.ConstValue.PERSISTENT_DIR_PATH, bundleName, nil);
+			loader:AddDependency(bundleName);
+			self:AddPointer(moduleType, bundleName);
+			return wait;
+		end
+	end
+	if self:IsStreamingBundleExist(moduleType, bundleName) then
+		local wait = self:LoadBundleAsync(moduleType, CS.Main.ConstValue.STREAMING_DIR_PATH, bundleName, nil);
+		loader:AddDependency(bundleName);
+		self:AddPointer(moduleType, bundleName);
+		return wait;
+	end
+	return nil;
+end
+
+--endregion
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param bundleName string
+function m:AddPointer(moduleType, bundleName)
+	local bundleContainer = self.m_BundleContainerDict[moduleType];
+	---@type Main.AssetBundleLoader
+	local loader = bundleContainer.bundleCacheDict:Get(bundleName);
+	if loader then
+		loader.PointerCount = loader.PointerCount + 1;
+		bundleContainer.bundleCacheDict:Remove(bundleName);
+		bundleContainer.bundleRequireDict[bundleName] = loader;
+		return;
+	end
+
+	loader = bundleContainer.bundleRequireDict[bundleName];
+	if loader then
+		loader.PointerCount = loader.PointerCount + 1;
+		return;
+	end
+
+	loader = bundleContainer.bundleLoadingDict[bundleName];
+	if loader then
+		loader.PointerCount = loader.PointerCount + 1;
+		bundleContainer.bundleRequireDict[bundleName] = loader;
+		return;
+	end
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+---@param bundleName string
+function m:RemovePointer(moduleType, bundleName)
+	local bundleContainer = self.m_BundleContainerDict[moduleType];
+	---@type Main.AssetBundleLoader
+	local loader = bundleContainer.bundleRequireDict[bundleName];
+	if loader then
+		loader.PointerCount = loader.PointerCount - 1;
+		if loader.PointerCount <= 0 then
+			bundleContainer.bundleRequireDict[bundleName] = nil;
+			if not bundleContainer.bundleLoadingDict[bundleName] then
+				bundleContainer.bundleCacheDict:Set(bundleName, loader);
+			end
+		end
+	end
+end
+
+---@static
+---@private
+---@param go UnityEngine.GameObject
+function m:ResetGoShader(go)
+	if self:ShaderNeedReset() then
+		---@type table<UnityEngine.Material, boolean>
+		local matSet = {};
+		---@type UnityEngine.Renderer[]
+		local rends = go:GetComponentsInChildren(typeof(CS.UnityEngine.Renderer), true);
+		for rendIndex = 0, rends.Length - 1 do
+			local mats = rends[rendIndex].sharedMaterials;
+			for matIndex = 0, mats.Length - 1 do
+				local mat = mats[matIndex];
+				if mat and not matSet[mat] then
+					matSet[mat] = true;
+				end
+			end
+		end
+		---@type UISprite[]
+		local sprites = go:GetComponentsInChildren(typeof(CS.UISprite), true);
+		for spriteIndex = 0, sprites.Length - 1 do
+			local mat = sprites[spriteIndex].material;
+			if mat and not matSet[mat] then
+				matSet[mat] = true;
+			end
+		end
+		---@type UILabel[]
+		local labels = go:GetComponentsInChildren(typeof(CS.UILabel), true);
+		for labelIndex = 0, labels.Length - 1 do
+			local mat = labels[labelIndex].material;
+			if mat and not matSet[mat] then
+				matSet[mat] = true;
+			end
+		end
+		---@type UITexture[]
+		local labels = go:GetComponentsInChildren(typeof(CS.UILabel), true);
+		for labelIndex = 0, labels.Length - 1 do
+			local mat = labels[labelIndex].material;
+			if mat and not matSet[mat] then
+				matSet[mat] = true;
+			end
+		end
+		for mat, _ in pairs(matSet) do
+			self:ResetMatShader(mat);
+		end
+	end
+end
+
+---@static
+---@private
+---@param mat UnityEngine.Material
+function m:ResetMatShader(mat)
+	if self:ShaderNeedReset() then
+		local shader = mat.shader;
+		if shader then
+			mat.shader = CS.UnityEngine.Shader.Find(shader.name);
+		end
+	end
+end
+
+---@static
+---@private
+---@return boolean
+function m:ShaderNeedReset()
+	local PlatformType = CS.UnityEngine.RuntimePlatform;
+	local platform = CS.Main.ConstValue.PLATFORM;
+	return (CS.Main.ConstValue.UNITY_EDITOR_WIN and platform ~= PlatformType.WindowsPlayer) or
+			(CS.Main.ConstValue.UNITY_EDITOR_OSX and platform ~= PlatformType.OSXPlayer and platform ~= PlatformType.IPhonePlayer);
+end
+
+return m;

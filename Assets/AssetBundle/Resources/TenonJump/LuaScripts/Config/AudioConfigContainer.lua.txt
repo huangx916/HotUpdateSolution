@@ -1,0 +1,8 @@
+---@class LuaClass.TenonJump.AudioConfigContainer : LuaClass.AudioConfigContainer
+---@field public Instance LuaClass.TenonJump.AudioConfigContainer @static
+local m = LuaClass.AudioConfigContainer:Derive("TenonJump", "AudioConfigContainer");
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.AudioConfigContainer = m;
+
+return m;

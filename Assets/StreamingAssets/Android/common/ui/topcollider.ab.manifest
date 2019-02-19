@@ -1,0 +1,26 @@
+ManifestFileVersion: 0
+CRC: 480451538
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 26b34dcb024aafda0a38880180142dc2
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 3eba026e6427f99898aed8afdfb3bf76
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: ae942c9068183dc40a9d01f648273726, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 858a20c1b21a3f94bb5b2d3b901c9aaf, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/UI/TopCollider.prefab
+Dependencies: []

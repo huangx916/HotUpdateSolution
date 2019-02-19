@@ -1,0 +1,62 @@
+---@class LuaClass.LanguageConfigContainer : LuaClass.BaseConfigContainer
+---@field public Instance LuaClass.LanguageConfigContainer @static
+---@field private m_LanguageConfig table<string, table<string, {default:string}>>
+local m = LuaClass.BaseConfigContainer:Derive("Common", "LanguageConfigContainer");
+LuaClass.LanguageConfigContainer = m;
+
+---@private
+function m:ctor()
+	self.m_LanguageConfig = CS.SimpleJson.JsonObject();
+end
+
+---@return LuaClass.ConfigLoader[]
+function m:GetLoaderList()
+	---@type LuaClass.ConfigLoader[]
+	local configLoaders = {
+		LuaClass.ConfigLoader("LanguageConfig", self.InitConfig)
+	}
+	return configLoaders;
+end
+
+---@private
+---@param jsonStr string
+function m:InitConfig(jsonStr)
+	self.m_LanguageConfig = LuaClass.RapidJson.Decode(jsonStr);
+end
+
+---@overload fun(type string, name string):string
+---@param type string
+---@param name string
+---@param language string
+---@return string
+function m:GetText(type, name, language)
+	language = language or "default";
+	local group = self.m_LanguageConfig[type];
+	if group then
+		local item = group[name];
+		if item then
+			return item[language];
+		end
+	end
+	return nil;
+end
+
+---@overload fun(type string, text string):string
+---@param type string
+---@param text string
+---@param language string
+---@return string
+function m:GetName(type, text, language)
+	language = language or "default";
+	local group = self.m_LanguageConfig[type];
+	if group then
+		for name, item in pairs(group) do
+			if item[language] == text then
+				return name;
+			end
+		end
+	end
+	return "";
+end
+
+return m;

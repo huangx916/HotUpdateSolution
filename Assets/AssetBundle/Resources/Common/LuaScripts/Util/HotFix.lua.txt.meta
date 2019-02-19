@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: a0b4d62eee524314880eed94f3ab9f22
+timeCreated: 1515985855
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/util/hotfix.lua
+  assetBundleVariant: ab

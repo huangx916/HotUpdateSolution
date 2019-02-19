@@ -1,0 +1,247 @@
+ManifestFileVersion: 0
+CRC: 2583388645
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: common/uiatlas/loadinguiatlas.ab
+      Dependencies: {}
+    Info_1:
+      Name: common/uiatlas/dialoguiatlas.ab
+      Dependencies: {}
+    Info_2:
+      Name: common/texture/loading_bg.ab
+      Dependencies: {}
+    Info_3:
+      Name: common/texture/sys_bg_solid_color.ab
+      Dependencies: {}
+    Info_4:
+      Name: common/uifont/systemfont.ab
+      Dependencies: {}
+    Info_5:
+      Name: common/ui/recordui.ab
+      Dependencies:
+        Dependency_0: common/texture/sys_bg_solid_color.ab
+    Info_6:
+      Name: common/ui/topcollider.ab
+      Dependencies: {}
+    Info_7:
+      Name: common/ui/loadingui.ab
+      Dependencies:
+        Dependency_0: common/uiatlas/loadinguiatlas.ab
+        Dependency_1: common/texture/loading_bg.ab
+        Dependency_2: common/uifont/systemfont.ab
+    Info_8:
+      Name: common/ui/platformui.ab
+      Dependencies:
+        Dependency_0: common/texture/sys_bg_solid_color.ab
+        Dependency_1: common/uifont/systemfont.ab
+    Info_9:
+      Name: common/ui/dialogui.ab
+      Dependencies:
+        Dependency_0: common/uiatlas/dialoguiatlas.ab
+        Dependency_1: common/texture/sys_bg_solid_color.ab
+        Dependency_2: common/uifont/systemfont.ab
+    Info_10:
+      Name: common/ui/lobbyui.ab
+      Dependencies: {}
+    Info_11:
+      Name: common/ui/uiroot.ab
+      Dependencies: {}
+    Info_12:
+      Name: common/luascripts/enum/dialogtype.lua.ab
+      Dependencies: {}
+    Info_13:
+      Name: common/luascripts/util/utilrequire.lua.ab
+      Dependencies: {}
+    Info_14:
+      Name: common/luascripts/manager/recordmanager.lua.ab
+      Dependencies: {}
+    Info_15:
+      Name: common/luascripts/manager/configmanager.lua.ab
+      Dependencies: {}
+    Info_16:
+      Name: common/luascripts/ui/recordui.lua.ab
+      Dependencies: {}
+    Info_17:
+      Name: common/config/audioconfig.ab
+      Dependencies: {}
+    Info_18:
+      Name: common/luascripts/util/stringextension.lua.ab
+      Dependencies: {}
+    Info_19:
+      Name: common/luascripts/enum/scenetype.lua.ab
+      Dependencies: {}
+    Info_20:
+      Name: common/config/languageconfig.ab
+      Dependencies: {}
+    Info_21:
+      Name: common/luascripts/manager/hotupdatemodule.lua.ab
+      Dependencies: {}
+    Info_22:
+      Name: common/luascripts/manager/timemanager.lua.ab
+      Dependencies: {}
+    Info_23:
+      Name: common/luascripts/util/globalextension.lua.ab
+      Dependencies: {}
+    Info_24:
+      Name: common/luascripts/ui/fadeui.lua.ab
+      Dependencies: {}
+    Info_25:
+      Name: common/luascripts/protocol/baseprotocolhandler.lua.ab
+      Dependencies: {}
+    Info_26:
+      Name: common/luascripts/data/playerinfo.lua.ab
+      Dependencies: {}
+    Info_27:
+      Name: common/luascripts/util/simplejson.lua.ab
+      Dependencies: {}
+    Info_28:
+      Name: common/luascripts/manager/assetloadmanager.lua.ab
+      Dependencies: {}
+    Info_29:
+      Name: common/luascripts/protocol/recordprotocolhandler.lua.ab
+      Dependencies: {}
+    Info_30:
+      Name: common/luascripts/main/managercollection.lua.ab
+      Dependencies: {}
+    Info_31:
+      Name: common/luascripts/manager/httpmanager.lua.ab
+      Dependencies: {}
+    Info_32:
+      Name: common/luascripts/ui/lobbyui.lua.ab
+      Dependencies: {}
+    Info_33:
+      Name: common/luascripts/util/rapidjson.lua.ab
+      Dependencies: {}
+    Info_34:
+      Name: common/luascripts/util/luabehaviour.lua.ab
+      Dependencies: {}
+    Info_35:
+      Name: common/luascripts/util/luaenum.lua.ab
+      Dependencies: {}
+    Info_36:
+      Name: common/luascripts/enum/assetpathtype.lua.ab
+      Dependencies: {}
+    Info_37:
+      Name: common/luascripts/util/tableextension.lua.ab
+      Dependencies: {}
+    Info_38:
+      Name: common/luascripts/manager/uimanager.lua.ab
+      Dependencies: {}
+    Info_39:
+      Name: common/luascripts/data/datarequire.lua.ab
+      Dependencies: {}
+    Info_40:
+      Name: common/audio/effect/ui/click.ab
+      Dependencies: {}
+    Info_41:
+      Name: common/luascripts/util/mathextension.lua.ab
+      Dependencies: {}
+    Info_42:
+      Name: common/luascripts/main/modulemain.lua.ab
+      Dependencies: {}
+    Info_43:
+      Name: common/luascripts/enum/audiotype.lua.ab
+      Dependencies: {}
+    Info_44:
+      Name: common/luascripts/manager/platformmanager.lua.ab
+      Dependencies: {}
+    Info_45:
+      Name: common/luascripts/manager/assetbundlemanager.lua.ab
+      Dependencies: {}
+    Info_46:
+      Name: common/luascripts/protocol/buriedpointprotocolhandler.lua.ab
+      Dependencies: {}
+    Info_47:
+      Name: common/luascripts/enum/enumrequire.lua.ab
+      Dependencies: {}
+    Info_48:
+      Name: common/luascripts/util/cachetable.lua.ab
+      Dependencies: {}
+    Info_49:
+      Name: common/luascripts/util/luaclass.lua.ab
+      Dependencies: {}
+    Info_50:
+      Name: common/audio/effect/ui/select.ab
+      Dependencies: {}
+    Info_51:
+      Name: common/luascripts/manager/playbackmanager.lua.ab
+      Dependencies: {}
+    Info_52:
+      Name: common/luascripts/manager/protocolmanager.lua.ab
+      Dependencies: {}
+    Info_53:
+      Name: common/luascripts/manager/branchmanager.lua.ab
+      Dependencies: {}
+    Info_54:
+      Name: common/luascripts/ui/platformui.lua.ab
+      Dependencies: {}
+    Info_55:
+      Name: common/luascripts/config/audioconfigcontainer.lua.ab
+      Dependencies: {}
+    Info_56:
+      Name: common/luascripts/data/errorcode.lua.ab
+      Dependencies: {}
+    Info_57:
+      Name: common/luascripts/manager/basemanager.lua.ab
+      Dependencies: {}
+    Info_58:
+      Name: common/luascripts/util/hotfix.lua.ab
+      Dependencies: {}
+    Info_59:
+      Name: common/luascripts/manager/buriedpointmanager.lua.ab
+      Dependencies: {}
+    Info_60:
+      Name: common/luascripts/util/test.lua.ab
+      Dependencies: {}
+    Info_61:
+      Name: common/luascripts/ui/dialogui.lua.ab
+      Dependencies: {}
+    Info_62:
+      Name: common/luascripts/data/constvalue.lua.ab
+      Dependencies: {}
+    Info_63:
+      Name: common/luascripts/data/matchinfo.lua.ab
+      Dependencies: {}
+    Info_64:
+      Name: common/luascripts/config/baseconfigcontainer.lua.ab
+      Dependencies: {}
+    Info_65:
+      Name: common/luascripts/main/luamain.lua.ab
+      Dependencies: {}
+    Info_66:
+      Name: common/luascripts/config/languageconfigcontainer.lua.ab
+      Dependencies: {}
+    Info_67:
+      Name: common/luascripts/manager/audiomanager.lua.ab
+      Dependencies: {}
+    Info_68:
+      Name: common/luascripts/data/confignotfind.lua.ab
+      Dependencies: {}
+    Info_69:
+      Name: common/luascripts/manager/settingsmanager.lua.ab
+      Dependencies: {}
+    Info_70:
+      Name: common/luascripts/ui/baseui.lua.ab
+      Dependencies: {}
+    Info_71:
+      Name: common/luascripts/manager/scenemanager.lua.ab
+      Dependencies: {}
+    Info_72:
+      Name: common/luascripts/protocol/playbackprotocolhandler.lua.ab
+      Dependencies: {}
+    Info_73:
+      Name: common/luascripts/ui/loadingui.lua.ab
+      Dependencies: {}
+    Info_74:
+      Name: common/luascripts/data/listenertype.lua.ab
+      Dependencies: {}
+    Info_75:
+      Name: common/luascripts/enum/moduletype.lua.ab
+      Dependencies: {}
+    Info_76:
+      Name: common/luascripts/enum/updatesteptype.lua.ab
+      Dependencies: {}
+    Info_77:
+      Name: common/luascripts/enum/uitype.lua.ab
+      Dependencies: {}

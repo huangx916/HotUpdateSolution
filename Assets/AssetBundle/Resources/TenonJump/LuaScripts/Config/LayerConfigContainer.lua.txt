@@ -1,0 +1,81 @@
+---@class LuaClass.TenonJump.LayerPartConfig
+---@field public id number
+---@field public obstaclesWeight number[]
+
+---@class LuaClass.TenonJump.LayerConfig
+---@field public name string
+---@field public value LuaClass.TenonJump.LayerPartConfig[]
+
+---@class LuaClass.TenonJump.LayerConfigContainer : LuaClass.BaseConfigContainer
+---@field public Instance LuaClass.TenonJump.LayerConfigContainer @static
+---@field private m_LayerConfigDict table<string, LuaClass.TenonJump.LayerConfig>
+local m = LuaClass.BaseConfigContainer:Derive("TenonJump", "LayerConfigContainer");
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.LayerConfigContainer = m;
+
+---@private
+function m:ctor()
+	self.m_LayerConfigDict = {};
+end
+
+---@return LuaClass.ConfigLoader[]
+function m:GetLoaderList()
+	---@type LuaClass.ConfigLoader[]
+	local configLoaders = {
+		LuaClass.ConfigLoader("LayerConfig", self.InitConfig)
+	}
+	return configLoaders;
+end
+
+---@private
+---@param jsonStr string
+function m:InitConfig(jsonStr)
+	local data = LuaClass.RapidJson.Decode(jsonStr);
+	---@param itemConfig LuaClass.TenonJump.LayerConfig
+	for _, itemConfig in ipairs(data) do
+		self.m_LayerConfigDict[itemConfig.name] = itemConfig;
+	end
+end
+
+---@return number
+function m:GetConfigCount()
+	return #self.m_LayerConfigDict;
+end
+
+---@param name string
+---@return LuaClass.TenonJump.LayerConfig
+function m:GetLayerConfig(name)
+	return name and self.m_LayerConfigDict[name];
+end
+
+---@private
+---@param name string
+---@param id number
+---@return number
+function m:GetTotalWeight(name, id)
+	local total = 0;
+	for index = 1, #self.m_LayerConfigDict[name].value[id].obstaclesWeight do
+		total = total + self.m_LayerConfigDict[name].value[id].obstaclesWeight[index];
+	end
+	return total;
+end
+
+---@public
+---@param name string
+---@param id number
+---@return number
+function m:GetRandomObstacleId(name, id)
+	local total = self:GetTotalWeight(name, id)
+	local random = LuaClass.PlatformManager.Instance:RandomRangeInt(1, total+1);
+	local curWeight = 0;
+	for index = 1, #self.m_LayerConfigDict[name].value[id].obstaclesWeight do
+		curWeight = curWeight + self.m_LayerConfigDict[name].value[id].obstaclesWeight[index];
+		if random <= curWeight then
+			return index;
+		end
+	end
+	return 0;
+end
+
+return m;

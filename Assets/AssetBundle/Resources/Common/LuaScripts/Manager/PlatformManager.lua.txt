@@ -1,0 +1,157 @@
+---@class LuaClass.PlatformManager : LuaClass.BaseManager
+---@field public Instance LuaClass.PlatformManager @static
+---@field private m_PlayerInfo LuaClass.PlayerInfo
+---@field private m_MatchInfo LuaClass.MatchInfo
+local m = LuaClass.BaseManager:Derive("Common", "PlatformManager");
+LuaClass.PlatformManager = m;
+
+---@private
+function m:Awake()
+	self.m_PlayerInfo = {};
+	self.m_PlayerInfo.ID = CS.Main.LuaHelp.GetHash(CS.UnityEngine.SystemInfo.deviceUniqueIdentifier);
+	self.m_PlayerInfo.IsCurrentPlayer = true;
+end
+
+---@return LuaClass.PlayerInfo | SkillzSDK.Player
+function m:GetPlayerInfo()
+	if not CS.Main.ConstValue.UNITY_EDITOR and not LuaClass.ConstValue.BETA_VERSION then
+		if CS.Main.ConstValue.SDK_SKILLZ then
+			return CS.SkillzCrossPlatform.GetPlayer();
+		end
+	end
+	return self.m_PlayerInfo;
+end
+
+---@return LuaClass.MatchInfo | SkillzSDK.Match
+function m:GetMatchInfo()
+	if not CS.Main.ConstValue.UNITY_EDITOR and not LuaClass.ConstValue.BETA_VERSION then
+		if CS.Main.ConstValue.SDK_SKILLZ then
+			return CS.SkillzCrossPlatform.GetMatchInfo();
+		end
+	end
+	return self.m_MatchInfo;
+end
+
+function m:EnterPlatform()
+	LuaClass.UIManager.Instance:Close("WelcomeUI");
+	if not CS.Main.ConstValue.UNITY_EDITOR and not LuaClass.ConstValue.BETA_VERSION then
+		if CS.Main.ConstValue.SDK_SKILLZ then
+			CS.SkillzCrossPlatform.LaunchSkillz(self);
+			return;
+		end
+	end
+	if LuaClass.ConstValue.BETA_VERSION then
+		LuaClass.PlatformManager.Instance:OnGameEnter(nil);
+	else
+		LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "PlatformUI");
+	end
+end
+
+function m:OnPlatformExit()
+	LuaClass.UIManager.Instance:Open(LuaMain:GetModuleType(), "WelcomeUI");
+	if not CS.Main.ConstValue.UNITY_EDITOR and not LuaClass.ConstValue.BETA_VERSION then
+		if CS.Main.ConstValue.SDK_SKILLZ then
+			return;
+		end
+	end
+	if not LuaClass.ConstValue.BETA_VERSION then
+		LuaClass.UIManager.Instance:Close("PlatformUI");
+	end
+end
+
+---@param matchInfo SkillzSDK.Match
+function m:OnGameEnter(matchInfo)
+	if not CS.Main.ConstValue.UNITY_EDITOR and not LuaClass.ConstValue.BETA_VERSION
+			and CS.Main.ConstValue.SDK_SKILLZ then
+		if matchInfo then
+			LogError(matchInfo:ToString());
+			for index, player in pairs(matchInfo.Players) do
+				LogError("Player " .. index .. ": ");
+				LogError(player:ToString());
+			end
+		end
+	else
+		---@type LuaClass.MatchInfo
+		self.m_MatchInfo = {};
+		self.m_MatchInfo.ID = LuaClass.TimeManager.Instance:GetNativeLongTime();
+		self.m_MatchInfo.Players = {};
+		self.m_MatchInfo.Players[1] = self.m_PlayerInfo;
+	end
+
+	LuaClass.UIManager.Instance:Open(LuaMain:GetModuleType(), "GameUI");
+	if not CS.Main.ConstValue.UNITY_EDITOR and not LuaClass.ConstValue.BETA_VERSION then
+		if CS.Main.ConstValue.SDK_SKILLZ then
+			return;
+		end
+	end
+	if not LuaClass.ConstValue.BETA_VERSION then
+		LuaClass.UIManager.Instance:Close("PlatformUI");
+	end
+end
+
+---@param score number
+function m:ExitGame(score)
+	LuaClass.UIManager.Instance:Close("GameUI");
+	if not CS.Main.ConstValue.UNITY_EDITOR and not LuaClass.ConstValue.BETA_VERSION then
+		if CS.Main.ConstValue.SDK_SKILLZ then
+			CS.SkillzCrossPlatform.ReportFinalScore(score);
+			return;
+		end
+	end
+	if LuaClass.ConstValue.BETA_VERSION then
+		LuaClass.UIManager.Instance:Open(LuaMain:GetModuleType(), "WelcomeUI");
+	else
+		LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "PlatformUI");
+	end
+end
+
+--region Skillz Callback
+
+---@private
+---@param matchInfo SkillzSDK.Match
+function m:OnMatchWillBegin(matchInfo)
+	self:OnGameEnter(matchInfo);
+end
+
+---@private
+function m:OnSkillzWillExit()
+	self:OnPlatformExit();
+end
+
+--endregion
+
+---@param min number
+---@param max number
+---@return number
+function m:RandomRangeInt(min, max)
+	min = math.floor(min);
+	max = math.floor(max);
+	if max < min then
+		min, max = max, min;
+	end
+	if not CS.Main.ConstValue.UNITY_EDITOR and not LuaClass.ConstValue.BETA_VERSION then
+		if CS.Main.ConstValue.SDK_SKILLZ then
+			local rand = CS.SkillzCrossPlatform.Random.Value();
+			if rand == 1 then
+				return math.max(max - 1, min);
+			else
+				return min + math.floor(rand * (max - min));
+			end
+		end
+	end
+	return CS.Main.LuaHelp.RandomRangeInt(min, max);
+end
+
+---@param min number
+---@param max number
+---@return number
+function m:RandomRangeFloat(min, max)
+	if not CS.Main.ConstValue.UNITY_EDITOR and not LuaClass.ConstValue.BETA_VERSION then
+		if CS.Main.ConstValue.SDK_SKILLZ then
+			return CS.SkillzCrossPlatform.Random.Range(min, max);
+		end
+	end
+	return CS.UnityEngine.Random.Range(min, max);
+end
+
+return m;

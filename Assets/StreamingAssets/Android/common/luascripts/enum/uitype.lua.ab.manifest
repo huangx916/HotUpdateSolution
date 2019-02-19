@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 1089207513
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: ffdbd86c43bb11c3fb1c8f75e1ef4050
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/LuaScripts/Enum/UIType.lua.txt
+Dependencies: []

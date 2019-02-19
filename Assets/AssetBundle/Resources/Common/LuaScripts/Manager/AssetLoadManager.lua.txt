@@ -1,0 +1,272 @@
+---@class LuaClass.AssetLoadManager : LuaClass.BaseManager
+---@field public Instance LuaClass.AssetLoadManager @static
+---@field private m_PreloadAssetDict table<LuaClass.ModuleType, table<string, UnityEngine.Object>>
+local m = LuaClass.BaseManager:Derive("Common", "AssetLoadManager");
+LuaClass.AssetLoadManager = m;
+
+---@private
+function m:Awake()
+	self.m_PreloadAssetDict = {};
+	for moduleType = 1, #LuaClass.ModuleType do
+		self.m_PreloadAssetDict[moduleType] = {};
+	end
+end
+
+function m:ClearAllModuleAsset()
+	for moduleType, _ in pairs(self.m_PreloadAssetDict) do
+		self:ClearModuleAsset(moduleType);
+	end
+end
+
+---@private
+---@param moduleType LuaClass.ModuleType
+function m:ClearModuleAsset(moduleType)
+	self.m_PreloadAssetDict[moduleType] = {};
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, relativePath:string):UnityEngine.Object
+---@param moduleType LuaClass.ModuleType
+---@param relativePath string
+---@param type System.Type
+---@return UnityEngine.Object
+function m:LoadResources(moduleType, relativePath, type)
+	local moduleName = LuaClass.ModuleType[moduleType];
+
+	if CS.Main.ConstValue.ASSET_LOAD_LOG then
+		Log("<b>Load form resources:</b> " .. moduleName .. "/" .. relativePath);
+	end
+
+	local fullPath = moduleName .. "/" .. relativePath;
+	type = type or typeof(CS.UnityEngine.Object);
+	local asset = CS.UnityEngine.Resources.Load(fullPath, type);
+	if asset then
+		return asset;
+	end
+	LogErrorFormat("<b>Resources.Load {0} failed:</b> {1}", type.Name, fullPath);
+	return nil;
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, relativePath:string):UnityEngine.Object
+---@param moduleType LuaClass.ModuleType
+---@param relativePath string
+---@param type System.Type
+---@return UnityEngine.Object
+function m:LoadStreaming(moduleType, relativePath, type)
+	local moduleName = LuaClass.ModuleType[moduleType];
+
+	if CS.Main.ConstValue.ASSET_LOAD_LOG then
+		Log("<b>Load form streaming:</b> " .. moduleName .. "/" .. relativePath);
+	end
+
+	type = type or typeof(CS.UnityEngine.Object);
+	local index = string.lastfind(relativePath, '/');
+	local assetName = string.sub(relativePath, index + 1);
+	local bundleName = moduleName .. "/" .. relativePath .. "." .. CS.Main.ConstValue.ASSET_BUNDLE_VARIANT;
+	return LuaClass.AssetBundleManager.Instance:LoadAsset(moduleType, CS.Main.ConstValue.STREAMING_DIR_PATH, bundleName, assetName, type);
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, relativePath:string):UnityEngine.Object
+---@param moduleType LuaClass.ModuleType
+---@param relativePath string
+---@param type System.Type
+---@return UnityEngine.Object
+function m:LoadPersistent(moduleType, relativePath, type)
+	local moduleName = LuaClass.ModuleType[moduleType];
+
+	if CS.Main.ConstValue.ASSET_LOAD_LOG then
+		Log("<b>Load form persistent:</b> " .. moduleName .. "/" .. relativePath);
+	end
+
+	type = type or typeof(CS.UnityEngine.Object);
+	local index = string.lastfind(relativePath, '/');
+	local assetName = string.sub(relativePath, index + 1);
+	local bundleName = moduleName .. "/" .. relativePath .. "." .. CS.Main.ConstValue.ASSET_BUNDLE_VARIANT;
+	return LuaClass.AssetBundleManager.Instance:LoadAsset(moduleType, CS.Main.ConstValue.PERSISTENT_DIR_PATH, bundleName, assetName, type);
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, relativePath:string):UnityEngine.Object
+---@param moduleType LuaClass.ModuleType
+---@param relativePath string
+---@param type System.Type
+---@return UnityEngine.Object
+function m:LoadPreloaded(moduleType, relativePath, type)
+	if CS.Main.ConstValue.ASSET_LOAD_LOG then
+		Log("<b>Load form preloaded:</b> " .. LuaClass.ModuleType[moduleType] .. "/" .. relativePath);
+	end
+
+	type = type or typeof(CS.UnityEngine.Object);
+	local asset = self.m_PreloadAssetDict[moduleType][relativePath];
+	if type and asset:GetType() == typeof(CS.UnityEngine.GameObject) and
+			typeof(CS.UnityEngine.Component):IsAssignableFrom(type) then
+		---@type UnityEngine.GameObject
+		local goAsset = asset;
+		local comp = goAsset:GetComponent(type);
+		if CS.Main.ConstValue.UNITY_EDITOR_WIN or CS.Main.ConstValue.UNITY_EDITOR_OSX then
+			return CS.Main.LuaHelp.IsNotNull(comp) and comp or nil;
+		else
+			return comp;
+		end
+	else
+		return asset;
+	end
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, relativePath:string):UnityEngine.Object
+---@param moduleType LuaClass.ModuleType
+---@param relativePath string
+---@param type System.Type
+---@return UnityEngine.Object
+function m:Load(moduleType, relativePath, type)
+	if not relativePath and relativePath ~= "" then
+		return nil;
+	end
+
+	local preloadAssets = self.m_PreloadAssetDict[moduleType];
+	if CS.Main.LuaHelp.IsNotNull(preloadAssets[relativePath]) then
+		return self:LoadPreloaded(moduleType, relativePath, type);
+	end
+
+	local longRelativePath = LuaClass.ModuleType[moduleType] .. "/" .. relativePath .. "." .. CS.Main.ConstValue.ASSET_BUNDLE_VARIANT;
+
+	if not CS.Main.ConstValue.LOAD_FROM_RES then
+		if CS.Main.ConstValue.DOWNLOAD then
+			local fullPath = CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. string.lower(longRelativePath);
+			if CS.Main.FileManager.IsFileExist(fullPath) then
+				local asset = self:LoadPersistent(moduleType, relativePath, type);
+				preloadAssets[relativePath] = asset;
+				return asset;
+			end
+		end
+
+		if LuaClass.AssetBundleManager.Instance:IsStreamingBundleExist(moduleType, string.lower(longRelativePath)) then
+			local asset = self:LoadStreaming(moduleType, relativePath, type);
+			preloadAssets[relativePath] = asset;
+			return asset
+		end
+	end
+
+	local asset = self:LoadResources(moduleType, relativePath, type);
+	preloadAssets[relativePath] = asset;
+	return asset
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, relativePath:string, callback:fun(asset:UnityEngine.Object)):UnityEngine.WaitUntil
+---@param moduleType LuaClass.ModuleType
+---@param relativePath string
+---@param callback fun(asset:UnityEngine.Object)
+---@param type System.Type
+---@return UnityEngine.WaitUntil
+function m:LoadStreamingAsync(moduleType, relativePath, callback, type)
+	local moduleName = LuaClass.ModuleType[moduleType];
+
+	if CS.Main.ConstValue.ASSET_LOAD_LOG then
+		Log("<b>Async load form streaming:</b> " .. moduleName .. "/" .. relativePath);
+	end
+
+	type = type or typeof(CS.UnityEngine.Object);
+	local index = string.lastfind(relativePath, '/');
+	local assetName = string.sub(relativePath, index + 1);
+	local bundleName = moduleName .. "/" .. relativePath .. "." .. CS.Main.ConstValue.ASSET_BUNDLE_VARIANT;
+	return LuaClass.AssetBundleManager.Instance:LoadAssetAsync(moduleType, CS.Main.ConstValue.STREAMING_DIR_PATH, bundleName, assetName, callback, type);
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, relativePath:string, callback:fun(asset:UnityEngine.Object)):UnityEngine.WaitUntil
+---@param moduleType LuaClass.ModuleType
+---@param relativePath string
+---@param callback fun(asset:UnityEngine.Object)
+---@param type System.Type
+---@return UnityEngine.WaitUntil
+function m:LoadPersistentAsync(moduleType, relativePath, callback, type)
+	local moduleName = LuaClass.ModuleType[moduleType];
+
+	if CS.Main.ConstValue.ASSET_LOAD_LOG then
+		Log("<b>Async load form persistent:</b> " .. moduleName .. "/" .. relativePath);
+	end
+
+	type = type or typeof(CS.UnityEngine.Object);
+	local index = string.lastfind(relativePath, '/');
+	local assetName = string.sub(relativePath, index + 1);
+	local bundleName = moduleName .. "/" .. relativePath .. "." .. CS.Main.ConstValue.ASSET_BUNDLE_VARIANT;
+	return LuaClass.AssetBundleManager.Instance:LoadAssetAsync(moduleType, CS.Main.ConstValue.PERSISTENT_DIR_PATH, bundleName, assetName, callback, type);
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, relativePath:string, callback:fun(asset:UnityEngine.Object)):UnityEngine.WaitUntil
+---@param moduleType LuaClass.ModuleType
+---@param relativePath string
+---@param callback fun(asset:UnityEngine.Object)
+---@param type System.Type
+---@return UnityEngine.WaitUntil
+function m:LoadPreloadedAsync(moduleType, relativePath, callback, type)
+	if CS.Main.ConstValue.ASSET_LOAD_LOG then
+		Log("<b>Async load form preloaded:</b> " .. LuaClass.ModuleType[moduleType] .. "/" .. relativePath);
+	end
+	if callback then
+		local asset = self.m_PreloadAssetDict[moduleType][relativePath];
+		if type and asset:GetType() == typeof(CS.UnityEngine.GameObject) and
+				typeof(CS.UnityEngine.Component):IsAssignableFrom(type) then
+			---@type UnityEngine.GameObject
+			local goAsset = asset;
+			local comp = goAsset:GetComponent(type);
+			if CS.Main.ConstValue.UNITY_EDITOR_WIN or CS.Main.ConstValue.UNITY_EDITOR_OSX then
+				asset = CS.Main.LuaHelp.IsNotNull(comp) and comp or nil;
+			else
+				asset = comp;
+			end
+		end
+		callback(asset);
+	end
+	return nil;
+end
+
+---@overload fun(moduleType:LuaClass.ModuleType, relativePath:string, callback:fun(asset:UnityEngine.Object)):UnityEngine.WaitUntil
+---@param moduleType LuaClass.ModuleType
+---@param relativePath string
+---@param callback fun(asset:UnityEngine.Object)
+---@param type System.Type
+---@return UnityEngine.WaitUntil
+function m:LoadAsync(moduleType, relativePath, callback, type)
+	if not callback then
+		return nil;
+	end
+
+	if not relativePath and relativePath ~= "" then
+		return nil;
+	end
+
+	local preloadAssets = self.m_PreloadAssetDict[moduleType];
+	if CS.Main.LuaHelp.IsNotNull(preloadAssets[relativePath]) then
+		return self:LoadPreloadedAsync(moduleType, relativePath, callback, type)
+	end
+
+	local longRelativePath = LuaClass.ModuleType[moduleType] .. "/" .. relativePath .. "." .. CS.Main.ConstValue.ASSET_BUNDLE_VARIANT;
+
+	if not CS.Main.ConstValue.LOAD_FROM_RES then
+		if CS.Main.ConstValue.DOWNLOAD then
+			local fullPath = CS.Main.ConstValue.PERSISTENT_DIR_PATH .. "/" .. string.lower(longRelativePath);
+			if CS.Main.FileManager.IsFileExist(fullPath) then
+				return self:LoadPersistentAsync(moduleType, relativePath, function(asset)
+					preloadAssets[relativePath] = asset;
+					if callback then
+						callback(asset);
+					end
+				end, type);
+			end
+		end
+
+		if LuaClass.AssetBundleManager.Instance:IsStreamingBundleExist(moduleType, string.lower(longRelativePath)) then
+			return self:LoadStreamingAsync(moduleType, relativePath, function(asset)
+				preloadAssets[relativePath] = asset;
+				if callback then
+					callback(asset);
+				end
+			end, type);
+		end
+	end
+
+	local asset = self:LoadResources(moduleType, relativePath, type);
+	preloadAssets[relativePath] = asset;
+	callback(asset);
+	return nil;
+end
+
+return m;

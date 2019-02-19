@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 664117860
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: a61c7f524da3d511cd1e8f9b83e65cde
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/LuaScripts/Manager/RecordManager.lua.txt
+Dependencies: []

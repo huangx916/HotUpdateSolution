@@ -1,0 +1,15 @@
+---@class LuaClass.LuaBehaviour : LuaClass.Object
+---@field public m_CSBehaviour Main.LuaBehaviour
+local m = LuaClass.Class(nil, "LuaBehaviour");
+LuaClass.LuaBehaviour = m;
+
+---@private
+function m:ctor()
+    local timestamp = CS.System.DateTime.Now.Ticks;
+    local nameSpace = self.class.nameSpace or "nil";
+    local className = self.class.className;
+    local key = nameSpace .. "." .. className .. "[" .. timestamp .. "]";
+    WeakTable[key] = self;
+end
+
+return m;

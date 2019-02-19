@@ -1,0 +1,14 @@
+---@class LuaClass.SceneType : LuaClass.Object
+
+---@class LuaClass.SceneType.Class : LuaClass.LuaEnum
+---@field Login LuaClass.SceneType
+---@field Lobby LuaClass.SceneType
+---@field Game LuaClass.SceneType
+local SceneType = LuaClass.LuaEnum.Create("Common", "SceneType", {
+	"Login";
+	"Lobby";
+	"Game";
+});
+LuaClass.SceneType = SceneType;
+
+return SceneType;

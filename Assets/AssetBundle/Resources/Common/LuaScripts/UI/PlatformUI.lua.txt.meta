@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 8b867f8259ae5d1498f89596e0416ea7
+timeCreated: 1531192246
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/ui/platformui.lua
+  assetBundleVariant: ab

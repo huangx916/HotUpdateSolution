@@ -1,0 +1,50 @@
+require("Common.LuaScripts.Protocol.BaseProtocolHandler.lua");
+
+---@class LuaClass.ProtocolManager : LuaClass.BaseManager
+---@field public Instance LuaClass.ProtocolManager @static
+---@field private m_ProtocolHandlerDict table<string, LuaClass.BaseProtocolHandler>
+local m = LuaClass.BaseManager:Derive("Common", "ProtocolManager");
+LuaClass.ProtocolManager = m;
+
+---@private
+function m:ctor()
+	self.m_ProtocolHandlerDict = {};
+end
+
+---@private
+function m:Awake()
+	self:Add("RecordProtocolHandler");
+	self:Add("PlaybackProtocolHandler");
+	self:Add("BuriedPointProtocolHandler");
+end
+
+---@protected
+---@param protocolHandlerName string
+---@return string
+function m:GetProtocolHandlerPath(protocolHandlerName)
+	return self.class.nameSpace .. ".LuaScripts.Protocol." .. protocolHandlerName .. ".lua";
+end
+
+---@protected
+---@param protocolHandlerName string
+function m:Add(protocolHandlerName)
+	---@type LuaClass.BaseProtocolHandler
+	local protocolHandler = CS.Main.LuaHelp.AddLuaChild(self.m_CSBehaviour, protocolHandlerName, self:GetProtocolHandlerPath(protocolHandlerName));
+	if protocolHandler then
+		self.m_ProtocolHandlerDict[protocolHandlerName] = protocolHandler;
+	end
+end
+
+---@param protocolHandlerName string
+---@return LuaClass.BaseProtocolHandler
+function m:Get(protocolHandlerName)
+	local protocolHandler = self.m_ProtocolHandlerDict[protocolHandlerName];
+	if protocolHandler then
+		return protocolHandler;
+	end
+
+	LogErrorFormat("{0} is not exist!", protocolHandlerName);
+	return nil;
+end
+
+return m;

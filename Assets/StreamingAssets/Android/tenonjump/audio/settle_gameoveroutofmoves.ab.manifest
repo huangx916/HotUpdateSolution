@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 2091366886
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: cf46e28acf13339b089282e2026d9369
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c516f2a3b2b6b67ef759f6410a790acd
+HashAppended: 0
+ClassTypes:
+- Class: 83
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Audio/Settle_GameOverOutOfMoves.wav
+Dependencies: []

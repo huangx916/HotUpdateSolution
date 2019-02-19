@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 4b8083932246feb428f305e02ddcefdb
+timeCreated: 1529981878
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/ui/lobbyui.lua
+  assetBundleVariant: ab

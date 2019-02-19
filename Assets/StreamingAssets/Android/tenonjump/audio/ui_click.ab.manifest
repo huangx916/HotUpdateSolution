@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 1790363698
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 40d84abeee89f115f3f36e7ec62f4417
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c516f2a3b2b6b67ef759f6410a790acd
+HashAppended: 0
+ClassTypes:
+- Class: 83
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Audio/UI_Click.wav
+Dependencies: []

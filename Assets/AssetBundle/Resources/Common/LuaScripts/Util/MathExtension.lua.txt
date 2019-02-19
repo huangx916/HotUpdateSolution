@@ -1,0 +1,13 @@
+---@param x number
+---@return number
+function math.round(x)
+	return math.floor(x + 0.5);
+end
+
+---@param x number
+---@param min number
+---@param max number
+---@return number
+function math.clamp(x, min, max)
+	return math.max(math.min(x, max), min);
+end

@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: b03219ee7790e694abe5c608e004517d
+timeCreated: 1531725173
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/data/matchinfo.lua
+  assetBundleVariant: ab

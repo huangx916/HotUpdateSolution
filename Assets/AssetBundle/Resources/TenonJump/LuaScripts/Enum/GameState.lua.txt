@@ -1,0 +1,18 @@
+---@class LuaClass.TenonJump.GameState : LuaClass.Object
+
+---@class LuaClass.TenonJump.GameState.Class : LuaClass.LuaEnum
+---@field public Prepare LuaClass.TenonJump.GameState
+---@field public Start LuaClass.TenonJump.GameState
+---@field public Die LuaClass.TenonJump.GameState
+---@field public Finish LuaClass.TenonJump.GameState
+local m = LuaClass.LuaEnum.Create("TenonJump", "GameState", {
+	"Prepare";
+	"Start";
+	"Die";
+	"Finish";
+});
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.GameState = m;
+
+return m;

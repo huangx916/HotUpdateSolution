@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 4061805460
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 86210b91a6c5a82ce2baee2bfe3a4c38
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/LuaScripts/Enum/DialogType.lua.txt
+Dependencies: []

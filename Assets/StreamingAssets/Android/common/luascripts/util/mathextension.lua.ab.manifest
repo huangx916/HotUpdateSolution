@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 6017339
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 2cd7dd7f549e4ea404aa185f30df1dd4
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/LuaScripts/Util/MathExtension.lua.txt
+Dependencies: []

@@ -1,0 +1,32 @@
+ManifestFileVersion: 0
+CRC: 1695159772
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 61146f7490a520ae702b6c172784be0e
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 0e2e72fd4f5a1a22968889ab5046bcd7
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: cce64f1644f4f774ab20e0da6a7a49a2, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 198
+  Script: {instanceID: 0}
+- Class: 199
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Prefab/hit_decal.prefab
+Dependencies: []

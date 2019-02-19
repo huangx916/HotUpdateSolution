@@ -1,0 +1,94 @@
+---@class LuaClass.TenonJump.HelpUI : LuaClass.FadeUI
+---@field private screenAdaptCurve UnityEngine.AnimationCurve
+---@field private exitBtnList UnityEngine.Collider[]
+---@field private scrollPanel UIPanel
+---@field private grid UIGrid
+---@field private centerOnChild UICenterOnChild
+---@field private prevBtnList UnityEngine.Collider[]
+---@field private nextBtnList UnityEngine.Collider[]
+---@field private paginationTaList TweenAlpha[]
+---
+---@field private m_PageList UnityEngine.Transform[]
+local m = LuaClass.Class("TenonJump", "HelpUI", LuaClass.FadeUI);
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.HelpUI = m;
+
+---@private
+function m:Awake()
+	self:InitData();
+	self:InitListener();
+	self:InitUI();
+
+	LuaClass.AudioManager.Instance:PlayModuleSceneOneShot(LuaClass.ModuleType.TenonJump, "Help_Open");
+	self.m_OnExit = function()
+		LuaClass.AudioManager.Instance:PlayModuleSceneOneShot(LuaClass.ModuleType.TenonJump, "Help_Close");
+	end
+end
+
+---@private
+function m:InitData()
+	self.m_PageList = {};
+	local gridTrans = CS.Main.CompAgent.FindChild(self.scrollPanel, "Grid");
+	---@param index number
+	for index = 0, gridTrans.childCount - 1 do
+		table.insert(self.m_PageList, gridTrans:GetChild(index));
+	end
+end
+
+---@private
+function m:InitListener()
+	for _, exitBtn in pairs(self.exitBtnList) do
+		CS.Main.UIAgent.SetOnClick(exitBtn, function() self:OnExitClick(); end);
+	end
+	for _, prevBtn in pairs(self.prevBtnList) do
+		CS.Main.UIAgent.SetOnClick(prevBtn, function() self:OnTurnClick(-1); end)
+	end
+	for _, nextBtn in pairs(self.nextBtnList) do
+		CS.Main.UIAgent.SetOnClick(nextBtn, function() self:OnTurnClick(1); end)
+	end
+	self.scrollPanel.onClipMove = function(panel) self:OnScroll() end;
+end
+
+---@private
+function m:InitUI()
+	self:ScreenAdapt();
+	self:OnScroll();
+end
+
+---@private
+function m:ScreenAdapt()
+	local ratio = CS.UnityEngine.Screen.width / CS.UnityEngine.Screen.height;
+	local scale = self.screenAdaptCurve:Evaluate(ratio) * CS.UnityEngine.Vector3.one;
+	self.grid.transform.localScale = scale;
+end
+
+---@private
+function m:UpdatePaginations()
+	local cellWidth = self.grid.cellWidth;
+	local offsetX = -self.scrollPanel.transform.localPosition.x;
+	local floatPos = math.clamp(offsetX / cellWidth, 0, #self.m_PageList - 1);
+	for index = 1, #self.paginationTaList do
+		self.paginationTaList[index].value = math.max(1 - math.abs(floatPos + 1 - index), 0);
+	end
+end
+
+---@private
+---@param direction number
+function m:OnTurnClick(direction)
+	local currentIndex = table.indexof(self.m_PageList, self.centerOnChild.centeredObject.transform);
+	local newIndex = math.clamp(currentIndex + direction, 1, #self.m_PageList);
+	self.centerOnChild:CenterOn(self.m_PageList[newIndex]);
+	self:OnScroll();
+
+	if newIndex ~= currentIndex then
+		LuaClass.AudioManager.Instance:PlayModuleSceneOneShot(LuaClass.ModuleType.TenonJump, "Help_Page");
+	end
+end
+
+---@private
+function m:OnScroll()
+	self:UpdatePaginations();
+end
+
+return m;

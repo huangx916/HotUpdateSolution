@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 2851182426
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 9ce68b1183ffc2b0958e3c8e16ba7c9a
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/LuaScripts/Manager/ProtocolManager.lua.txt
+Dependencies: []

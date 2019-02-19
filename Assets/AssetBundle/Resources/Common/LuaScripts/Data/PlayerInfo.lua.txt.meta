@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 321deb3de7a6b9740966333c229c2c52
+timeCreated: 1531725173
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/data/playerinfo.lua
+  assetBundleVariant: ab

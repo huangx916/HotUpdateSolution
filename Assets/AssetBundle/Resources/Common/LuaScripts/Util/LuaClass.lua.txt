@@ -1,0 +1,276 @@
+LuaClass = {};
+
+---@class LuaClass.Object : table
+---@field public nameSpace string
+---@field public className string
+---@field public class LuaClass.Object
+---@field public isClass boolean
+---@field public super LuaClass.Object @static
+---@field private ctor fun(instance:LuaClass.Object, ...:any) @static
+
+---@static
+---@overload fun(nameSpace:string, className:string):LuaClass.Object
+---@overload fun(nameSpace:string, className:string, super:LuaClass.Object):LuaClass.Object
+---@param nameSpace string
+---@param className string
+---@param super LuaClass.Object
+---@param staticVars table
+---@return LuaClass.Object
+function LuaClass.Class(nameSpace, className, super, staticVars)
+	if not className then
+		error("ClassName is nil!");
+		return nil;
+	end
+	if super and not super.isClass then
+		error("Super is not a LuaClass!");
+		return nil;
+	end
+
+	---@type LuaClass.Object
+	local classTable = staticVars or {};
+	local classTableMeta = {};
+	setmetatable(classTable, classTableMeta);
+
+	---@param table LuaClass.Object
+	---@param key any
+	---@return any
+	function classTableMeta.__index(table, key)
+		if key == "nameSpace" then
+			return nameSpace;
+		elseif key == "className" then
+			return className;
+		elseif key == "super" then
+			return super;
+		elseif key == "class" then
+			return table;
+		elseif key == "isClass" then
+			return true;
+		end
+
+		if super then
+			-- avoid return super.ctor
+			if key == "ctor" then
+				return nil;
+			end
+			return super[key];
+		end
+		return nil;
+	end
+
+	---@param table LuaClass.Object
+	---@param key any
+	---@param value any
+	function classTableMeta.__newindex(table, key, value)
+		if key == "nameSpace" or
+				key == "className" or
+				key == "super" or
+				key == "class" or
+				key == "isClass" then
+			error("Attempt to set a read only value ('" .. key .."')")
+			return;
+		end
+		rawset(table, key, value)
+	end
+
+	---@param clsTable LuaClass.Object
+	---@param ... any
+	---@return any
+	function classTableMeta.__call(clsTable, ...)
+		---@type LuaClass.Object
+		local instance = {};
+		local instanceMeta = {};
+		setmetatable(instance, instanceMeta);
+
+		---@param table table
+		---@param key any
+		---@return any
+		function instanceMeta.__index(table, key)
+			if key == "nameSpace" or key == "className" then
+				return clsTable and clsTable[key] or nil;
+			elseif key == "super" then
+				return nil;
+			elseif key == "class" then
+				return clsTable;
+			elseif key == "isClass" then
+				return false;
+			elseif key == "ctor" then
+				return nil;
+			end
+			return clsTable and clsTable[key];
+		end
+
+		---@param table table
+		---@param key any
+		---@param value any
+		function instanceMeta.__newindex(table, key, value)
+			if key == "nameSpace" or
+					key == "className" or
+					key == "super" or
+					key == "class" or
+					key == "isClass" or
+					key == "ctor" then
+				error("Attempt to set a read only value ('" .. key .."')")
+				return;
+			end
+			rawset(table, key, value)
+		end
+
+		do
+			local function create(ct, ...)
+				if ct.super then
+					create(ct.super,...);
+				end
+				if ct.ctor then
+					ct.ctor(instance,...);
+				end
+			end
+			create(clsTable,...);
+		end
+
+		return instance;
+	end
+
+	return classTable;
+end
+
+---@class PropertyHandle : LuaClass.Object
+---@field public Get fun(t:any):any
+---@field public Set fun(t:any, v:any)
+
+---@static
+---@overload fun(instance:LuaClass.Object)
+---@overload fun(instance:LuaClass.Object, propertyHandles:table<any, PropertyHandle>)
+---@param classOrInstance LuaClass.Object
+---@param propertyHandles table<any, PropertyHandle>
+---@param propertyValues table
+function LuaClass.SetProperty(classOrInstance, propertyHandles, propertyValues)
+	if classOrInstance then
+		propertyHandles = propertyHandles or {};
+		propertyValues = propertyValues or {};
+		---@type table
+		local meta = getmetatable(classOrInstance);
+		if not meta then
+			meta = {};
+			setmetatable(classOrInstance, meta);
+		end
+		---@type fun(t:any, k: any):any
+		local __index = meta.__index;
+		if type(__index) == "table" then
+			local __indexTable = __index;
+			__index = function(t, k) return __indexTable[k]; end;
+		end
+		---@type fun(t:any, k: any, v: any):any
+		local __newindex = meta.__newindex;
+		if type(__newindex) == "table" then
+			local __newIndexTable = __newindex;
+			__newindex = function(t, k, v) __newIndexTable[k] = v; end;
+		end
+		---@param t table
+		---@param k any
+		---@return any
+		 function meta.__index(t, k)
+			local property = propertyHandles[k];
+			if property then
+				return property.Get and property.Get(propertyValues);
+			end
+			return __index and __index(t, k);
+		end
+		---@param t table
+		---@param k any
+		---@param v any
+		function meta.__newindex(t, k, v)
+			local property = propertyHandles[k];
+			if property then
+				if property then
+					property.Set(propertyValues, v);
+				end
+				return;
+			end
+			if __newindex then
+				__newindex(t, k, v);
+			end
+			rawset(t, k, v);		end
+	end
+end
+
+---@static
+---@param class LuaClass.Object
+---@return LuaClass.Type | System.Type
+function LuaClass.Typeof(class)
+	if not class then
+		return nil;
+	end
+	if class.isClass then
+		return LuaClass.Type(class);
+	end
+	-- function "typeof" is come from XLua
+	return typeof(class);
+end
+
+---@static
+---@param instance LuaClass.Object
+---@return boolean
+function LuaClass.IsInstanceOf(instance, class)
+	if not instance or not class or not class.isClass then
+		return false;
+	end
+	local tempClass = instance.class;
+	while tempClass do
+		if tempClass == class then
+			return true;
+		end
+		tempClass = tempClass.super;
+	end
+	return false;
+end
+
+---@class LuaClass.Type : LuaClass.Object
+---@field public Name string
+---@field private targetClass LuaClass.Object
+local Type = LuaClass.Class(nil, "Type");
+LuaClass.Type = Type;
+
+---@param targetClass LuaClass.Object
+function Type:ctor(targetClass)
+	self.targetClass = targetClass;
+
+	---@param type1 LuaClass.Type
+	---@param type2 LuaClass.Type
+	---@return boolean
+	local function typeEquals(type1, type2)
+		return type1.targetClass == type2.targetClass;
+	end;
+	getmetatable(self).__eq = typeEquals;
+
+	---@param propertyValues table
+	---@return string
+	local function Get(propertyValues)
+		return "LuaClass." .. (targetClass.nameSpace and targetClass.nameSpace .. "." or "") .. targetClass.className;
+	end
+	---@type table<any, PropertyHandle>
+	local propertyHandles = {
+		---@type PropertyHandle
+		Name = {
+			Get = Get;
+		};
+	};
+	local propertyValues = {};
+	LuaClass.SetProperty(self, propertyHandles, propertyValues)
+end
+
+return LuaClass;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

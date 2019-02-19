@@ -1,0 +1,10 @@
+﻿[
+	{ "id": 1, "name": "open_30", "die" : false, "finish" : false, "resource": ""},
+	{ "id": 2, "name": "green_30", "die" : false, "finish" : false, "resource": "obstacle_green_30"},
+	{ "id": 3, "name": "red_30", "die" : true, "finish" : false, "resource": "obstacle_red_30"},
+	{ "id": 4, "name": "obstacle_red_move_30_1.5s", "die" : true, "finish" : false, "resource": "obstacle_red_move_30_1.5s"},
+	{ "id": 5, "name": "obstacle_red_move_60_2s", "die" : true, "finish" : false, "resource": "obstacle_red_move_60_2s"},
+	{ "id": 6, "name": "obstacle_red_move_90_2s", "die" : true, "finish" : false, "resource": "obstacle_red_move_90_2s"},
+	{ "id": 7, "name": "red_wall_30", "die" : true, "finish" : false, "resource": "obstacle_red_wall_30"},
+	{ "id": 8, "name": "end_360", "die" : false, "finish" : true, "resource": "obstacle_end_360"}
+]

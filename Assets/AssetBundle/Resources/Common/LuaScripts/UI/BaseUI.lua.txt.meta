@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: e0f4dab146920f84084670288df50948
+timeCreated: 1513837877
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/ui/baseui.lua
+  assetBundleVariant: ab

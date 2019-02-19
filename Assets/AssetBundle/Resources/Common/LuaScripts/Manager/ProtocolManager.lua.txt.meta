@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 8a4ac689b1add494c987a66d514935c9
+timeCreated: 1517386914
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/protocolmanager.lua
+  assetBundleVariant: ab

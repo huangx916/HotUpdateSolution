@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 506e5749a0ffa824a8244f57605927b3
+timeCreated: 1513675586
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/util/luabehaviour.lua
+  assetBundleVariant: ab

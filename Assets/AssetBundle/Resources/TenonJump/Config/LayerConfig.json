@@ -1,0 +1,195 @@
+﻿[
+    {"name" : "start", "value" :
+        [
+            { "id": 1, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 2, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 3, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 4, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 5, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 6, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 7, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 8, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 9, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 10, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 11, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 12, "obstaclesWeight": [0,1,0,0,0,0,0,0]}
+        ]
+    },
+    {"name" : "finish", "value" :
+        [
+            { "id": 1, "obstaclesWeight": [0,0,0,0,0,0,0,1]},
+            { "id": 2, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 3, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 4, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 5, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 6, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 7, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 8, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 9, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 10, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 11, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 12, "obstaclesWeight": [1,0,0,0,0,0,0,0]}
+        ]
+    },
+    {"name" : "difficulty1", "value" :
+        [
+            { "id": 1, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 2, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 3, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 4, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 5, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 6, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 7, "obstaclesWeight": [0,2,1,0,0,0,0,0]},
+            { "id": 8, "obstaclesWeight": [0,2,1,0,0,0,0,0]},
+            { "id": 9, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 10, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 11, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 12, "obstaclesWeight": [0,1,0,0,0,0,0,0]}
+        ]
+    },
+    {"name" : "difficulty2", "value" :
+        [
+            { "id": 1, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 2, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 3, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 4, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 5, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 6, "obstaclesWeight": [1,2,1,0,0,0,0,0]},
+            { "id": 7, "obstaclesWeight": [1,2,0,0,0,0,0,0]},
+            { "id": 8, "obstaclesWeight": [1,2,0,0,0,0,0,0]},
+            { "id": 9, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 10, "obstaclesWeight": [0,2,1,0,0,0,0,0]},
+            { "id": 11, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 12, "obstaclesWeight": [1,1,0,0,0,0,0,0]}
+        ]
+    },
+    {"name" : "difficulty3", "value" :
+        [
+            { "id": 1, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 2, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 3, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 4, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 5, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 6, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 7, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 8, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 9, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 10, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 11, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 12, "obstaclesWeight": [0,1,0,0,0,0,0,0]}
+        ]
+    },
+    {"name" : "difficulty4", "value" :
+        [
+            { "id": 1, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 2, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 3, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 4, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 5, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 6, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 7, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 8, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 9, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 10, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 11, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 12, "obstaclesWeight": [0,6,0,1,0,0,0,0]}
+        ]
+    },
+    {"name" : "difficulty5", "value" :
+        [
+            { "id": 1, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 2, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 3, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 4, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 5, "obstaclesWeight": [0,1,2,0,0,0,0,0]},
+            { "id": 6, "obstaclesWeight": [0,1,2,0,0,0,0,0]},
+            { "id": 7, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 8, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 9, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 10, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 11, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 12, "obstaclesWeight": [0,6,0,1,0,0,0,0]}
+        ]
+    },
+    {"name" : "difficulty6", "value" :
+        [
+            { "id": 1, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 2, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 3, "obstaclesWeight": [0,5,0,0,1,0,0,0]},
+            { "id": 4, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 5, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 6, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 7, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 8, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 9, "obstaclesWeight": [1,1,1,0,0,0,0,0]},
+            { "id": 10, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 11, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 12, "obstaclesWeight": [0,1,0,0,0,0,0,0]}
+        ]
+    },
+    {"name" : "difficulty7", "value" :
+        [
+            { "id": 1, "obstaclesWeight": [1,1,1,0,0,0,0,0]},
+            { "id": 2, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 3, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 4, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 5, "obstaclesWeight": [1,1,1,0,0,0,0,0]},
+            { "id": 6, "obstaclesWeight": [0,4,2,0,1,0,0,0]},
+            { "id": 7, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 8, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 9, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 10, "obstaclesWeight": [0,0,1,0,0,0,0,0]},
+            { "id": 11, "obstaclesWeight": [0,1,1,0,0,0,1,0]},
+            { "id": 12, "obstaclesWeight": [0,1,0,0,0,0,0,0]}
+        ]
+    },
+    {"name" : "difficulty8", "value" :
+        [
+            { "id": 1, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 2, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 3, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 4, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 5, "obstaclesWeight": [1,0,1,0,0,0,0,0]},
+            { "id": 6, "obstaclesWeight": [0,3,3,0,1,0,0,0]},
+            { "id": 7, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 8, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 9, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 10, "obstaclesWeight": [0,0,1,0,0,0,0,0]},
+            { "id": 11, "obstaclesWeight": [0,1,1,0,0,0,1,0]},
+            { "id": 12, "obstaclesWeight": [1,1,0,0,0,0,0,0]}
+        ]
+    },
+    {"name" : "difficulty9", "value" :
+        [
+            { "id": 1, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 2, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 3, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 4, "obstaclesWeight": [0,3,3,1,0,0,0,0]},
+            { "id": 5, "obstaclesWeight": [0,0,1,0,0,0,0,0]},
+            { "id": 6, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 7, "obstaclesWeight": [1,1,0,0,0,0,0,0]},
+            { "id": 8, "obstaclesWeight": [0,2,2,0,0,1,0,0]},
+            { "id": 9, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 10, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 11, "obstaclesWeight": [0,0,1,0,0,0,1,0]},
+            { "id": 12, "obstaclesWeight": [1,1,0,0,0,0,0,0]}
+        ]
+    },
+    {"name" : "difficulty10", "value" :
+        [
+            { "id": 1, "obstaclesWeight": [1,1,1,0,0,0,0,0]},
+            { "id": 2, "obstaclesWeight": [1,0,0,0,0,0,0,0]},
+            { "id": 3, "obstaclesWeight": [0,2,2,0,1,0,0,0]},
+            { "id": 4, "obstaclesWeight": [0,0,1,0,0,0,0,0]},
+            { "id": 5, "obstaclesWeight": [0,1,0,0,0,0,0,0]},
+            { "id": 6, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 7, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 8, "obstaclesWeight": [0,2,0,0,0,1,0,0]},
+            { "id": 9, "obstaclesWeight": [0,1,1,0,0,0,0,0]},
+            { "id": 10, "obstaclesWeight": [0,0,1,0,0,0,0,0]},
+            { "id": 11, "obstaclesWeight": [0,1,1,0,0,0,1,0]},
+            { "id": 12, "obstaclesWeight": [0,1,0,0,0,0,0,0]}
+        ]
+    }
+
+]

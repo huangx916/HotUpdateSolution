@@ -1,0 +1,44 @@
+ManifestFileVersion: 0
+CRC: 3931642051
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 6d7f6f89aed735aa6d6114fbc5cdb167
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 0796842c1c147798eb44840f8f0d6de7
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: ae942c9068183dc40a9d01f648273726, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 5c041f61e4a9fbf4e830210f5d933ece, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 858a20c1b21a3f94bb5b2d3b901c9aaf, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: e9d0b5f3bbe925a408bd595c79d0bf63, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 0b4eb3a400afab046abb8471a9d746d6, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 97b7e9457f29fe6489fdf7c13aea7e94, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 1bdd6ba7ce140f64ba4a144685be8643, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 82ea5dee09c28244f9e8e2220dd499d9, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/UI/PlatformUI.prefab
+Dependencies:
+- F:/TenonJumpClient/TenonJump/Assets/StreamingAssets/Android/common/texture/sys_bg_solid_color.ab
+- F:/TenonJumpClient/TenonJump/Assets/StreamingAssets/Android/common/uifont/systemfont.ab

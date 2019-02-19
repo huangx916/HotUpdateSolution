@@ -1,0 +1,21 @@
+---@class LuaClass.TenonJump.ConfigManager : LuaClass.ConfigManager
+---@field public Instance LuaClass.TenonJump.ConfigManager @static
+local m = LuaClass.ConfigManager:Derive("TenonJump", "ConfigManager");
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.ConfigManager = m;
+
+---@private
+function m:Awake()
+	--self:Add("LanguageConfigContainer");
+	self:Add("AudioConfigContainer");
+
+	--self:Add("BlockGroupConfigContainer");
+	--self:Add("ScoreConfigContainer");
+
+    self:Add("ObstacleConfigContainer");
+    self:Add("LayerConfigContainer");
+    self:Add("LevelConfigContainer");
+end
+
+return m;

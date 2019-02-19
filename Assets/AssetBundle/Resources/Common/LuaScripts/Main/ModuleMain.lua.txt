@@ -1,0 +1,28 @@
+require("Common.LuaScripts.Enum.EnumRequire.lua");
+require("Common.LuaScripts.Data.DataRequire.lua");
+
+---@class LuaClass.ModuleMain : LuaClass.LuaBehaviour
+---@field private m_ManagerCollection LuaClass.ManagerCollection
+local ModuleMain = LuaClass.Class("Common", "ModuleMain", LuaClass.LuaBehaviour);
+LuaClass.ModuleMain = ModuleMain;
+
+---@private
+function ModuleMain:Awake()
+	---@type LuaClass.ManagerCollection
+	local managerCollection = CS.Main.LuaHelp.AddLuaChild(
+			self.m_CSBehaviour,"ManagerCollection", self:GetManagerCollectionPath());
+	self.m_ManagerCollection = managerCollection;
+end
+
+---@private
+---@return string
+function ModuleMain:GetManagerCollectionPath()
+	return self.class.nameSpace .. ".LuaScripts.Main.ManagerCollection.lua";
+end
+
+---@return LuaClass.ManagerCollection
+function ModuleMain:GetManagerCollection()
+	return self.m_ManagerCollection;
+end
+
+return ModuleMain;

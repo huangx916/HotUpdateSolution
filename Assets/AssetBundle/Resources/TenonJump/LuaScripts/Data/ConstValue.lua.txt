@@ -1,0 +1,22 @@
+---@class LuaClass.TenonJump.ConstValue : LuaClass.ConstValue
+local ConstValue = {
+	BOARD_ROW_COUNT = 10;
+	BOARD_COLUMN_COUNT = 10;
+	STORAGE_LENGTH = 3;
+	GAME_DURATION = 180;
+	REDUCE_TIME = 10;
+
+	FINISH_SCORE = 100;
+	BASE_SCORE = 10;
+	TIME_BONUS_SCORE = 1;
+
+	BEST_SCORE_PREF = "TenonJump/BestScore";
+}
+
+---@type LuaClass.TenonJump.ConstValue
+local m = LuaClass.Class("TenonJump", "ConstValue", LuaClass.ConstValue, ConstValue);
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.ConstValue = m;
+
+return m;

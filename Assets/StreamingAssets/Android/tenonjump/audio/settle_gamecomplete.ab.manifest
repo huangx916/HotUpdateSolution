@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 295449575
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 3109b83a5637882729a36de1ccf64d02
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c516f2a3b2b6b67ef759f6410a790acd
+HashAppended: 0
+ClassTypes:
+- Class: 83
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Audio/Settle_GameComplete.wav
+Dependencies: []

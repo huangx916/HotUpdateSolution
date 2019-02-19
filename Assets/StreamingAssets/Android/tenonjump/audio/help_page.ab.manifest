@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 4140906883
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: f244c99753f93ff4e6ce9e07e8ecacf1
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c516f2a3b2b6b67ef759f6410a790acd
+HashAppended: 0
+ClassTypes:
+- Class: 83
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Audio/Help_Page.wav
+Dependencies: []

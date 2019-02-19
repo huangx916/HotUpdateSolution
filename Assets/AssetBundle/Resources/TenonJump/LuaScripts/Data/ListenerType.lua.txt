@@ -1,0 +1,24 @@
+---@class LuaClass.TenonJump.ListenerType : LuaClass.ListenerType
+local ListenerType = {
+	---@param baseAdd number
+	---@param comboAdd number
+	---@param streakAdd number
+	ScoreUpdate = "ScoreUpdate";
+	BoardUpdate = "BoardUpdate";
+	BlockGroupsCreate = "BlockGroupsCreate";
+	GameOver = "GameOver";
+	---@param eliminatedBlockMatrix number[][]
+	Eliminate = "Eliminate";
+	---@param percent number
+	LevelProgress = "LevelProgress";
+	UpdateScore = "UpdateScore";
+	Wonderful = "Wonderful";
+	TimeReduce = "TimeReduce";
+}
+---@type LuaClass.TenonJump.ListenerType
+local m = LuaClass.Class("TenonJump", "ListenerType", LuaClass.ListenerType, ListenerType);
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.ListenerType = m;
+
+return m;

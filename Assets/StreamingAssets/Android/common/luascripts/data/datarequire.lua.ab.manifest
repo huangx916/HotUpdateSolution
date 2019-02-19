@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 1370197023
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 1f8f6c1e457f2838e37b9f4905061a82
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/LuaScripts/Data/DataRequire.lua.txt
+Dependencies: []

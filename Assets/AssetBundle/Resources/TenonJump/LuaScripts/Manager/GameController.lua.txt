@@ -1,0 +1,317 @@
+---@class LuaClass.TenonJump.GameController : LuaClass.BaseManager
+---@field public Instance LuaClass.TenonJump.GameController @static
+---@field private dragFactor number
+---@field private firstClick UnityEngine.Vector2
+---@field private secondClick UnityEngine.Vector2
+---@field private curTouchCount number
+---@field private scenePivot UnityEngine.Transform
+---@field private obstacleList LuaClass.TenonJump.ObstacleLogic[][]
+---@field private playerLogic LuaClass.TenonJump.PlayerLogic
+---@field private cameraLogic LuaClass.TenonJump.CameraLogic
+---@field private gameState LuaClass.TenonJump.GameState
+---@field private m_Paused boolean
+---@field private m_GamingCo UnityEngine.Coroutine
+---@field private game3DRoot UnityEngine.GameObject
+---@field private building boolean
+---@field private startTime number
+---@field private endTime number
+local m = LuaClass.BaseManager:Derive("TenonJump", "GameController");
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.GameController = m;
+
+function m:OnGUI()
+    if self.gameState == LuaClass.TenonJump.GameState.Start and self.m_Paused == false then
+        if CS.UnityEngine.Event.current.type == CS.UnityEngine.EventType.MouseDown then
+            self.firstClick = CS.UnityEngine.Event.current.mousePosition;
+        end
+        if CS.UnityEngine.Event.current.type == CS.UnityEngine.EventType.MouseDrag then
+            self.secondClick = CS.UnityEngine.Event.current.mousePosition;
+
+            if CS.UnityEngine.Input.touchCount ~= self.curTouchCount then
+                self.curTouchCount = CS.UnityEngine.Input.touchCount;
+                self.firstClick = self.secondClick;
+                return;
+            end
+
+            if self.secondClick.x < self.firstClick.x then
+                local euler = self.scenePivot.localEulerAngles;
+                euler.y = euler.y + (self.firstClick.x - self.secondClick.x) * self.dragFactor;
+                self.scenePivot.localEulerAngles = euler;
+            end
+            if self.secondClick.x > self.firstClick.x then
+                local euler = self.scenePivot.localEulerAngles;
+                euler.y = euler.y - (self.secondClick.x - self.firstClick.x) * self.dragFactor;
+                self.scenePivot.localEulerAngles = euler;
+            end
+            self.firstClick = self.secondClick;
+        end
+    end
+end
+
+function m:ResetData()
+    self.gameState = LuaClass.TenonJump.GameState.Prepare;
+    self.obstacleList = {};
+    if CS.Main.ConstValue.UNITY_EDITOR then
+        self.dragFactor = 720/1080;
+    else
+        self.dragFactor = 720/1080;
+    end
+    self.firstClick = CS.UnityEngine.Vector2.zero;
+    self.secondClick = CS.UnityEngine.Vector2.zero;
+    self.m_Paused = false;
+    self.building = false;
+end
+
+---@param level number
+function m:InitScene(level)
+    self.startTime = LuaClass.TimeManager.Instance:GetNativeLongTime();
+    LuaClass.BuriedPointManager.Instance:StartGame();
+
+    self.game3DRoot = CS.UnityEngine.GameObject("Game3DRoot");
+
+    local relativePath = "Prefab/penguin";
+    local playerPrefab = LuaClass.AssetLoadManager.Instance:Load(LuaClass.ModuleType.TenonJump, relativePath, typeof(CS.UnityEngine.GameObject));
+    ---@type UnityEngine.GameObject
+    local player = CS.UnityEngine.Object.Instantiate(playerPrefab, self.game3DRoot.transform);
+    ---@type Main.LuaBehaviour
+    local luaBehaviourComponent = player:GetComponent(typeof(CS.Main.LuaBehaviour));
+    luaBehaviourComponent:InitLua();
+    self.playerLogic = luaBehaviourComponent.LuaTable;
+
+    relativePath = "Prefab/cameraPivot";
+    local cameraPivotPrefab = LuaClass.AssetLoadManager.Instance:Load(LuaClass.ModuleType.TenonJump, relativePath, typeof(CS.UnityEngine.GameObject));
+    ---@type UnityEngine.GameObject
+    local cameraPivot = CS.UnityEngine.Object.Instantiate(cameraPivotPrefab, self.game3DRoot.transform);
+    ---@type Main.LuaBehaviour
+    local cameraLuaBehaviourComponent = cameraPivot:GetComponent(typeof(CS.Main.LuaBehaviour));
+    cameraLuaBehaviourComponent:InitLua();
+    ---@type LuaClass.TenonJump.CameraLogic
+    self.cameraLogic = cameraLuaBehaviourComponent.LuaTable;
+    self.cameraLogic.playerPivot = player.transform;
+
+    relativePath = "Prefab/light";
+    local lightPrefab = LuaClass.AssetLoadManager.Instance:Load(LuaClass.ModuleType.TenonJump, relativePath, typeof(CS.UnityEngine.GameObject));
+    CS.UnityEngine.Object.Instantiate(lightPrefab, self.game3DRoot.transform);
+
+    relativePath = "Prefab/bg_effect";
+    local bgEffectPrefab = LuaClass.AssetLoadManager.Instance:Load(LuaClass.ModuleType.TenonJump, relativePath, typeof(CS.UnityEngine.GameObject));
+    CS.UnityEngine.Object.Instantiate(bgEffectPrefab, self.game3DRoot.transform);
+
+    local scene = CS.UnityEngine.GameObject("scene");
+    scene.transform.parent = self.game3DRoot.transform;
+    self.scenePivot = scene.transform;
+
+    local gameDataManager = LuaClass.TenonJump.GameDataManager.Instance;
+    gameDataManager:GenerateGameData(level);
+
+    local layerCount = gameDataManager:GetLayerCount();
+
+    relativePath = "Prefab/floor";
+    local floorPrefab = LuaClass.AssetLoadManager.Instance:Load(LuaClass.ModuleType.TenonJump, relativePath, typeof(CS.UnityEngine.GameObject));
+    local floorGo = CS.UnityEngine.Object.Instantiate(floorPrefab, self.game3DRoot.transform);
+    floorGo.transform.position = CS.UnityEngine.Vector3(0, 48 - layerCount * 8, 0);
+
+    for layerIndex = 1, layerCount do
+
+        self.obstacleList[layerIndex] = {};
+
+        if math.fmod(layerIndex, 6) == 1 then
+            relativePath = "Prefab/cylinder";
+            local cylinderPrefab = LuaClass.AssetLoadManager.Instance:Load(LuaClass.ModuleType.TenonJump, relativePath, typeof(CS.UnityEngine.GameObject));
+            ---@type UnityEngine.GameObject
+            local cylinder = CS.UnityEngine.Object.Instantiate(cylinderPrefab, scene.transform);
+            local cylinderIndex = (layerIndex - 1) / 6 ;
+            cylinder.transform.position = CS.UnityEngine.Vector3(0, cylinderIndex * -48, 0);
+        end
+
+        local layer = CS.UnityEngine.GameObject("layer" .. layerIndex);
+        layer.transform.parent = scene.transform;
+        layer.transform.position = CS.UnityEngine.Vector3(0, 48 - layerIndex * 8, 0);
+
+        --- random start point each layer
+        local random = LuaClass.PlatformManager.Instance:RandomRangeInt(1, 12);
+
+        local obstacles = gameDataManager:GetObstacles(layerIndex);
+        for obstacleIndex = 1, #obstacles do
+            if obstacles[obstacleIndex] ~= 1 then
+                --LogError(obstacles[obstacleIndex]);
+                local obstacleConfig = LuaClass.TenonJump.ObstacleConfigContainer.Instance:GetObstacleConfig(obstacles[obstacleIndex]);
+                local resourceName = obstacleConfig.resource;
+                relativePath = "Prefab/" .. resourceName;
+                local obstaclePrefab = LuaClass.AssetLoadManager.Instance:Load(LuaClass.ModuleType.TenonJump, relativePath, typeof(CS.UnityEngine.GameObject));
+                ---@type UnityEngine.GameObject
+                local obstacle = CS.UnityEngine.Object.Instantiate(obstaclePrefab, layer.transform);
+                ---@type Main.LuaBehaviour
+                local obstacleLuaBehaviourComponent = obstacle:GetComponent(typeof(CS.Main.LuaBehaviour));
+                obstacleLuaBehaviourComponent:InitLua();
+                --- the first layer do not random start point
+                if layerIndex == 1 then
+                    obstacle.transform.localEulerAngles = CS.UnityEngine.Vector3(0, 30 * (obstacleIndex - 1), 0);
+                else
+                    obstacle.transform.localEulerAngles = CS.UnityEngine.Vector3(0, 30 * (obstacleIndex - 1 + random), 0);
+                end
+                self.obstacleList[layerIndex][obstacleIndex] = obstacleLuaBehaviourComponent.LuaTable;
+                self.obstacleList[layerIndex][obstacleIndex].layerIndex = layerIndex;
+                self.obstacleList[layerIndex][obstacleIndex].die = obstacleConfig.die;
+                self.obstacleList[layerIndex][obstacleIndex].finish = obstacleConfig.finish;
+            end
+        end
+    end
+    self.gameState = LuaClass.TenonJump.GameState.Start;
+end
+
+---@public
+---@param level number
+function m:StartGame(level)
+    self:ResetData();
+    self:InitScene(level);
+    self.m_GamingCo = CS.Main.CoroutineManager.Start(self:DoGaming(), self.m_CSBehaviour);
+end
+
+function m:DoGaming()
+    return util.cs_generator(function()
+        local gameDataManager = LuaClass.TenonJump.GameDataManager.Instance;
+        while gameDataManager.m_GameData.m_Duration < gameDataManager.m_GameData.maxDuration do
+            coroutine.yield(nil);
+            if not self.m_Paused and self.gameState ~= LuaClass.TenonJump.GameState.Die then
+                gameDataManager.m_GameData.m_Duration = gameDataManager.m_GameData.m_Duration + CS.UnityEngine.Time.deltaTime;
+            end
+        end
+        gameDataManager.m_GameData.m_Duration = gameDataManager.m_GameData.maxDuration;
+        self:GameOver(LuaClass.TenonJump.ResultType.TimesUp);
+    end);
+end
+
+function m:Pause()
+    self.m_Paused = true;
+end
+
+function m:Resume()
+    self.m_Paused = false;
+end
+
+---@public
+---@return boolean
+function m:IsPaused()
+    return self.m_Paused;
+end
+
+---@param resultType LuaClass.TenonJump.ResultType
+function m:GameOver(resultType)
+    self.gameState = LuaClass.TenonJump.GameState.Finish;
+    if self.m_GamingCo then
+        CS.Main.CoroutineManager.StopCo(self.m_GamingCo, self.m_CSBehaviour);
+        self.m_GamingCo = nil;
+        LuaClass.TenonJump.GameDataManager.Instance.m_GameData.resultType = resultType;
+        CS.Main.ListenerManager.TriggerExt(LuaClass.TenonJump.ListenerType.GameOver);
+        --if not self.m_IsReplay then
+        --    LuaClass.TenonCube.ReplayManager.Instance:AddItem(self.m_Duration, self.m_GameData, LuaClass.TenonCube.ListenerType.GameOver);
+        --end
+    end
+end
+
+function m:Revive()
+
+end
+
+---@param layerIndex number
+function m:BreakLayer(layerIndex)
+    local obstacles = self.obstacleList[layerIndex];
+    for _,v in pairs(obstacles) do
+        if v then
+            v:PlayBreak();
+        end
+    end
+    self.obstacleList[layerIndex] = {};
+end
+
+---@param layerIndex number
+function m:PassLayer(layerIndex)
+    local obstacles = self.obstacleList[layerIndex];
+    for _,v in pairs(obstacles) do
+        if v then
+            v:PlayPass();
+        end
+    end
+    self.obstacleList[layerIndex] = {};
+end
+
+---@param dieLayerIndex number
+function m:DoDieReset(dieLayerIndex)
+    return util.cs_generator(function()
+        ---防止两个collider重复创建
+        if self.building then
+            return;
+        end
+        self.building = true;
+
+        coroutine.yield(CS.UnityEngine.WaitForSeconds(1));
+
+        local layerIndex = dieLayerIndex - 1;
+        --LogError("Build : " .. layerIndex);
+
+        local layer = CS.UnityEngine.GameObject("layer" .. layerIndex);
+        layer.transform.parent = self.scenePivot;
+        layer.transform.position = CS.UnityEngine.Vector3(0, 48 - layerIndex * 8, 0);
+        local gameDataManager = LuaClass.TenonJump.GameDataManager.Instance;
+        local obstacles = gameDataManager:GetObstacles(1);
+        for obstacleIndex = 1, #obstacles do
+            if obstacles[obstacleIndex] ~= 1 then
+                local obstacleConfig = LuaClass.TenonJump.ObstacleConfigContainer.Instance:GetObstacleConfig(obstacles[obstacleIndex]);
+                local resourceName = obstacleConfig.resource;
+                local relativePath = "Prefab/" .. resourceName;
+                local obstaclePrefab = LuaClass.AssetLoadManager.Instance:Load(LuaClass.ModuleType.TenonJump, relativePath, typeof(CS.UnityEngine.GameObject));
+                ---@type UnityEngine.GameObject
+                local obstacle = CS.UnityEngine.Object.Instantiate(obstaclePrefab, layer.transform);
+                ---@type Main.LuaBehaviour
+                local obstacleLuaBehaviourComponent = obstacle:GetComponent(typeof(CS.Main.LuaBehaviour));
+                obstacleLuaBehaviourComponent:InitLua();
+                --- the first layer do not random start point
+                obstacle.transform.localEulerAngles = CS.UnityEngine.Vector3(0, 30 * (obstacleIndex - 1), 0);
+
+                self.obstacleList[layerIndex][obstacleIndex] = obstacleLuaBehaviourComponent.LuaTable;
+                self.obstacleList[layerIndex][obstacleIndex].layerIndex = layerIndex;
+                self.obstacleList[layerIndex][obstacleIndex].die = obstacleConfig.die;
+                self.obstacleList[layerIndex][obstacleIndex].finish = obstacleConfig.finish;
+            end
+        end
+
+        gameDataManager:DieReduceTime();
+        CS.Main.ListenerManager.TriggerExt(LuaClass.TenonJump.ListenerType.TimeReduce);
+
+        if gameDataManager:GetLeftTime() <= 0 then
+            LuaClass.TenonJump.GameController.Instance.gameState = LuaClass.TenonJump.GameState.Start;
+            return;
+        end
+
+        self.playerLogic:DieReset(layer.transform);
+        self.cameraLogic:DieReset();
+
+        self.playerLogic:PlayReborn();
+        coroutine.yield(CS.UnityEngine.WaitForSeconds(1.3));
+        self.playerLogic:PlayUpAnim();
+
+        LuaClass.TenonJump.GameController.Instance.gameState = LuaClass.TenonJump.GameState.Start;
+        self.building = false;
+        end);
+end
+
+---@param dieLayerIndex number
+function m:DieReset(dieLayerIndex)
+    CS.Main.CoroutineManager.Start(self:DoDieReset(dieLayerIndex), self.m_CSBehaviour);
+end
+
+function m:Exit();
+    self.endTime = LuaClass.TimeManager.Instance:GetNativeLongTime();
+    local costTime = LuaClass.TenonJump.GameDataManager.Instance:GetDuration();
+    local score = LuaClass.TenonJump.GameDataManager.Instance:GetScore();
+    local leftTime = math.round(LuaClass.TenonJump.GameDataManager.Instance:GetLeftTime());
+    local timeBonus = leftTime * LuaClass.TenonJump.ConstValue.TIME_BONUS_SCORE;
+    local finalScore = score + timeBonus;
+    LuaClass.BuriedPointManager.Instance:EndGame(costTime, finalScore, self.startTime, self.endTime);
+
+    CS.UnityEngine.Object.Destroy(self.game3DRoot);
+end
+
+return m;

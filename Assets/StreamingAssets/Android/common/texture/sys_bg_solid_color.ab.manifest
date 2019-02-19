@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 2346411134
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 1fabc2689b74cf7234efea3d6e0dc027
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c1642440719609290a7e09a50a7286f4
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/Texture/sys_bg_solid_color.png
+Dependencies: []

@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 1937507937
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 0e5646fdc53e305963f9786dd5064e86
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c516f2a3b2b6b67ef759f6410a790acd
+HashAppended: 0
+ClassTypes:
+- Class: 83
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Audio/Obstacle_Break.mp3
+Dependencies: []

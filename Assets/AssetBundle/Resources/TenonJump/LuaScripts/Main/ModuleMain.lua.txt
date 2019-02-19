@@ -1,0 +1,14 @@
+---@class LuaClass.TenonJump
+local TenonJump = {};
+LuaClass.TenonJump = TenonJump;
+
+require("TenonJump.LuaScripts.Enum.EnumRequire.lua");
+require("TenonJump.LuaScripts.Data.DataRequire.lua");
+
+---@class LuaClass.TenonJump.ModuleMain : LuaClass.ModuleMain
+local m = LuaClass.Class("TenonJump", "ModuleMain", LuaClass.ModuleMain);
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.ModuleMain = m;
+
+return m;

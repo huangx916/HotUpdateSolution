@@ -1,0 +1,139 @@
+---@class LuaClass.LoadingUI : LuaClass.BaseUI
+---@field public ProgressBarGo UnityEngine.GameObject
+---@field public ProgressLabelGo UnityEngine.GameObject
+---@field private m_default boolean
+---@field private m_curProgress number
+local LoadingUI = LuaClass.Class("Common", "LoadingUI", LuaClass.BaseUI);
+LuaClass.LoadingUI = LoadingUI;
+
+function LoadingUI:Awake()
+    self.m_curProgress = 0;
+    self.m_default = false;
+
+end
+
+function LoadingUI:Update()
+    if self.m_default == true then
+        self:UpdateDefault();
+    end
+    if CS.Main.HotUpdateManager.Instance.UpdateStepType == CS.Main.UpdateStepType.FileDownload then
+        self:UpdateCommonDownload();
+    end
+    if LuaClass then
+        if LuaClass.HotUpdateModule.Instance.m_UpdateStepType == LuaClass.UpdateStepType.FileDownload then
+            self:UpdateModuleDownload();
+        end
+        if LuaClass.HotUpdateModule.Instance.m_UpdateStepType == LuaClass.UpdateStepType.UpdateCancel
+                or LuaClass.HotUpdateModule.Instance.m_UpdateStepType == LuaClass.UpdateStepType.UpdateFinished then
+            self:GotoLobbyUI();
+        end
+    end
+end
+
+---@protected
+---@return number
+function LoadingUI:UpdateModuleDownload()
+    CS.Main.UIAgent.SetAlpha(self.ProgressBarGo, 1);
+
+    local totalSize = 0;
+    local currentSize = 0;
+    for index, fileName in ipairs(LuaClass.HotUpdateModule.Instance.m_UpdateFileNameList) do
+        local fileJo = LuaClass.HotUpdateModule.Instance.m_CdnFileList[fileName];
+        local size = fileJo["Size"];
+        totalSize = totalSize + size;
+        if index < LuaClass.HotUpdateModule.Instance.m_Index then
+            currentSize = currentSize + size;
+        elseif index == LuaClass.HotUpdateModule.Instance.m_Index then
+            currentSize = currentSize + size * LuaClass.HotUpdateModule.Instance.m_CurrentLoader.Progress;
+        end
+    end
+
+    CS.Main.UIAgent.SetText(self.ProgressLabelGo, CS.Main.LuaHelp.StringFormat("{0:#}k/{1:#}k", currentSize * 0.001, totalSize * 0.001));
+    CS.Main.UIAgent.SetProgress(self.ProgressBarGo, totalSize == 0 and 0 or currentSize / totalSize);
+
+    --return totalSize == 0 and 1 or currentSize / totalSize;
+end
+
+function LoadingUI:PlayDefault()
+    --CS.Main.Debugger.LogError("PlayDefault");
+    self.m_default = true;
+    CS.Main.UIAgent.SetAlpha(self.ProgressBarGo, 1);
+end
+
+function LoadingUI:UpdateDefault()
+    self.m_curProgress = self.m_curProgress + CS.UnityEngine.Time.deltaTime * 1;
+    CS.Main.UIAgent.SetProgress(self.ProgressBarGo, self.m_curProgress);
+    CS.Main.UIAgent.SetText(self.ProgressLabelGo, math.floor(self.m_curProgress * 100) .. "%");
+    if self.m_curProgress >= 1 then
+        self:CheckModule();
+        self.m_default = false;
+    end
+end
+
+function LoadingUI:UpdateCommonDownload()
+    CS.Main.UIAgent.SetAlpha(self.ProgressBarGo, 1);
+
+    --local fileDownloadingText = CS.Main.LanguageConfigManager.Instance:GetText(self.m_Behaviour.name, "FileDownloading");
+    --CS.Main.UIAgent.SetText(self.m_OperationLabelGo, fileDownloadingText);
+
+    local totalSize = 0;
+    local currentSize = 0;
+    local index = 0;
+    while(index < CS.Main.HotUpdateManager.Instance.UpdateFileNameList.Count) do
+        local fileName = CS.Main.HotUpdateManager.Instance.UpdateFileNameList[index];
+        local fileJo = CS.Main.JsonParser.JoItemToJo(CS.Main.HotUpdateManager.Instance.CdnFileList, fileName, false);
+        local size = CS.Main.JsonParser.JoItemToLong(fileJo, "Size", 0);
+        totalSize = totalSize + size;
+        if index < CS.Main.HotUpdateManager.Instance.Index then
+            currentSize = currentSize + size;
+        elseif index == CS.Main.HotUpdateManager.Instance.Index then
+            local currentProgress = CS.Main.HotUpdateManager.Instance.CurrentLoader.Progress;
+            currentSize = currentSize + size * currentProgress;
+        end
+        index = index + 1;
+    end
+    --local fileDownloadingProgressFormat = CS.Main.LanguageConfigManager.Instance:GetText(self.m_Behaviour.name, "FileDownloadingProgress");
+    CS.Main.UIAgent.SetText(self.ProgressLabelGo, CS.Main.LuaHelp.StringFormat("{0:#}k/{1:#}k", currentSize * 0.001, totalSize * 0.001));
+
+    CS.Main.UIAgent.SetProgress(self.ProgressBarGo, totalSize == 0 and 0 or currentSize / totalSize);
+end
+
+---@param version string
+function LoadingUI:ShowReDownloadDialog(version)
+    ---@type LuaClass.LanguageConfigContainer
+    local languageConfigContainer = LuaClass.LanguageConfigContainer.Instance;
+    local contentFormat = languageConfigContainer:GetText("HotUpdateSlot", "RedownloadContent");
+    local contentStr = CS.Main.LuaHelp.StringFormat(contentFormat, version);
+
+    ---@type LuaClass.DialogUI
+    local dialogUI = LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "DialogUI");
+    dialogUI:InitConfirm(nil, contentStr, nil);
+    dialogUI:SetConfirmAction(function() CS.UnityEngine.Application.Quit(); end);
+end
+
+function LoadingUI:ShowOfflineDialog()
+    ---@type LuaClass.LanguageConfigContainer
+    local languageConfigContainer = LuaClass.LanguageConfigContainer.Instance;
+    local contentStr = languageConfigContainer:GetText("SlotLoadingUI", "ConnectionLostContent");
+
+    ---@type LuaClass.DialogUI
+    local dialogUI = LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "DialogUI");
+    dialogUI:InitConfirm(nil, contentStr, nil);
+    dialogUI:SetConfirmAction(function() CS.UnityEngine.Application.Quit(); end);
+end
+
+function LoadingUI:CheckModule()
+    LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "LoadingUI");
+    --ModuleType
+    local moduleName = LuaClass.BranchManager.Instance:GetBranchName();
+    LuaClass.HotUpdateModule.Instance:Init(moduleName);
+    LuaClass.HotUpdateModule.Instance:CheckModule();
+end
+
+function LoadingUI:GotoLobbyUI()
+    --LogError("GotoLobbyUI");
+    LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.Common, "LobbyUI");
+    LuaClass.UIManager.Instance:Close("LoadingUI");
+end
+
+return LoadingUI;

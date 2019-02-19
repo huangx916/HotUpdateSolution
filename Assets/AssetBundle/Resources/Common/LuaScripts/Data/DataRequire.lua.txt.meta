@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 5bc9cb23cd1ba6f428b5dae3d29130b0
+timeCreated: 1513955607
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/data/datarequire.lua
+  assetBundleVariant: ab

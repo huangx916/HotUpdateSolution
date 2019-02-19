@@ -1,0 +1,18 @@
+---@class LuaClass.TenonJump.CameraLogic : LuaClass.LuaBehaviour
+---@field playerPivot UnityEngine.Transform
+local m = LuaClass.Class("TenonJump", "CameraLogic", LuaClass.LuaBehaviour);
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.CameraLogic = m;
+
+function m:LateUpdate()
+    if self.m_CSBehaviour.transform.position.y - self.playerPivot.position.y > 0 then
+        self.m_CSBehaviour.transform.position = self.playerPivot.position;
+    end
+end
+
+function m:DieReset()
+    self.m_CSBehaviour.transform.position = self.playerPivot.position;
+end
+
+return m;

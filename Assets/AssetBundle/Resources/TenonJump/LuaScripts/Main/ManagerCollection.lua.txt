@@ -1,0 +1,15 @@
+---@class LuaClass.TenonJump.ManagerCollection : LuaClass.ManagerCollection
+local m = LuaClass.Class("TenonJump", "ManagerCollection", LuaClass.ManagerCollection);
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.ModuleMain = m;
+
+---@private
+function m:Awake()
+	self:Add("ConfigManager");
+	self:Add("ProtocolManager");
+	self:Add("GameController");
+	self:Add("GameDataManager");
+end
+
+return m;

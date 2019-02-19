@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 1426406186
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 1d6a921391366f33186d759cc458ed9b
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/LuaScripts/Manager/GameDataManager.lua.txt
+Dependencies: []

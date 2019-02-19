@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: a785f1c999d5b7140a54e6dbbefdaec1
+timeCreated: 1531994735
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/util/test.lua
+  assetBundleVariant: ab

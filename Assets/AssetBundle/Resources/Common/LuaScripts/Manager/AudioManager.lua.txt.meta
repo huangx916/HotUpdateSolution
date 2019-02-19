@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: badec1b272ce979488da88bb064665b8
+timeCreated: 1513859555
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/audiomanager.lua
+  assetBundleVariant: ab

@@ -1,0 +1,87 @@
+---@class LuaClass.ConfigLoader : LuaClass.Object
+---@field private m_FileName string
+---@field private m_InitAction fun(container LuaClass.BaseConfigContainer, content string)
+local ConfigLoader = LuaClass.Class("Common", "ConfigLoader");
+LuaClass.ConfigLoader = ConfigLoader;
+
+---@private
+---@param fileName string
+---@param initAction fun(container LuaClass.BaseConfigContainer, content string)
+function ConfigLoader:ctor(fileName, initAction)
+	self.m_FileName = fileName;
+	self.m_InitAction = initAction;
+end
+
+---@param container LuaClass.BaseConfigContainer
+function ConfigLoader:LoadConfig(container)
+	if not self.m_InitAction or string.isnilorempty(self.m_FileName) then
+		return;
+	end
+	---@type LuaClass.ModuleType
+	local moduleType = LuaClass.ModuleType[container.class.nameSpace];
+	local relativePath = LuaClass.ConstValue.ASSET_DIR_CONFIG .. "/" .. self.m_FileName;
+	---@type UnityEngine.TextAsset
+	local textAsset = LuaClass.AssetLoadManager.Instance:Load(moduleType, relativePath, typeof(CS.UnityEngine.TextAsset));
+	self.m_InitAction(container, textAsset.text);
+end
+
+---@class LuaClass.BaseConfigContainer : LuaClass.Object
+---@field private m_Inited boolean
+local m = LuaClass.Class("Common", "BaseConfigContainer");
+LuaClass.BaseConfigContainer = m;
+
+---@static
+---@param nameSpace string
+---@param className string
+---@return LuaClass.BaseConfigContainer
+function m:Derive(nameSpace, className)
+	---@type LuaClass.BaseConfigContainer
+	local containerClass = LuaClass.Class(nameSpace, className, self);
+
+	---@return LuaClass.BaseConfigContainer
+	local function Get(propertyValues)
+		local isCommon = containerClass.nameSpace == LuaClass.ModuleType[LuaClass.ModuleType.Common];
+		local configManagerClass = isCommon and LuaClass.ConfigManager or LuaClass[containerClass.nameSpace].ConfigManager;
+		return configManagerClass.Instance:Get(containerClass.className);
+	end
+	---@type table<any, PropertyHandle>
+	local propertyHandles = {
+		---@type PropertyHandle
+		Instance = {
+			Get = Get;
+		};
+	};
+	local propertyValues = {};
+	LuaClass.SetProperty(containerClass, propertyHandles, propertyValues)
+
+	return containerClass;
+end
+
+---@return LuaClass.ConfigLoader[]
+function m:GetLoaderList()
+	return nil;
+end
+
+function m:LoadConfig()
+	if self.m_Inited then
+		return;
+	end
+	if self.GetLoaderList then
+		local loaderList = self:GetLoaderList();
+		if loaderList then
+			for index = 1, #loaderList do
+				loaderList[index]:LoadConfig(self);
+			end
+			self.m_Inited = true;
+			return;
+		end
+	end
+	LogErrorFormat("{0}: Loader list is null!", self.class.className);
+end
+
+---@return boolean
+function m:GetInited()
+	return self.m_Inited;
+end
+
+return m;

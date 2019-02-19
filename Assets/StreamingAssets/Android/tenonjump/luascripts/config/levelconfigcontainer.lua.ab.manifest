@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 65785918
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: f075c54d13797c79c01e11527618f7dc
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/LuaScripts/Config/LevelConfigContainer.lua.txt
+Dependencies: []

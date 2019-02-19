@@ -1,0 +1,19 @@
+---@class LuaClass.BuriedPointProtocolHandler : LuaClass.BaseProtocolHandler
+---@field public Instance LuaClass.BuriedPointProtocolHandler @static
+---@field private m_PreUrl string
+local m = LuaClass.BaseProtocolHandler:Derive("Common", "BuriedPointProtocolHandler", {
+    m_PreUrl = "http://47.254.43.36/minigames/trace?game=";
+});
+LuaClass.BuriedPointProtocolHandler = m;
+
+---@public
+---@param param string
+---@param callback fun(result:string)
+function m:BuriedPoint(param, callback)
+    local moduleName = LuaClass.BranchManager.Instance:GetBranchName();
+    local route = self.m_PreUrl .. moduleName .. param;
+    --LogError("route ======" .. route);
+    LuaClass.HttpManager.Instance:Get(route, callback);
+end
+
+return m;

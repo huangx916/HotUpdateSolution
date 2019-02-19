@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 10eaa22ad0c8b2143869e0446b17e4cc
+timeCreated: 1513667978
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/configmanager.lua
+  assetBundleVariant: ab

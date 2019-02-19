@@ -1,0 +1,28 @@
+---@class LuaClass.UpdateStepType : LuaClass.Object
+---
+---@class LuaClass.UpdateStepType.Class : LuaClass.LuaEnum
+---@field public UpdateFailed LuaClass.UpdateStepType
+---@field public UpdateCancel LuaClass.UpdateStepType
+---@field public NativeVersionCompare LuaClass.UpdateStepType
+---@field public VersionCompare LuaClass.UpdateStepType
+---@field public VersionCompared LuaClass.UpdateStepType
+---@field public FileCompare LuaClass.UpdateStepType
+---@field public FileDownload LuaClass.UpdateStepType
+---@field public FileDelete LuaClass.UpdateStepType
+---@field public VersionWrite LuaClass.UpdateStepType
+---@field public UpdateFinished LuaClass.UpdateStepType
+local UpdateStepType = LuaClass.LuaEnum.Create("Common", "UpdateStepType", {
+    "UpdateFailed",
+    "UpdateCancel",
+    "NativeVersionCompare",
+    "VersionCompare",
+    "VersionCompared",
+    "FileCompare",
+    "FileDownload",
+    "FileDelete",
+    "VersionWrite",
+    "UpdateFinished"
+});
+LuaClass.UpdateStepType = UpdateStepType;
+
+return UpdateStepType;

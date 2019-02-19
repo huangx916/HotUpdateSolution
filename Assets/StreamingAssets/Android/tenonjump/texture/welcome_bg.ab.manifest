@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 1648475844
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 8e44525660e96bc79601f071e758a767
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c1642440719609290a7e09a50a7286f4
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Texture/welcome_bg.png
+Dependencies: []

@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 2997040270
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 461f8a9a1ebe4359701effb20643512a
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c516f2a3b2b6b67ef759f6410a790acd
+HashAppended: 0
+ClassTypes:
+- Class: 83
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Audio/Settle_BestScore.wav
+Dependencies: []

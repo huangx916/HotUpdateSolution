@@ -1,0 +1,12 @@
+---@class LuaClass.UIType : LuaClass.Object
+
+---@class LuaClass.UIType.Class : LuaClass.LuaEnum
+---@field public Default LuaClass.UIType
+---@field public Transitory LuaClass.UIType
+local m = LuaClass.LuaEnum.Create("Common", "UIType", {
+	"Default";
+	"Transitory";
+});
+LuaClass.UIType = m;
+
+return m;

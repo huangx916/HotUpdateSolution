@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 5add3c64a93cb3843a081a9d26e2b40d
+timeCreated: 1513215087
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/uimanager.lua
+  assetBundleVariant: ab

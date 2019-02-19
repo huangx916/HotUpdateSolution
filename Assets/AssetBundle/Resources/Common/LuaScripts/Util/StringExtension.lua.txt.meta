@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 18a259bea46ee114e8a571dd3303814f
+timeCreated: 1513673428
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/util/stringextension.lua
+  assetBundleVariant: ab

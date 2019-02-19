@@ -1,0 +1,267 @@
+---@class LuaClass.TenonJump.GameUI.TopBar
+---@field public countdownLabel UILabel
+---@field public countdownColorList {leftSeconds:number, color:UnityEngine.Color}[]
+---@field public scoreTit TweenIntText
+
+---@class LuaClass.TenonJump.GameUI.Tips
+---@field public countdownTips {leftSeconds:number, tweenerList:UITweener[]}[]
+---@field public resultTips {outOfMovesTweenerList:UITweener[], timesUpTweenerList:UITweener[]}
+---@field public addScoreTips LuaClass.TenonJump.GameUI.Tips.AddScoreTips
+
+---@class LuaClass.TenonJump.GameUI.Tips.AddScoreTips
+---@field public comboAddTipTrans UITweener[]
+---@field public streakAddTipTrans UITweener[]
+---@field public addLabelPivot UnityEngine.Transform
+---@field public baseAddLabelPrefab UILabel
+---@field public comboAddLabelPrefab UILabel
+---@field public streakAddLabelPrefab UILabel
+---@field public wonderfulSpritePrefab UISprite
+---@field public timeReduceLabel UILabel
+
+---@class LuaClass.TenonJump.GameUI : LuaClass.BaseUI
+---@field levelProgress UISlider
+---@field soundBtn UnityEngine.Collider
+---@field helpBtn UnityEngine.Collider
+---@field stopBtn UnityEngine.Collider
+---@field dragPivot UnityEngine.Transform
+---
+---@field private topBar LuaClass.TenonJump.GameUI.TopBar
+---
+---@field private tips LuaClass.TenonJump.GameUI.Tips
+---@field private m_OldLeftTime number
+---
+local m = LuaClass.Class("TenonJump", "GameUI", LuaClass.BaseUI);
+---@type LuaClass.TenonJump
+local ns = LuaClass.TenonJump;
+ns.GameUI = m;
+
+---@private
+function m:Awake()
+    self:InitData();
+    self:InitListener();
+    self:InitUI();
+
+    LuaClass.AudioManager.Instance:PlayModuleBgm(LuaClass.ModuleType.TenonJump, "Music");
+    --CS.Main.CoroutineManager.Delay(0.5, function()
+    --    self:StartGame();
+    --end, self.m_CSBehaviour);
+end
+
+function m:Start()
+    local level = LuaClass.PlatformManager.Instance:GetMatchInfo().SkillzDifficulty;
+    Log("=================================================================level : ");
+    Log(level);
+    if not level then
+        level = 5;
+    end
+    LuaClass.TenonJump.GameController.Instance:StartGame(level);
+end
+
+function m:Update()
+    if LuaClass.TenonJump.GameController.Instance.gameState == LuaClass.TenonJump.GameState.Start then
+        local leftTime = LuaClass.TenonJump.GameDataManager.Instance:GetLeftTime();
+        self:UpdateCountdown(math.max(leftTime, 0));
+        --self:UpdateCountdownTip(math.max(leftTime, 0));
+    end
+end
+
+function m:InitData()
+    self.m_OldLeftTime = 0;
+end
+
+function m:InitListener()
+    CS.Main.UIAgent.SetOnClick(self.soundBtn, function() self:OnSoundBtnClick(); end);
+    CS.Main.UIAgent.SetOnClick(self.helpBtn, function() self:OnHelpBtnClick(); end);
+    CS.Main.UIAgent.SetOnClick(self.stopBtn, function() self:OnStopBtnClick(); end);
+
+    --CS.Main.UIAgent.SetOnDrag(self.dragPivot, function(go, delta) self:OnPivotDrag(delta); end);
+
+    CS.Main.ListenerManager.AddLua1(LuaClass.TenonJump.ListenerType.LevelProgress, self.m_CSBehaviour,
+            function(percent) self:SetGameProgress(percent); end);
+    CS.Main.ListenerManager.AddLua2(LuaClass.TenonJump.ListenerType.UpdateScore, self.m_CSBehaviour,
+            function(score, addScore) self:UpdateScore(score, addScore); end);
+    CS.Main.ListenerManager.Add(LuaClass.TenonJump.ListenerType.GameOver, self.m_CSBehaviour, function() self:OnGameOver(); end);
+    CS.Main.ListenerManager.Add(LuaClass.TenonJump.ListenerType.Wonderful, self.m_CSBehaviour, function() self:PlayWonderful(); end);
+    CS.Main.ListenerManager.Add(LuaClass.TenonJump.ListenerType.TimeReduce, self.m_CSBehaviour, function() self:PlayTimeReduce(); end);
+
+    CS.Main.ListenerManager.AddLua1(LuaClass.ListenerType.ApplicationPause, self.m_CSBehaviour,
+            function(pause) self:OnGamePause(pause); end);
+end
+
+function m:InitUI()
+    self:UpdateCountdown(LuaClass.TenonJump.ConstValue.GAME_DURATION);
+    self:InitScore();
+end
+
+function m:OnSoundBtnClick()
+    --LuaClass.TenonJump.GameController.Instance.dragSpeed = LuaClass.TenonJump.GameController.Instance.dragSpeed + 10;
+    --CS.Main.UIAgent.SetText(self.clockLabel, LuaClass.TenonJump.GameController.Instance.dragSpeed);
+    LuaClass.TenonJump.GameController.Instance:Pause();
+    LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.TenonJump, "SettingUI",nil, function()
+        LuaClass.TenonJump.GameController.Instance:Resume();
+    end);
+end
+
+function m:OnHelpBtnClick()
+    --LuaClass.TenonJump.GameController.Instance.dragSpeed = LuaClass.TenonJump.GameController.Instance.dragSpeed - 10;
+    --CS.Main.UIAgent.SetText(self.clockLabel, LuaClass.TenonJump.GameController.Instance.dragSpeed);
+    LuaClass.TenonJump.GameController.Instance:Pause();
+    LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.TenonJump, "HelpUI",nil, function()
+        LuaClass.TenonJump.GameController.Instance:Resume();
+    end);
+end
+
+function m:OnStopBtnClick()
+    LuaClass.TenonJump.GameController.Instance:Pause();
+    LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.TenonJump, "PausedUI",nil, function()
+        LuaClass.TenonJump.GameController.Instance:Resume();
+    end);
+    LuaClass.TenonJump.GameController.Instance:Pause();
+end
+
+---@private
+---@param delta UnityEngine.Vector2
+function m:OnPivotDrag(delta)
+    if LuaClass.TenonJump.GameController.Instance.gameState == LuaClass.TenonJump.GameState.Start
+            and LuaClass.TenonJump.GameController.Instance.m_Paused == false then
+        local euler = LuaClass.TenonJump.GameController.Instance.scenePivot.localEulerAngles;
+        euler.y = euler.y - delta.x * LuaClass.TenonJump.GameController.Instance.dragFactor;
+        LuaClass.TenonJump.GameController.Instance.scenePivot.localEulerAngles = euler;
+    end
+end
+
+---@public
+---@param percent number
+function m:SetGameProgress(percent)
+    CS.Main.UIAgent.SetProgress(self.levelProgress, percent);
+end
+
+---@private
+---@param leftTime number
+function m:UpdateCountdown(leftTime)
+    leftTime = math.round(leftTime);
+    local minutes = math.floor(leftTime / 60);
+    local seconds = leftTime - minutes * 60;
+    CS.Main.UIAgent.SetText(self.topBar.countdownLabel, string.format(" %d: %02d", minutes, seconds));
+    for _, countdownColor in ipairs(self.topBar.countdownColorList) do
+        if leftTime > countdownColor.leftSeconds then
+            CS.Main.UIAgent.SetColor(self.topBar.countdownLabel, countdownColor.color);
+            break;
+        end
+    end
+end
+
+---@private
+---@param leftTime number
+function m:UpdateCountdownTip(leftTime)
+    leftTime = math.round(leftTime);
+    for _, countdownTip in ipairs(self.tips.countdownTips) do
+        if self.m_OldLeftTime ~= countdownTip.leftSeconds and leftTime == countdownTip.leftSeconds then
+            for _, tweener in pairs(countdownTip.tweenerList) do
+                CS.Main.UIAgent.PlayForward(tweener, true);
+            end
+            LuaClass.AudioManager.Instance:PlayModuleSceneOneShot(LuaClass.ModuleType.TenonJump, "Game_TimeReminding_" .. leftTime)
+        end
+    end
+    self.m_OldLeftTime = leftTime;
+end
+
+---@private
+function m:InitScore()
+    self.topBar.scoreTit.to = 0;
+    CS.Main.UIAgent.SetTweenValue(self.topBar.scoreTit, 1);
+end
+
+---@private
+---@param score number
+---@param addScore number
+function m:UpdateScore(score, addScore)
+    self.topBar.scoreTit.from = self.topBar.scoreTit.value;
+    self.topBar.scoreTit.to = score;
+    CS.Main.UIAgent.PlayForward(self.topBar.scoreTit, true);
+    do
+        local baseAddLabel = CS.Main.CompAgent.AddChild(self.tips.addScoreTips.addLabelPivot, self.tips.addScoreTips.baseAddLabelPrefab);
+        CS.Main.UIAgent.SetText(baseAddLabel, "+" .. addScore);
+        ---@type TweenPosition
+        local baseAddTp = baseAddLabel:GetComponent(typeof(CS.TweenPosition));
+        --baseAddTp.from = self.tips.addScoreTips.addLabelPivot:InverseTransformPoint(self.m_BlockGroupShadowTrans.position);
+        --baseAddTp.to = self.tips.addScoreTips.addLabelPivot:InverseTransformPoint(self.topBar.scoreTit.transform.position);
+        local duration = CS.Main.UIAgent.PlayForward(baseAddLabel);
+        --local addedScore = oldScore + baseAdd;
+        CS.Main.CoroutineManager.Delay(duration, function()
+            --self:UpdateScore(addedScore);
+            CS.UnityEngine.Object.Destroy(baseAddLabel.gameObject);
+        end, baseAddLabel);
+    end
+end
+
+function m:PlayWonderful()
+    local wonderfulSprite = CS.Main.CompAgent.AddChild(self.tips.addScoreTips.addLabelPivot, self.tips.addScoreTips.wonderfulSpritePrefab);
+    ---@type TweenPosition
+    local duration = CS.Main.UIAgent.PlayForward(wonderfulSprite);
+    CS.Main.CoroutineManager.Delay(duration, function()
+        CS.UnityEngine.Object.Destroy(wonderfulSprite.gameObject);
+    end, wonderfulSprite);
+end
+
+function m:PlayTimeReduce()
+    local timeReduceLabel = CS.Main.CompAgent.AddChild(self.tips.addScoreTips.addLabelPivot, self.tips.addScoreTips.timeReduceLabel);
+    ---@type TweenPosition
+    local duration = CS.Main.UIAgent.PlayForward(timeReduceLabel);
+    CS.Main.CoroutineManager.Delay(duration, function()
+        CS.UnityEngine.Object.Destroy(timeReduceLabel.gameObject);
+    end, timeReduceLabel);
+end
+
+---@private
+---@return System.Collections.IEnumerator
+function m:DoOnGameOver()
+    return util.cs_generator(function()
+        LuaClass.UIManager.Instance:AddTopCollider(self, "GameOver");
+
+        local resultType = LuaClass.TenonJump.GameDataManager.Instance:GetResultType();
+        if resultType == LuaClass.TenonJump.ResultType.TimesUp then
+            local duration = 0;
+            for _, tweener in pairs(self.tips.resultTips.timesUpTweenerList) do
+                duration = math.max(duration, CS.Main.UIAgent.PlayForward(tweener, true));
+            end
+            LuaClass.AudioManager.Instance:PlayModuleSceneOneShot(LuaClass.ModuleType.TenonJump, "Game_TimesUp");
+            coroutine.yield(CS.UnityEngine.WaitForSeconds(duration));
+        elseif resultType == LuaClass.TenonJump.ResultType.Finish then
+            local duration = 0;
+            for _, tweener in pairs(self.tips.resultTips.finishTweenerList) do
+                duration = math.max(duration, CS.Main.UIAgent.PlayForward(tweener, true));
+            end
+            LuaClass.AudioManager.Instance:PlayModuleSceneOneShot(LuaClass.ModuleType.TenonJump, "Game_Finish");
+            coroutine.yield(CS.UnityEngine.WaitForSeconds(duration));
+        end
+
+        local score = LuaClass.TenonJump.GameDataManager.Instance:GetScore();
+        local leftTime = math.round(LuaClass.TenonJump.GameDataManager.Instance:GetLeftTime());
+        local timeBonus = leftTime * LuaClass.TenonJump.ConstValue.TIME_BONUS_SCORE;
+        local finalScore = score + timeBonus;
+
+        LuaClass.AudioManager.Instance:StopBgm();
+        LuaClass.UIManager.Instance:Open(LuaClass.ModuleType.TenonJump, "SettleUI", nil, function()
+            LuaClass.PlatformManager.Instance:ExitGame(finalScore);
+        end);
+
+        LuaClass.UIManager.Instance:RemoveTopCollider(self, "GameOver");
+    end);
+end
+
+---@private
+function m:OnGameOver()
+    self.m_Started = false;
+    CS.Main.CoroutineManager.Start(self:DoOnGameOver(), self.m_CSBehaviour);
+end
+
+---@private
+---@param pause boolean
+function m:OnGamePause(pause)
+    if pause and LuaClass.TenonJump.GameController.Instance.gameState ~= LuaClass.TenonJump.GameState.Finish then
+        self:OnStopBtnClick();
+    end
+end
+
+return m;

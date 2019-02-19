@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 8ce40ea2ba0c0344bb412624646ba880
+timeCreated: 1515764141
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/config/audioconfigcontainer.lua
+  assetBundleVariant: ab

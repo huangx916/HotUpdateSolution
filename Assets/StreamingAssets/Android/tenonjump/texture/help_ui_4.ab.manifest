@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 880327850
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 38f33ca9b3d720bd56eb0196ac7da471
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c1642440719609290a7e09a50a7286f4
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Texture/help_ui_4.png
+Dependencies: []

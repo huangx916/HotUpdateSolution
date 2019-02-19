@@ -1,0 +1,14 @@
+---@class LuaClass.LobbyUI : LuaClass.BaseUI
+local m = LuaClass.Class("Common", "LobbyUI", LuaClass.BaseUI);
+LuaClass.LobbyUI = m;
+
+---@private
+function m:Awake()
+	local moduleType = LuaClass.ModuleType[LuaClass.BranchManager.Instance:GetBranchName()];
+	LuaClass.SceneManager.Instance:SwitchToScene(LuaClass.SceneType.Game, moduleType, function()
+		LuaClass.UIManager.Instance:Open(moduleType, "WelcomeUI");
+		LuaClass.UIManager.Instance:Close("LobbyUI");
+	end);
+end
+
+return m;

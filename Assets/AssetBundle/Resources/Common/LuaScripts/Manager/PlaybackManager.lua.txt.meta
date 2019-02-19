@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 89b0379edb2091549ab9c93a292e2af8
+timeCreated: 1532611535
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/playbackmanager.lua
+  assetBundleVariant: ab

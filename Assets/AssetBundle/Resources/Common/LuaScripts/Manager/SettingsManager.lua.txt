@@ -1,0 +1,90 @@
+---@class LuaClass.SettingsManager : LuaClass.BaseManager
+---@field public Instance LuaClass.SettingsManager @static
+---@field private m_SoundsVolume number
+---@field private m_MusicVolume number
+---@field private m_SoundsEnable boolean
+---@field private m_MusicEnable boolean
+local m = LuaClass.BaseManager:Derive("Common", "SettingsManager");
+LuaClass.SettingsManager = m;
+
+function m:Awake()
+	self.m_SoundsVolume = CS.UnityEngine.PlayerPrefs.GetFloat("SoundsVolume", 1);
+	self.m_MusicVolume = CS.UnityEngine.PlayerPrefs.GetFloat("MusicVolume", 1);
+	self.m_SoundsEnable = CS.UnityEngine.PlayerPrefs.GetInt("SoundsEnable", 1) > 0;
+	self.m_MusicEnable = CS.UnityEngine.PlayerPrefs.GetInt("MusicEnable", 1) > 0;
+
+	CS.Main.CoroutineManager.Delay(nil, function()
+		LuaClass.AudioManager.Instance.SoundVolume = self.m_SoundsEnable and self.m_SoundsVolume or 0;
+		LuaClass.AudioManager.Instance.BgmVolume = self.m_MusicEnable and self.m_MusicVolume or 0;
+	end, self.m_CSBehaviour);
+end
+
+---@public
+---@return number
+function m:GetSoundsVolume()
+	return self.m_SoundsVolume;
+end
+
+---@public
+---@param volume number
+function m:SetSoundsVolume(volume)
+	volume = math.clamp(volume, 0, 1);
+	if self.m_SoundsVolume ~= volume then
+		self.m_SoundsVolume = volume;
+		CS.UnityEngine.PlayerPrefs.SetFloat("SoundsVolume", volume);
+		LuaClass.AudioManager.Instance.SoundVolume = self.m_SoundsEnable and self.m_SoundsVolume or 0;
+	end
+end
+
+---@public
+---@return number
+function m:GetMusicVolume()
+	return self.m_MusicVolume;
+end
+
+---@public
+---@param volume number
+function m:SetMusicVolume(volume)
+	volume = math.clamp(volume, 0, 1);
+	if self.m_MusicVolume ~= volume then
+		self.m_MusicVolume = volume;
+		CS.UnityEngine.PlayerPrefs.SetFloat("MusicVolume", volume);
+		LuaClass.AudioManager.Instance.BgmVolume = self.m_MusicEnable and self.m_MusicVolume or 0;
+	end
+end
+
+---@public
+---@return boolean
+function m:GetSoundsEnable()
+	return self.m_SoundsEnable;
+end
+
+---@public
+---@param enable boolean
+function m:SetSoundsEnable(enable)
+	enable = enable == true;
+	if self.m_SoundsEnable ~= enable then
+		self.m_SoundsEnable = enable;
+		CS.UnityEngine.PlayerPrefs.SetInt("SoundsEnable", enable and 1 or 0);
+		LuaClass.AudioManager.Instance.SoundVolume = self.m_SoundsEnable and self.m_SoundsVolume or 0;
+	end
+end
+
+---@public
+---@return boolean
+function m:GetMusicEnable()
+	return self.m_MusicEnable;
+end
+
+---@public
+---@param enable number
+function m:SetMusicEnable(enable)
+	enable = enable == true;
+	if self.m_MusicEnable ~= enable then
+		self.m_MusicEnable = enable;
+		CS.UnityEngine.PlayerPrefs.SetInt("MusicEnable", enable and 1 or 0);
+		LuaClass.AudioManager.Instance.BgmVolume = self.m_MusicEnable and self.m_MusicVolume or 0;
+	end
+end
+
+return m;

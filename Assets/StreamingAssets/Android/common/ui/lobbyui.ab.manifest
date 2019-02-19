@@ -1,0 +1,26 @@
+ManifestFileVersion: 0
+CRC: 723262148
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: c981425a91423aebe9ef78585555cbca
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: e0505a1f74eb4b7cc8685f184800fdb5
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: ae942c9068183dc40a9d01f648273726, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 97b7e9457f29fe6489fdf7c13aea7e94, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 82ea5dee09c28244f9e8e2220dd499d9, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/UI/LobbyUI.prefab
+Dependencies: []

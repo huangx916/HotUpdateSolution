@@ -1,0 +1,17 @@
+---@class LuaClass.AssetPathType : LuaClass.Object
+---
+---@class LuaClass.AssetPathType.Class : LuaClass.LuaEnum
+---@field Resources LuaClass.AssetPathType
+---@field Streaming LuaClass.AssetPathType
+---@field Persistent LuaClass.AssetPathType
+---@field Temporary LuaClass.AssetPathType
+local AssetPathType = LuaClass.LuaEnum.Create("Common", "AssetPathType",{
+    "Resources",
+    "Streaming",
+    "Persistent",
+    "Temporary"
+});
+
+LuaClass.AssetPathType = AssetPathType;
+
+return AssetPathType;

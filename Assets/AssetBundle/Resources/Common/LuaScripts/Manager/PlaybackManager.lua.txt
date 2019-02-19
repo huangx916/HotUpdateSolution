@@ -1,0 +1,234 @@
+---@class LuaClass.GameData
+
+---@class LuaClass.EventData
+---@field public eventType string
+---@field public args any[]
+---@field public argCount number
+
+---@class LuaClass.PlaybackFrame
+---@field public time number
+---@field public gameData LuaClass.GameData
+---@field public eventData LuaClass.EventData
+
+---@class LuaClass.PlaybackData
+---@field public matchId number
+---@field public seatIndex number
+---@field public frameList LuaClass.PlaybackFrame[]
+
+
+---@class LuaClass.PlaybackManager : LuaClass.BaseManager
+---@field public Instance LuaClass.PlaybackManager @static
+---@field private m_BytesCacheDict table<number, table<number, string>>
+---@field private m_DataList LuaClass.PlaybackData[]
+local m = LuaClass.BaseManager:Derive("Common", "PlaybackManager");
+LuaClass.PlaybackManager = m;
+
+function m:ctor()
+	self.m_BytesCacheDict = {};
+	self.m_DataList = {};
+end
+
+--region use
+
+---@param seatIndex number
+---@return boolean
+function m:IsDataExist(seatIndex)
+	return self.m_DataList[seatIndex] ~= nil;
+end
+
+---@param seatIndex number
+---@param targetTime number
+function m:Sample(seatIndex, targetTime)
+	local gameDataHandler = LuaClass.TenonCube.GameDataManager.Instance:GetHandler(seatIndex);
+	local frameIndex = self:GetIndex(seatIndex, targetTime);
+	local playbackData = self.m_DataList[seatIndex].frameList[frameIndex];
+	gameDataHandler:ReplaceGameData(playbackData.gameData);
+	CS.Main.ListenerManager.TriggerExt(LuaClass.ListenerType.GameDataUpdate .. seatIndex);
+end
+
+---@param seatIndex number
+---@param startTime number
+---@param endTime number
+function m:PlayRange(seatIndex, startTime, endTime)
+	local startIndex = self:GetIndex(seatIndex, startTime);
+	local endIndex = self:GetIndex(seatIndex, endTime);
+	local gameDataHandler = LuaClass[LuaClass.ModuleType[LuaMain:GetModuleType()]].GameDataManager.Instance:GetHandler(seatIndex);
+	for frameIndex = startIndex + 1, endIndex do
+		local playbackFrame = self.m_DataList[seatIndex].frameList[frameIndex];
+		gameDataHandler:ReplaceGameData(playbackFrame.gameData);
+		CS.Main.ListenerManager.TriggerExt(LuaClass.ListenerType.GameDataUpdate .. seatIndex);
+		local eventData = playbackFrame.eventData;
+		CS.Main.ListenerManager.TriggerExt(eventData.eventType .. seatIndex, table.unpack(eventData.args, 1, eventData.argCount));
+	end
+end
+
+---@private
+---@param seatIndex number
+---@param targetTime number
+function m:GetIndex(seatIndex, targetTime)
+	if targetTime then
+		local frameList = self.m_DataList[seatIndex].frameList;
+		for index = #frameList, 1, -1 do
+			if frameList[index].time <= targetTime then
+				return index;
+			end;
+		end
+	end
+	return 0;
+end
+
+--endregion
+
+--region load
+
+---@param matchId number
+---@param callback fun()
+function m:StartPlayback(matchId, callback)
+	self.m_DataList = {};
+	local recordInfo = LuaClass.RecordManager.Instance:GetRecord(matchId);
+
+	local playbackGot = {};
+	for index, player in ipairs(recordInfo.players) do
+		if player.id ~= 0 then
+			playbackGot[index] = false;
+		end
+	end
+
+	---@param index number
+	---@param bytes string
+	local function OnParse(index, bytes)
+		local jsonStr = CS.Main.ConvertExt.BytesToString(bytes);
+		self.m_DataList[index] = LuaClass.RapidJson.Decode(jsonStr);
+		playbackGot[index] = true;
+		local allGot = table.indexof(playbackGot, false);
+		if allGot == 0 then
+			CS.Main.CoroutineManager.MainThread(callback);
+		end
+	end
+
+	local playerId = LuaClass.PlatformManager.Instance:GetPlayerInfo().ID;
+	for _, player in ipairs(recordInfo.players) do
+		if player.id == playerId then
+			self:LoadData(matchId, player, function(gzBytes)
+				CS.Main.ZipManager.DecompressAsync(gzBytes, function(bytes)
+					OnParse(1, bytes);
+				end);
+			end);
+		end
+	end
+	local index = 2;
+	for _, player in ipairs(recordInfo.players) do
+		if player.id ~= 0 and player.id ~= playerId then
+			local othersIndex = index;
+			self:LoadData(matchId, player, function(gzBytes)
+				CS.Main.ZipManager.DecompressAsync(gzBytes, function(bytes)
+					OnParse(othersIndex, bytes);
+				end);
+			end);
+			index = index + 1;
+		end
+	end
+end
+
+---@private
+---@param matchId number
+---@param player LuaClass.RecordPlayer
+---@param callback fun(gzBytes:string)
+function m:LoadData(matchId, player, callback)
+	local playerId = player.id;
+	local bytes = self.m_BytesCacheDict[matchId] and self.m_BytesCacheDict[matchId][playerId];
+	if bytes then
+		callback(bytes);
+	else
+		local playbackPath = self:GetPlaybackPath(matchId, playerId);
+		if CS.Main.FileManager.IsFileExist(playbackPath) then
+			CS.Main.FileManager.ReadAsync(playbackPath, function(gzBytes)
+				if not self.m_BytesCacheDict[matchId] then
+					self.m_BytesCacheDict[matchId] = {};
+				end
+				self.m_BytesCacheDict[matchId][playerId] = gzBytes;
+				callback(gzBytes);
+			end);
+		else
+			LuaClass.PlaybackProtocolHandler.Instance:Download(player.log, function(bytes)
+				CS.Main.FileManager.WriteAsync(playbackPath, bytes);
+				if not self.m_BytesCacheDict[matchId] then
+					self.m_BytesCacheDict[matchId] = {};
+				end
+				self.m_BytesCacheDict[matchId][playerId] = bytes;
+				callback(bytes);
+			end);
+		end
+	end
+end
+
+--endregion
+
+--region save
+
+---@param seatIndex number
+function m:NewGame(seatIndex)
+	---@type LuaClass.PlaybackData
+	local playbackData = {};
+	playbackData.matchId = LuaClass.PlatformManager.Instance:GetMatchInfo().ID;
+	playbackData.seatIndex = seatIndex;
+	playbackData.frameList = {};
+
+	self.m_DataList[seatIndex] = playbackData;
+end
+
+---@param time number
+---@param seatIndex number
+---@param gameData LuaClass.GameData
+---@param eventType string
+function m:AddItem(time, seatIndex, gameData, eventType, ...)
+	---@type LuaClass.PlaybackFrame
+	local playbackFrame = {};
+	playbackFrame.time = time;
+	playbackFrame.gameData = table.deepcopy(gameData);
+	playbackFrame.eventData = {};
+	playbackFrame.eventData.eventType = eventType;
+	local args = table.pack(...);
+	playbackFrame.eventData.args = args;
+	playbackFrame.eventData.argCount = #args;
+	args.n = nil;
+	table.insert(self.m_DataList[seatIndex].frameList, playbackFrame);
+end
+
+---@param seatIndex number
+---@param score number
+function m:GameEnd(seatIndex, score)
+	self:SubmitRecord(score, function()
+		self:UploadAndCache(seatIndex);
+	end);
+end
+
+---@param score number
+---@param callback fun()
+function m:SubmitRecord(score, callback)
+	LuaClass.RecordManager.Instance:SubmitRecord(score, callback);
+end
+
+---@param seatIndex number
+function m:UploadAndCache(seatIndex)
+	local matchId = LuaClass.PlatformManager.Instance:GetMatchInfo().ID;
+	local playerId = LuaClass.PlatformManager.Instance:GetPlayerInfo().ID;
+	local dataStr = LuaClass.RapidJson.Encode(self.m_DataList[seatIndex]);
+	local dataBytes = CS.Main.ConvertExt.StringToBytes(dataStr);
+	CS.Main.ZipManager.CompressAsync(dataBytes, function(gzBytes)
+		LuaClass.PlaybackProtocolHandler.Instance:Upload(matchId, playerId, gzBytes);
+		CS.Main.FileManager.WriteAsync(self:GetPlaybackPath(matchId, playerId), gzBytes);
+	end);
+end
+
+---@param matchId number
+---@param playerId number
+---@return string
+function m:GetPlaybackPath(matchId, playerId)
+	local moduleName = LuaClass.ModuleType[LuaMain:GetModuleType()];
+	return CS.UnityEngine.Application.temporaryCachePath .. "/" .. moduleName .. "/Playback/" .. matchId .. "_" .. playerId .. ".txt";
+end
+
+--endregion
+
+return m;

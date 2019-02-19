@@ -1,0 +1,25 @@
+---@class LuaClass.BaseUI : LuaClass.LuaBehaviour
+local m = LuaClass.Class("Common", "BaseUI", LuaClass.LuaBehaviour);
+LuaClass.BaseUI = m;
+
+function m:OnClose()
+end
+
+---@protected
+function m:OnDestroy()
+	if LuaClass and LuaClass.UIManager then
+		LuaClass.UIManager.Instance:RemoveTopCollider(self);
+	end
+	CS.Main.ListenerManager.RemoveAllExt(self.m_CSBehaviour);
+	for key, _ in pairs(self) do
+		self[key] = nil;
+	end
+	CS.UnityEngine.Resources.UnloadUnusedAssets();
+end
+
+---@return LuaClass.UIType
+function m:GetType()
+	return LuaClass.UIType.Default;
+end
+
+return m;

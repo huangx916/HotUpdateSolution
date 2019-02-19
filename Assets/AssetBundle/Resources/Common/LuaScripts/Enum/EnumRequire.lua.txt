@@ -1,0 +1,7 @@
+require("Common.LuaScripts.Enum.ModuleType.lua");
+require("Common.LuaScripts.Enum.SceneType.lua");
+require("Common.LuaScripts.Enum.AudioType.lua");
+require("Common.LuaScripts.Enum.UIType.lua");
+require("Common.LuaScripts.Enum.UpdateStepType.lua");
+require("Common.LuaScripts.Enum.AssetPathType.lua");
+require("Common.LuaScripts.Enum.DialogType.lua");

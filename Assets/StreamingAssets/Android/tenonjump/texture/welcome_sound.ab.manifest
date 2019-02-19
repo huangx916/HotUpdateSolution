@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 1707416317
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: fe0ea57708fec778853ebca783a78033
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: c1642440719609290a7e09a50a7286f4
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/Texture/welcome_sound.png
+Dependencies: []

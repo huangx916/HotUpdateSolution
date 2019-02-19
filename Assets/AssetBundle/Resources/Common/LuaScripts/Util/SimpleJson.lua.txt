@@ -1,0 +1,120 @@
+---@class LuaClass.Json
+local m = LuaClass.Class(nil, "Json");
+LuaClass.SimpleJson = m;
+
+---@static
+---@param jsonStr string
+---@return any
+function m.Decode(jsonStr)
+	if string.isnilorempty(jsonStr) then
+		return nil;
+	end
+	local jsonObject = CS.SimpleJson.SimpleJson.DeserializeObject(jsonStr);
+	return m.ObjectToTable(jsonObject);
+end
+
+---@static
+---@param data any
+---@param defaultValue any
+---@return any
+function m.ObjectToTable(data)
+	if type(data) == "userdata" then
+		---@type System.Type
+		local dataType = data:GetType();
+		if typeof(CS.System.Collections.IList):IsAssignableFrom(dataType) then
+			return m.ListToTable(data);
+		elseif typeof(CS.System.Collections.IDictionary):IsAssignableFrom(dataType)
+				or typeof(CS.SimpleJson.JsonObject):IsAssignableFrom(dataType) then
+			return m.DictToTable(data);
+		end
+	end
+	return data;
+end
+
+---@private
+---@static
+---@param data System.Collections.IList | System.Collections.ICollection
+---@return table
+function m.ListToTable(data)
+	local dataTable = {};
+	for index = 1, data.Count do
+		dataTable[index] = m.ObjectToTable(data[index - 1]);
+	end
+	return dataTable;
+end
+
+---@private
+---@static
+---@param data System.Collections.IDictionary | SimpleJson.JsonObject
+---@return table
+function m.DictToTable(data)
+	local dataTable = {};
+	local enumerator = data:GetEnumerator();
+	while enumerator:MoveNext() do
+		dataTable[enumerator.Current.Key] = m.ObjectToTable(enumerator.Current.Value);
+	end
+	return dataTable;
+end
+
+---@static
+---@param object any
+---@return string
+function m.Encode(object)
+	local jsonObj = m.ObjectToJson(object);
+	return CS.SimpleJson.SimpleJson.SerializeObject(jsonObj);
+end
+
+---@static
+---@param data any
+---@return any
+function m.ObjectToJson(data)
+	if type(data) == "table" then
+		local allIntKey = true;
+		for key, _ in pairs(data) do
+			-- math.floor(key) ~= key
+			if type(key) ~= "number" then
+				allIntKey = false;
+				break;
+			end
+		end
+		if allIntKey then
+			return m.TableToJa(data);
+		else
+			return m.TableToJo(data);
+		end
+	end
+	return data;
+end
+
+---@private
+---@static
+---@param data table
+---@return SimpleJson.JsonArray
+function m.TableToJa(data)
+	local ja = CS.SimpleJson.JsonArray();
+	for index, value in pairs(data) do
+		while ja.Count < index do
+			ja:Add(nil);
+		end
+		ja[index - 1] = m.ObjectToJson(value);
+	end
+	return ja;
+end
+
+---@private
+---@static
+---@param data table
+---@return SimpleJson.JsonObject
+function m.TableToJo(data)
+	local jo = CS.SimpleJson.JsonObject();
+	for key, value in pairs(data) do
+		if type(data) == "userdata" then
+			jo:Add(key:ToString(), m.ObjectToJson(value));
+		else
+			jo:Add(tostring(key), m.ObjectToJson(value));
+		end
+	end
+	return jo;
+end
+
+return m;

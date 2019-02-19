@@ -1,0 +1,14 @@
+---@class LuaClass.ConfigNotFind : LuaClass.Object
+local ConfigNotFind = LuaClass.Class("Common", "ConfigNotFind", nil, {
+	CONFIG_NOT_FIND_AUDIO = "<b>Can not find audio config by audio-name:</b> {0}";
+});
+LuaClass.ConfigNotFind = ConfigNotFind;
+
+---@static
+---@param audioName string
+---@return string @error message
+function ConfigNotFind.Audio(audioName)
+	return CS.Main.LuaHelp.StringFormat(LuaClass.ConfigNotFind.CONFIG_NOT_FIND_AUDIO, audioName)
+end
+
+return ConfigNotFind;

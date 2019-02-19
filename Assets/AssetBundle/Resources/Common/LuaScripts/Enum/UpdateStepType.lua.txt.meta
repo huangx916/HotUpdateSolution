@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: fce4e1e842effc14090dc5749448baf1
+timeCreated: 1529408424
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/enum/updatesteptype.lua
+  assetBundleVariant: ab

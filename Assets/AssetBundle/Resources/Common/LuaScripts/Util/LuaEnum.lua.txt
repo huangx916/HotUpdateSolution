@@ -1,0 +1,27 @@
+---@class LuaClass.LuaEnum : LuaClass.Object
+local LuaEnum = LuaClass.Class(nil, "LuaEnum");
+LuaClass.LuaEnum = LuaEnum;
+
+---@static
+---@protected
+---@param stepInterval number
+---@return number
+function LuaEnum:Next(stepInterval)
+	self.index = self.index or 0 + (stepInterval or 1);
+	return self.index;
+end
+
+---@static
+---@private
+---@param nameSpace string
+---@param className string
+---@param initalValues table
+---@return LuaClass.Object
+function LuaEnum.Create(nameSpace, className, initalValues)
+	for index, value in ipairs(initalValues) do
+		initalValues[value] = index;
+	end
+	return LuaClass.Class(nameSpace, className, LuaClass.LuaEnum, initalValues);
+end
+
+return LuaEnum;

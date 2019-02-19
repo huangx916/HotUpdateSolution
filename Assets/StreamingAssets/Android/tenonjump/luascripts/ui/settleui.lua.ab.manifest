@@ -1,0 +1,16 @@
+ManifestFileVersion: 0
+CRC: 1509806640
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 5ecced397ac4c6d8d22d53f8eec49242
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 1033bf7ddfd4c6d43e7a6382c0a0a61a
+HashAppended: 0
+ClassTypes:
+- Class: 49
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/LuaScripts/UI/SettleUI.lua.txt
+Dependencies: []

@@ -1,0 +1,20 @@
+---@class LuaClass.ListenerType : LuaClass.Object
+local ListenerType = {
+	---@param time number
+	TimePass = "TimePass";
+	ApplicationPause = "ApplicationPause";
+	SceneSwitch = "SceneSwitch";
+
+	---@param route string
+	---@param errorCode number
+	---@param message string
+	NetError = "NetError";
+	---@param route string
+	ConnectError = "ConnectError";
+
+	GameDataUpdate = "GameDataUpdate";
+}
+---@type LuaClass.ListenerType
+LuaClass.ListenerType = LuaClass.Class("Common", "ListenerType", nil, ListenerType);
+
+return ListenerType;

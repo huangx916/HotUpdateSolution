@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: dd3fc936f01f5e645b3db646bb9345b0
+timeCreated: 1522154148
+licenseType: Free
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/settingsmanager.lua
+  assetBundleVariant: ab

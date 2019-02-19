@@ -1,0 +1,11 @@
+---@class LuaClass.PlayerInfo : LuaClass.Object
+---@field public DisplayName string
+---@field public ID number
+---@field public TournamentPlayerID number
+---@field public AvatarURL string
+---@field public FlagURL string
+---@field public IsCurrentPlayer boolean
+local m = LuaClass.Class("Common", "PlayerInfo");
+LuaClass.PlayerInfo = m;
+
+return m;

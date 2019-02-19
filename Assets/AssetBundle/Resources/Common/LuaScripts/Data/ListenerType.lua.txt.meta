@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: f4a4545b12a4bf34d89bd6d3f2c0b5f5
+timeCreated: 1513780697
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/data/listenertype.lua
+  assetBundleVariant: ab

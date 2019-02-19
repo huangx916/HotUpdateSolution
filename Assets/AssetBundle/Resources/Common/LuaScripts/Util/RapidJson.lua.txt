@@ -1,0 +1,82 @@
+---@class LuaClass.RapidJson
+---@field private encode fun(data:any):string
+---@field private decode fun(jsonStr:string):any
+---@field private null any
+local m = LuaClass.Class(nil, "RapidJson", nil, require "rapidjson");
+LuaClass.RapidJson = m;
+
+---@static
+---@overload fun(data:any):string
+---@param data any
+---@return string
+function m.Encode(data, revert)
+    data = m.NilToNull(data);
+    local jsonStr = m.encode(data);
+    if revert then
+        m.NullToNil(data);
+    end
+    return jsonStr;
+end
+
+
+---@private
+---@static
+---@param data any
+---@return any
+function m.NilToNull(data)
+    if not data then
+        return m.null;
+    end
+    m.ItemNilToNull(data);
+    return data;
+end
+
+---@private
+---@static
+---@param data any
+function m.ItemNilToNull(data)
+    if type(data) == "table" then
+        local maxIntKey = 0;
+        for key, value in pairs(data) do
+            m.ItemNilToNull(value);
+            -- math.floor(key) ~= key
+            if type(key) == "number" and key > maxIntKey then
+                maxIntKey = key;
+            end
+        end
+        for index = 1, maxIntKey do
+            if not data[index] then
+                data[index] = m.null;
+            end
+        end
+    end
+end
+
+---@static
+---@param jsonStr string
+---@return any
+function m.Decode(jsonStr)
+    if string.isnilorempty(jsonStr) then
+        return nil;
+    end
+    local data = m.decode(jsonStr);
+    return m.NullToNil(data);
+end
+
+---@private
+---@static
+---@param data any
+---@return any
+function m.NullToNil(data)
+    if data == m.null then
+        return nil;
+    end
+    if type(data) == "table" then
+        for key, value in pairs(data) do
+            data[key] = m.NullToNil(value);
+        end
+    end
+    return data;
+end
+
+return m;

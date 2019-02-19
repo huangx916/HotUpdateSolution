@@ -1,0 +1,58 @@
+ManifestFileVersion: 0
+CRC: 3935297925
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 46bb699f4f37e953b51f1003179eccbd
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: d89825b80ea899726b1d8351ffe6ebf8
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 65
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: ae942c9068183dc40a9d01f648273726, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 5c041f61e4a9fbf4e830210f5d933ece, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 75e7459110b9666449485c40f25362a5, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 858a20c1b21a3f94bb5b2d3b901c9aaf, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 9e2747e3775af504da1a4d5a46c5a1ce, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: e9d0b5f3bbe925a408bd595c79d0bf63, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 0b4eb3a400afab046abb8471a9d746d6, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 97b7e9457f29fe6489fdf7c13aea7e94, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: d4c818b5a3258db4987049e3c35579e5, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 1bdd6ba7ce140f64ba4a144685be8643, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 4d0c51bb0b6e93049af5e88f93826e3b, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 6c20815eb3063c24290a61b7020a1836, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 82ea5dee09c28244f9e8e2220dd499d9, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 1b3dc54f924693f41b5cbecb267e647a, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/TenonJump/UI/SettingUI.prefab
+Dependencies:
+- F:/TenonJumpClient/TenonJump/Assets/StreamingAssets/Android/tenonjump/uiatlas/settinguiatlas.ab
+- F:/TenonJumpClient/TenonJump/Assets/StreamingAssets/Android/tenonjump/texture/help_ui_bg.ab
+- F:/TenonJumpClient/TenonJump/Assets/StreamingAssets/Android/tenonjump/texture/sys_bg_solid_color.ab
+- F:/TenonJumpClient/TenonJump/Assets/StreamingAssets/Android/tenonjump/uifont/fzy4jwfont.ab

@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 2997fd79337c6844fa170002d7b12f53
+timeCreated: 1529405541
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/manager/hotupdatemodule.lua
+  assetBundleVariant: ab

@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 2c271537b78894c4bb5425366ce81426
+timeCreated: 1515563517
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/util/globalextension.lua
+  assetBundleVariant: ab

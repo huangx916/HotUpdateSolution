@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: a00f15b815318094aaae36163c5f7a20
+timeCreated: 1531734077
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/data/errorcode.lua
+  assetBundleVariant: ab

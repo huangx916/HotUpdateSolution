@@ -1,0 +1,76 @@
+---@overload fun(t:table, value:any):number
+---@overload fun(t:table, value:any, startPos:number):number
+---@param t table
+---@param value any
+---@param startPos number
+---@param endPos number
+---@return number
+function table.indexof(t, value, startPos, endPos)
+	---@param index number
+	for index = startPos or 1, endPos or #t do
+		if t[index] == value then
+			return index;
+		end
+	end
+	return 0;
+end
+
+---@overload fun(t:table, value:any):number
+---@overload fun(t:table, value:any, startPos:number):number
+---@param t table
+---@param value any
+---@param startPos number
+---@param endPos number
+---@return number
+function table.lastindexof(t, value, startPos, endPos)
+	---@param index number
+	for index = startPos or #t, endPos or 1, -1 do
+		if t[index] == value then
+			return index;
+		end
+	end
+	return -1;
+end
+
+---@param t table
+---@param value any
+---@return boolean
+function table.contains(t, value)
+	---@param index number
+	for index = 1, #t do
+		if t[index] == value then
+			return true;
+		end
+	end
+	return false;
+end
+
+---@param t table
+---@return number
+function table.count(t)
+	local count = 0;
+	for _, _ in pairs(t) do
+		count = count + 1;
+	end
+	return count;
+end
+
+---@param t table
+function table.deepcopy(t)
+	local lookupTable = {}
+	---@param obj any
+	local function copy(obj)
+		if type(obj) ~= "table" then
+			return obj;
+		elseif lookupTable[obj] then
+			return lookupTable[obj];
+		end
+		local newT = {};
+		lookupTable[obj] = newT;
+		for index, value in pairs(obj) do
+			newT[copy(index)] = copy(value);
+		end
+		return setmetatable(newT, getmetatable(obj));
+	end
+	return copy(t);
+end

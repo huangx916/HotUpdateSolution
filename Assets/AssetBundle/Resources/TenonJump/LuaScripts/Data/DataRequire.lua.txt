@@ -1,0 +1,4 @@
+require("TenonJump.LuaScripts.Data.ConstValue.lua");
+require("TenonJump.LuaScripts.Data.ListenerType.lua");
+require("TenonJump.LuaScripts.Data.ConfigNotFind.lua");
+--require("TenonJump.LuaScripts.Data.BlockGroupData.lua");

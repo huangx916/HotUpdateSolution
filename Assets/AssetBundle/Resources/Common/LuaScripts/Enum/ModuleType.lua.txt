@@ -1,0 +1,16 @@
+---@class LuaClass.ModuleType : LuaClass.Object
+
+---@class LuaClass.ModuleType.Class : LuaClass.LuaEnum
+---@field public Common LuaClass.ModuleType
+---@field public TenonCube LuaClass.ModuleType
+---@field public TenonJump LuaClass.ModuleType
+---@field public TenonSolitaire LuaClass.ModuleType
+local ModuleType = LuaClass.LuaEnum.Create("Common", "ModuleType", {
+	"Common";
+	"TenonCube";
+	"TenonJump";
+	"TenonSolitaire";
+});
+LuaClass.ModuleType = ModuleType;
+
+return ModuleType;

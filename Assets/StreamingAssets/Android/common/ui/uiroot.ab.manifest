@@ -1,0 +1,30 @@
+ManifestFileVersion: 0
+CRC: 3969599525
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: c3c0c1a3e832b88a87a0f93ad79d4caa
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 58993904304aa174606b7a7f33ea4139
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 20
+  Script: {instanceID: 0}
+- Class: 54
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: ae942c9068183dc40a9d01f648273726, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 2c5ecb5660b11414fb042fb826e03b73, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 2a92b5d748695fd44aac9feef17ba415, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+Assets:
+- Assets/AssetBundle/Resources/Common/UI/UIRoot.prefab
+Dependencies: []

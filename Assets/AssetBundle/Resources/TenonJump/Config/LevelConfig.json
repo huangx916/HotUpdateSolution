@@ -1,0 +1,86 @@
+﻿[
+	{"id" : 1, "name" : "difficulty1", "value" :
+		[
+            {"index" : 1, "use" : "start"},
+			{"index" : 40, "use" : "difficulty1"},
+			{"index" : 41, "use" : "finish"}
+		]
+	},
+	{"id" : 2, "name" : "difficulty2", "value" :
+		[
+            {"index" : 1, "use" : "start"},
+			{"index" : 20, "use" : "difficulty1"},
+			{"index" : 50, "use" : "difficulty2"},
+			{"index" : 51, "use" : "finish"}
+		]
+	},
+    {"id" : 3, "name" : "difficulty3", "value" :
+		[
+            {"index" : 1, "use" : "start"},
+			{"index" : 30, "use" : "difficulty2"},
+			{"index" : 60, "use" : "difficulty3"},
+			{"index" : 61, "use" : "finish"}
+		]
+	},
+    {"id" : 4, "name" : "difficulty4", "value" :
+		[
+            {"index" : 1, "use" : "start"},
+			{"index" : 30, "use" : "difficulty3"},
+			{"index" : 70, "use" : "difficulty4"},
+			{"index" : 71, "use" : "finish"}
+		]
+	},
+    {"id" : 5, "name" : "difficulty5", "value" :
+		[
+            {"index" : 1, "use" : "start"},
+			{"index" : 40, "use" : "difficulty4"},
+			{"index" : 80, "use" : "difficulty5"},
+			{"index" : 81, "use" : "finish"}
+		]
+	},
+    {"id" : 6, "name" : "difficulty6", "value" :
+		[
+            {"index" : 1, "use" : "start"},
+			{"index" : 20, "use" : "difficulty4"},
+			{"index" : 50, "use" : "difficulty5"},
+			{"index" : 90, "use" : "difficulty6"},
+			{"index" : 91, "use" : "finish"}
+		]
+	},
+    {"id" : 7, "name" : "difficulty7", "value" :
+		[
+            {"index" : 1, "use" : "start"},
+			{"index" : 20, "use" : "difficulty5"},
+			{"index" : 50, "use" : "difficulty6"},
+			{"index" : 100, "use" : "difficulty7"},
+			{"index" : 101, "use" : "finish"}
+		]
+	},
+    {"id" : 8, "name" : "difficulty8", "value" :
+		[
+            {"index" : 1, "use" : "start"},
+			{"index" : 20, "use" : "difficulty5"},
+			{"index" : 50, "use" : "difficulty6"},
+			{"index" : 110, "use" : "difficulty8"},
+			{"index" : 111, "use" : "finish"}
+		]
+	},
+    {"id" : 9, "name" : "difficulty9", "value" :
+		[
+            {"index" : 1, "use" : "start"},
+			{"index" : 20, "use" : "difficulty5"}, 
+			{"index" : 50, "use" : "difficulty7"},
+			{"index" : 120, "use" : "difficulty9"},
+			{"index" : 121, "use" : "finish"}
+		]
+	},
+    {"id" : 10, "name" : "difficulty10", "value" :
+		[
+            {"index" : 1, "use" : "start"},
+			{"index" : 30, "use" : "difficulty5"},
+			{"index" : 60, "use" : "difficulty7"},
+			{"index" : 130, "use" : "difficulty10"},
+			{"index" : 131, "use" : "finish"}
+		]
+	}
+]

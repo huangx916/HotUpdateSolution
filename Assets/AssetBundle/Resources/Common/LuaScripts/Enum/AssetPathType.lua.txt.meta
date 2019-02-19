@@ -1,0 +1,8 @@
+fileFormatVersion: 2
+guid: 56fc0f3dd61fd5a46bda6280bef60209
+timeCreated: 1529408565
+licenseType: Pro
+TextScriptImporter:
+  userData: 
+  assetBundleName: common/luascripts/enum/assetpathtype.lua
+  assetBundleVariant: ab

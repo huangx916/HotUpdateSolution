@@ -1,0 +1,32 @@
+{
+	"Test": {
+		"test": { "default": "测试" }
+	},
+	"DialogUI": {
+		"Title": { "default": "Warning" },
+		"Content": { "default": "Content" },
+		"Confirm": { "default": "Confirm" },
+		"Cancel": { "default": "Cancel" }
+	},
+	"ConnectError": {
+		"Title": { "default": "ConnectError" },
+		"Content": { "default": "The Internet connection was lost, Please try again." },
+		"Confirm": { "default": "Confirm" }
+	},
+	"NetError": {
+		"Title": { "default": "ConnectError" },
+		"Content": { "default": "The Internet connection was lost, Please try again." },
+		"Confirm": { "default": "Confirm" },
+		"LoginFailed": { "default": "LoginFailed" },
+		"PasswordError": { "default": "PasswordError" },
+		"TokenInvalid": { "default": "TokenInvalid" },
+		"NoEnoughMoney": { "default": "NoEnoughMoney" }
+	},
+	"SlotLoadingUI": {
+		"ConnectionLostContent": { "default": "           Connection Lost" }
+	},
+	"HotUpdateSlot": {
+		"RedownloadContent": { "default": "Version {0} is available. Download the latest version to earn Free Coins." },
+		"ConnectionLostContent": { "default": "The Internet connection was lost, Please try again." }
+	}
+}
