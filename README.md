@@ -1,5 +1,5 @@
-# HotUpdateSolution
-================================================================================
+# HotUpdateSolution  
+---
 #### AssetBundleBuilder  
 <img class="shadow" src="./1.png" width="1024">  
 #### HotUpdateFile Package Auto  
