@@ -1,4 +1,5 @@
 Library/
+Temp/
 HotUpdateSolution.CSharp.csproj
 HotUpdateSolution.CSharp.Editor.csproj
 HotUpdateSolution.sln
