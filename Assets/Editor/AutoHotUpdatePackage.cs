@@ -11,8 +11,8 @@ using System.Text;
 public class AutoHotUpdatePackage : EditorWindow
 {
     [System.NonSerialized]
-    string m_CdnUrl = "http://47.88.60.106:8090/games";
-    //string m_CdnUrl = "http://127.0.0.1:80/cdn";
+    //string m_CdnUrl = "http://47.88.60.106:8090/games";
+    string m_CdnUrl = "http://127.0.0.1/cdn";
 
     public JsonObject m_CdnFileList;
     public JsonObject m_StreamingFileList;
@@ -120,7 +120,8 @@ public class AutoHotUpdatePackage : EditorWindow
     {
         // 下载CDN服务器上的版本信息
         string[] streamingVersions = ConstValue.VERSION.Split('.');
-        string cdnCurVerUrl = ConstValue.CDN_URL + "/" + ConstValue.GAME_NAME + "/" + ConstValue.BUNDLE_DIR + "/" + streamingVersions[0] + "." + streamingVersions[1];
+        //string cdnCurVerUrl = ConstValue.CDN_URL + "/" + ConstValue.GAME_NAME + "/" + ConstValue.BUNDLE_DIR + "/" + streamingVersions[0] + "." + streamingVersions[1];
+        string cdnCurVerUrl = ConstValue.CDN_URL + "/" + ConstValue.BUNDLE_DIR + "/" + streamingVersions[0] + "." + streamingVersions[1];
         WWW cdnVersionLoader = new WWW(cdnCurVerUrl + "/" + moduleName + "/" + fileName);
         yield return cdnVersionLoader;
         if (cdnVersionLoader.error != null)

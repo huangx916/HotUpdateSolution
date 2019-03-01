@@ -112,21 +112,20 @@ namespace Main
 		public const string FILE_LIST_MD5_KEY = "Md5";
 		public const string ASSET_BUNDLE_VARIANT = "ab";
         [System.NonSerialized]
-		public static string CDN_URL =
+		public static string CDN_URL = 
 #if UNITY_WEBGL
-			STREAMING_DIR_PATH;
+            STREAMING_DIR_PATH;
 #else
 #if DEBUG_MACRO
-				"http://127.0.0.1:80/cdn";
-				// "http://47.88.60.106:8090/games";
-                // "";
+                "http://127.0.0.1:80/cdn";
+                // "http://47.88.60.106:8090/games";
 #else
-				"http://47.88.60.106:8090/games";
-                // "";
+                "http://127.0.0.1:80/cdn";
+                // "http://47.88.60.106:8090/games";
 #endif
 #endif
 
-		public static string PERSISTENT_DIR_PATH
+        public static string PERSISTENT_DIR_PATH
 		{
 			get
 			{
